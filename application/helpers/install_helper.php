@@ -85,8 +85,8 @@ function dirfile_check(&$dirfile_items) {
 	foreach($dirfile_items as $key => $item) {
 		$item_path = $item['path'];
 		if($item['type'] == 'dir') {
-			if(!dir_writeable(APPPATH.$item_path)) {
-				if(is_dir(APPPATH.$item_path)) {
+			if(!dir_writeable($item_path)) {
+				if(is_dir($item_path)) {
 					$dirfile_items[$key]['status'] = 0;
 					$dirfile_items[$key]['current'] = '+r';
 				} else {
@@ -98,8 +98,8 @@ function dirfile_check(&$dirfile_items) {
 				$dirfile_items[$key]['current'] = '+r+w';
 			}
 		} else {
-			if(file_exists(APPPATH.$item_path)) {
-				if(is_writable(APPPATH.$item_path)) {
+			if(file_exists($item_path)) {
+				if(is_writable($item_path)) {
 					$dirfile_items[$key]['status'] = 1;
 					$dirfile_items[$key]['current'] = '+r+w';
 				} else {
@@ -107,7 +107,7 @@ function dirfile_check(&$dirfile_items) {
 					$dirfile_items[$key]['current'] = '+r';
 				}
 			} else {
-				if(dir_writeable(dirname(APPPATH.$item_path))) {
+				if(dir_writeable(dirname($item_path))) {
 					$dirfile_items[$key]['status'] = 1;
 					$dirfile_items[$key]['current'] = '+r+w';
 				} else {
@@ -191,16 +191,15 @@ function show_env_result(&$env_items, &$dirfile_items, &$func_items) {
 	foreach($dirfile_items as $key => $item) {
 		$tagname = $item['type'] == 'file' ? 'File' : 'Dir';
 		$variable = $item['type'].'_str';
-		$apppath = APPPATH;
 
 		if($view_off) {
 			if($item['status'] == 0) {
 				$error_code = ENV_CHECK_ERROR;
 			}
-			$$variable .= "\t\t\t<File name=\"{$apppath}$item[path]\" status=\"$item[status]\" requirePermisson=\"+r+w\" currentPermisson=\"$item[current]\" />\n";
+			$$variable .= "\t\t\t<File name=\"$item[path]\" status=\"$item[status]\" requirePermisson=\"+r+w\" currentPermisson=\"$item[current]\" />\n";
 		} else {
 			$$variable .= "<tr>\n";
-			$$variable .= "<td>{$apppath}$item[path]</td><td class=\"w pdleft1\">".lang('writeable')."</td>\n";
+			$$variable .= "<td>$item[path]</td><td class=\"w pdleft1\">".lang('writeable')."</td>\n";
 			if($item['status'] == 1) {
 				$$variable .= "<td class=\"w pdleft1\">".lang('writeable')."</td>\n";
 			} elseif($item['status'] == -1) {
@@ -539,7 +538,20 @@ function get_onlineip() {
 }
 
 function config_edit() {
-	extract($GLOBALS, EXTR_SKIP);
+	global $form_db_init_items;
+	if(isset($form_db_init_items) && is_array($form_db_init_items))
+	{
+		foreach($form_db_init_items as $key => $items)
+		{
+			$$key = getgpc($key, 'p');
+			foreach($items as $k => $v)
+			{
+				$tmp = $$key;
+				$$k = $tmp[$k];
+			}
+		}
+	}
+	
 	$ucsalt = substr(uniqid(rand()), 0, 6);
 	$ucfounderpw= md5(md5($ucfounderpw).$ucsalt);
 	$regdate = time();
@@ -547,26 +559,46 @@ function config_edit() {
 	$ucauthkey = generate_key();
 	$ucsiteid = generate_key();
 	$ucmykey = generate_key();
-	$config = "<?php \r\ndefine('UC_DBHOST', '$dbhost');\r\n";
-	$config .= "define('UC_DBUSER', '$dbuser');\r\n";
-	$config .= "define('UC_DBPW', '$dbpw');\r\n";
-	$config .= "define('UC_DBNAME', '$dbname');\r\n";
-	$config .= "define('UC_DBCHARSET', '".DBCHARSET."');\r\n";
-	$config .= "define('UC_DBTABLEPRE', '$tablepre');\r\n";
-	$config .= "define('UC_COOKIEPATH', '/');\r\n";
-	$config .= "define('UC_COOKIEDOMAIN', '');\r\n";
-	$config .= "define('UC_DBCONNECT', 0);\r\n";
-	$config .= "define('UC_CHARSET', '".CHARSET."');\r\n";
-	$config .= "define('UC_FOUNDERPW', '$ucfounderpw');\r\n";
-	$config .= "define('UC_FOUNDERSALT', '$ucsalt');\r\n";
-	$config .= "define('UC_KEY', '$ucauthkey');\r\n";
-	$config .= "define('UC_SITEID', '$ucsiteid');\r\n";
-	$config .= "define('UC_MYKEY', '$ucmykey');\r\n";
-	$config .= "define('UC_DEBUG', false);\r\n";
-	$config .= "define('UC_PPP', 20);\r\n";
-	$fp = fopen(CONFIG, 'w');
-	fwrite($fp, $config);
-	fclose($fp);
+
+	$constants = file_get_contents(CONSTANTS);
+	$pattern = array(
+			"/define\('UC_FOUNDERPW', '.*'\);/",
+			"/define\('UC_FOUNDERSALT', '.*'\);/",
+			"/define\('UC_KEY', '.*'\);/",
+			"/define\('UC_SITEID', '.*'\);/",
+			"/define\('UC_MYKEY', '.*'\);/",
+			"/define\('UC_DEBUG', '.*'\);/",
+			"/define\('UC_PPP', '.*'\);/",
+	);
+	$replacement = array(
+			"define('UC_FOUNDERPW', '$ucfounderpw');",
+			"define('UC_FOUNDERSALT', '$ucsalt');",
+			"define('UC_KEY', '$ucauthkey');",
+			"define('UC_SITEID', '$ucsiteid');",
+			"define('UC_MYKEY', '$ucmykey');",
+			"define('UC_DEBUG', false);",
+			"define('UC_PPP', 20);",
+	);
+	$constants = preg_replace($pattern, $replacement, $constants);
+	file_put_contents(CONSTANTS, $constants);
+
+	$database = file_get_contents(DATABASE);
+	$pattern = array(
+			"/\\\$db\['default'\]\['hostname'\] \= '.*';/",
+			"/\\\$db\['default'\]\['username'\] \= '.*';/",
+			"/\\\$db\['default'\]\['password'\] \= '.*';/",
+			"/\\\$db\['default'\]\['database'\] \= '.*';/",
+			"/\\\$db\['default'\]\['dbprefix'\] \= '.*';/",
+	);
+	$replacement = array(
+			"\$db['default']['hostname'] = '$dbhost';",
+			"\$db['default']['username'] = '$dbuser';",
+			"\$db['default']['password'] = '$dbpw';",
+			"\$db['default']['database'] = '$dbname';",
+			"\$db['default']['dbprefix'] = '$tablepre';",
+	);
+	$database = preg_replace($pattern, $replacement, $database);
+	file_put_contents(DATABASE, $database);
 }
 
 function authcode($string, $operation = 'DECODE', $key = '', $expiry = 0) {

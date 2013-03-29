@@ -11,7 +11,7 @@ $lang = array(
 	'EN_ISO' => 'ENGLISH ISO8859',
 	'EN_UTF8' => 'ENGLIST UTF-8',
 
-	'title_install' => SOFT_NAME.' 安装向导',
+	'title_install' => 'UCenter 安装向导',
 	'agreement_yes' => '我同意',
 	'agreement_no' => '我不同意',
 	'notset' => '不限制',
@@ -68,7 +68,7 @@ $lang = array(
 	'step_ext_info_desc' => '点击进入登陆',
 
 	'ext_info_succ' => '安装成功',
-	'install_locked' => '安装锁定，已经安装过了，如果您确定要重新安装，请到服务器上删除<br /> '.str_replace(APPPATH, '', LOCKINSTALL),
+	'install_locked' => '安装锁定，已经安装过了，如果您确定要重新安装，请到服务器上删除<br /> '.LOCK_INSTALL,
 	'error_quit_msg' => '您必须解决以上问题，安装才可以继续',
 
 	'step_app_reg_title' => '设置运行环境',

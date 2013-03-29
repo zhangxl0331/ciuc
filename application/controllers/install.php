@@ -3,64 +3,11 @@ error_reporting(E_ERROR | E_WARNING | E_PARSE);
 @set_time_limit(1000);
 set_magic_quotes_runtime(0);
 
-//var.ini.php start
-define('SOFT_NAME', 'UCenter');
-define('SOFT_VERSION', '1.5.0');
-define('SOFT_RELEASE', '20090121');
-define('INSTALL_LANG', 'SC_UTF8');
-
-define('CONFIG', APPPATH.'cache/config.inc.php');
-define('LOCKINSTALL', APPPATH.'cache/install.lock');
-define('LOCKUPGRADE', APPPATH.'cache/install.lock');
-define('SQLFILE', APPPATH.'cache/uc.sql');
-
-define('CHARSET', 'utf-8');
-define('DBCHARSET', 'utf8');
-
-define('ORIG_TABLEPRE', 'uc_');
-
-define('METHOD_UNDEFINED', 255);
-define('ENV_CHECK_RIGHT', 0);
-define('ERROR_CONFIG_VARS', 1);
-define('SHORT_OPEN_TAG_INVALID', 2);
-define('INSTALL_LOCKED', 3);
-define('DATABASE_NONEXISTENCE', 4);
-define('PHP_VERSION_TOO_LOW', 5);
-define('MYSQL_VERSION_TOO_LOW', 6);
-define('UC_URL_INVALID', 7);
-define('UC_DNS_ERROR', 8);
-define('UC_URL_UNREACHABLE', 9);
-define('UC_VERSION_INCORRECT', 10);
-define('UC_DBCHARSET_INCORRECT', 11);
-define('UC_API_ADD_APP_ERROR', 12);
-define('UC_ADMIN_INVALID', 13);
-define('UC_DATA_INVALID', 14);
-define('DBNAME_INVALID', 15);
-define('DATABASE_ERRNO_2003', 16);
-define('DATABASE_ERRNO_1044', 17);
-define('DATABASE_ERRNO_1045', 18);
-define('DATABASE_CONNECT_ERROR', 19);
-define('TABLEPRE_INVALID', 20);
-define('CONFIG_UNWRITEABLE', 21);
-define('ADMIN_USERNAME_INVALID', 22);
-define('ADMIN_EMAIL_INVALID', 25);
-define('ADMIN_EXIST_PASSWORD_ERROR', 26);
-define('ADMININFO_INVALID', 27);
-define('LOCKFILE_NO_EXISTS', 28);
-define('TABLEPRE_EXISTS', 29);
-define('ERROR_UNKNOW_TYPE', 30);
-define('ENV_CHECK_ERROR', 31);
-define('UNDEFINE_FUNC', 32);
-define('MISSING_PARAMETER', 33);
-define('LOCK_FILE_NOT_TOUCH', 34);
-
 class Install extends CI_Controller {
 	
 	public function __construct()
 	{
 		parent::__construct();
-		
-		$this->load->helper('install');
 	}
 	
 	/**
@@ -79,72 +26,37 @@ class Install extends CI_Controller {
 	 * @see http://codeigniter.com/user_guide/general/urls.html
 	 */
 	public function index()
-	{
-	
-//var.ini.php end		
-
-
-		if(!ini_get('short_open_tag'))
-		{
-			show_msg('short_open_tag_invalid', '', 0);
-		}
-		elseif(file_exists(LOCKINSTALL))
-		{
-			show_msg('install_locked', '', 0);
-		}
+	{		
+		global $func_items, $env_items, $dirfile_items, $form_db_init_items, $allow_method;
 		
-		$allow_method = array('show_license', 'env_check', 'db_init', 'ext_info', 'install_check', 'tablepre_check');
+		$this->load->helper('install');
+		
+		$view_off = getgpc('view_off') ? TRUE : FALSE;
 		
 		$step = intval(getgpc('step', 'R')) ? intval(getgpc('step', 'R')) : 0;
 		$method = getgpc('method');
-		$$view_off = getgpc('$view_off') ? TRUE : FALSE;
 		
-		if(empty($method) || !in_array($method, $allow_method)) 
+		if(empty($method) || !in_array($method, $allow_method))
 		{
 			$method = isset($allow_method[$step]) ? $allow_method[$step] : '';
-		}
+		}		
 		
 		if(empty($method)) 
 		{
 			show_msg('method_undefined', $method, 0);
-		}		
+		}	
 		
+		if(file_exists(LOCK_INSTALL))
+		{
+			show_msg('install_locked', '', 0);
+		}
+					
 		if($method == 'show_license') 
 		{		
 			show_license();		
 		} 
 		elseif($method == 'env_check') 
-		{
-			$func_items = array
-			(
-				'mysql_connect', 
-				'fsockopen', 
-				'gethostbyname', 
-				'file_get_contents', 
-				'xml_parser_create'
-			);
-			
-			$env_items = array
-			(
-				'os' => array('c' => 'PHP_OS', 'r' => 'notset', 'b' => 'unix'),
-				'php' => array('c' => 'PHP_VERSION', 'r' => '4.0', 'b' => '5.0'),
-				'attachmentupload' => array('r' => 'notset', 'b' => '2M'),
-				'gdversion' => array('r' => '1.0', 'b' => '2.0'),
-				'diskspace' => array('r' => '10M', 'b' => 'notset'),
-			);
-			
-			$dirfile_items = array
-			(
-				'config' => array('type' => 'file', 'path' => 'cache/config.inc.php'),
-				'data' => array('type' => 'dir', 'path' => 'cache'),
-				'cache' => array('type' => 'dir', 'path' => 'cache/cache'),
-				'view' => array('type' => 'dir', 'path' => 'cache/view'),
-				'avatar' => array('type' => 'dir', 'path' => 'cache/avatar'),
-				'logs' => array('type' => 'dir', 'path' => 'cache/logs'),
-				'backup' => array('type' => 'dir', 'path' => 'cache/backup'),
-				'tmp' => array('type' => 'dir', 'path' => 'cache/tmp')
-			);
-			
+		{			
 			$view_off && function_check($func_items);
 		
 			env_check($env_items);
@@ -153,24 +65,9 @@ class Install extends CI_Controller {
 		
 			show_env_result($env_items, $dirfile_items, $func_items);
 		
-		} elseif($method == 'db_init') {
-			$form_db_init_items = array
-			(
-					'dbinfo' => array
-					(
-							'dbhost' => array('type' => 'text', 'required' => 1, 'reg' => '/^.*$/', 'value' => array('type' => 'string', 'var' => 'localhost')),
-							'dbname' => array('type' => 'text', 'required' => 1, 'reg' => '/^.*$/', 'value' => array('type' => 'string', 'var' => 'ucenter')),
-							'dbuser' => array('type' => 'text', 'required' => 0, 'reg' => '/^.*$/', 'value' => array('type' => 'string', 'var' => 'root')),
-							'dbpw' => array('type' => 'password', 'required' => 0, 'reg' => '/^.*$/', 'value' => array('type' => 'string', 'var' => '')),
-							'tablepre' => array('type' => 'text', 'required' => 0, 'reg' => '/^.*$/', 'value' => array('type' => 'string', 'var' => 'uc_')),
-					),
-					'admininfo' => array
-					(
-							'ucfounderpw' => array('type' => 'password', 'required' => 1, 'reg' => '/^.*$/'),
-							'ucfounderpw2' => array('type' => 'password', 'required' => 1, 'reg' => '/^.*$/'),
-					)
-			);
-			
+		} 
+		elseif($method == 'db_init') 
+		{			
 			@include CONFIG;
 			$submit = true;
 			$error_msg = array();
@@ -275,7 +172,7 @@ class Install extends CI_Controller {
 				{
 					show_msg('tablepre_invalid', $tablepre, 0);
 				}
-		
+				
 				config_edit();
 		
 				$params['hostname'] = $dbhost;
@@ -288,7 +185,7 @@ class Install extends CI_Controller {
 				$params['db_debug'] = TRUE;
 				$params['cache_on'] = FALSE;
 				$params['cachedir'] = '';
-				$params['char_set'] = 'utf8';
+				$params['char_set'] = DBCHARSET;
 				$params['dbcollat'] = 'utf8_general_ci';
 				$params['swap_pre'] = '';
 				$params['autoinit'] = TRUE;
@@ -327,8 +224,8 @@ class Install extends CI_Controller {
 		} 
 		elseif($method == 'ext_info') 
 		{		
-			@touch(LOCKINSTALL);
-			@touch(LOCKUPGRADE);
+			@touch(LOCK_INSTALL);
+			@touch(FCPATH.'data/install.lock');
 			if($view_off) 
 			{
 				show_msg('ext_info_succ');
@@ -344,14 +241,14 @@ class Install extends CI_Controller {
 		} 
 		elseif($method == 'install_check') 
 		{		
-			if(file_exists(LOCKINSTALL)) 
+			if(file_exists(LOCK_INSTALL)) 
 			{
-				@touch(LOCKUPGRADE);
+				@touch(LOCK_UPGRADE);
 				show_msg('installstate_succ');
 			} 
 			else 
 			{
-				show_msg('lock_file_not_touch', LOCKINSTALL, 0);
+				show_msg('lock_file_not_touch', LOCK_INSTALL, 0);
 			}
 		
 		} 
@@ -372,5 +269,5 @@ class Install extends CI_Controller {
 	}
 }
 
-/* End of file welcome.php */
-/* Location: application/controllers/welcome.php */
+/* End of file install.php */
+/* Location: application/controllers/install.php */
