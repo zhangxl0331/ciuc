@@ -741,17 +741,7 @@ function insertconfig($s, $find, $replace) {
 	return $s;
 }
 
-function getgpc($k, $t='GP') {
-	$t = strtoupper($t);
-	switch($t) {
-		case 'GP' : isset($_POST[$k]) ? $var = &$_POST : $var = &$_GET; break;
-		case 'G': $var = &$_GET; break;
-		case 'P': $var = &$_POST; break;
-		case 'C': $var = &$_COOKIE; break;
-		case 'R': $var = &$_REQUEST; break;
-	}
-	return isset($var[$k]) ? $var[$k] : '';
-}
+
 
 function var_to_hidden($k, $v) {
 	return "<input type=\"hidden\" name=\"$k\" value=\"$v\" />\n";
