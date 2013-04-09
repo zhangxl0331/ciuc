@@ -7,7 +7,7 @@ class Applications_m extends CI_Model
 		parent::__construct();
 	}
 	
-	public function get_badwords() 
+	public function get_applications() 
 	{
 		if($result = $this->db->get('applications')->result_array())
 		{
