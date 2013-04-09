@@ -14,17 +14,19 @@ class MY_Controller extends CI_Controller
 	var $badwords = array();
 	var $applications = array();
 	var $input = array();
+	
+	var $cookie_status = 1;
 
-	function __construct() {
-		$this->base();
-		$this->load->helper('install');
+	function __construct() 
+	{
+		parent::__construct();
+		$this->load->helper(array('install', 'global'));
 		//init var
 		$this->time = time();
 		$this->onlineip = $this->input->ip_address();
-		define('FORMHASH', $this->formhash());
-		$_GET['page'] =  max(1, intval(getgpc('page')));
+		$_GET['page'] =  max(1, intval($this->input->get_post('page')));
 		
-		$this->load->language('main');
+		$this->load->language(array('main', 'templates'));
 		
 		//init cache
 		$this->load->driver('cache');
@@ -39,7 +41,7 @@ class MY_Controller extends CI_Controller
 				$this->load->model($model);
 				if($$v = $this->$model->$method())
 				{
-					$this->cache->set($v, $$v);
+					$this->cache->save($v, $$v);
 				}
 			}
 				
@@ -77,78 +79,68 @@ class MY_Controller extends CI_Controller
 // 		}
 		
 		//		$this->cron();
-	}
-
-	function init_input($getagent = '') {
-		$input = getgpc('input', 'R');
-		if($input) {
-			$input = $this->authcode($input, 'DECODE', $this->app['authkey']);
-			parse_str($input, $this->input);
-			$this->input = daddslashes($this->input, 1, TRUE);
-			$agent = $getagent ? $getagent : $this->input['agent'];
-
-			if(($getagent && $getagent != $this->input['agent']) || (!$getagent && md5($_SERVER['HTTP_USER_AGENT']) != $agent)) {
-				exit('Access denied for agent changed');
-			} elseif($this->time - $this->input('time') > 3600) {
-				exit('Authorization has expired');
-			}
-		}
-		if(empty($this->input)) {
-			exit('Invalid input');
+		
+		$sid = $this->cookie_status ? getgpc('sid', 'C') : rawurlencode(getgpc('sid', 'R'));
+		$a = getgpc('a');
+		if($this->router->fetch_class() !='user' && $this->router->fetch_method() != 'login' && $this->router->fetch_method() != 'logout') {
+			$this->check_priv();
 		}
 	}
-
-	function page($num, $perpage, $curpage, $mpurl) {
-		$multipage = '';
-		$mpurl .= strpos($mpurl, '?') ? '&' : '?';
-		if($num > $perpage) {
-			$page = 10;
-			$offset = 2;
-
-			$pages = @ceil($num / $perpage);
-
-			if($page > $pages) {
-				$from = 1;
-				$to = $pages;
-			} else {
-				$from = $curpage - $offset;
-				$to = $from + $page - 1;
-				if($from < 1) {
-					$to = $curpage + 1 - $from;
-					$from = 1;
-					if($to - $from < $page) {
-						$to = $page;
-					}
-				} elseif($to > $pages) {
-					$from = $pages - $page + 1;
-					$to = $pages;
+	
+	function check_priv() {
+		$sid = $this->cookie_status ? getgpc('sid', 'C') : rawurlencode(getgpc('sid', 'R'));
+		$username = $this->sid_decode($sid);
+		if(empty($username)) {
+			header('Location: '.$this->config->base_url().'admin/user/login?iframe='.getgpc('iframe', 'G').($this->cookie_status ? '' : '&sid='.$sid));
+			exit;
+		} else {
+			$this->user['isfounder'] = $username == 'UCenterAdministrator' ? 1 : 0;
+			if(!$this->user['isfounder']) {
+				$admin = $this->db->fetch_first("SELECT a.*, m.* FROM ".UC_DBTABLEPRE."admins a LEFT JOIN ".UC_DBTABLEPRE."members m USING(uid) WHERE a.username='$username'");
+				if(empty($admin)) {
+					header('Location: '.$this->config->base_url().'admin/user/login?iframe='.getgpc('iframe', 'G').($this->cookie_status ? '' : '&sid='.$sid));
+					exit;
+				} else {
+					$this->user = $admin;
+					$this->user['username'] = $username;
+					$this->user['admin'] = 1;
+					$this->view->sid = $this->sid_encode($username);
+					$this->setcookie('sid', $this->view->sid, 86400);
 				}
+			} else {
+				$this->user['username'] = 'UCenterAdministrator';
+				$this->user['admin'] = 1;
 			}
-
-			$multipage = ($curpage - $offset > 1 && $pages > $page ? '<a href="'.$mpurl.'page=1" class="first"'.$ajaxtarget.'>1 ...</a>' : '').
-			($curpage > 1 && !$simple ? '<a href="'.$mpurl.'page='.($curpage - 1).'" class="prev"'.$ajaxtarget.'>&lsaquo;&lsaquo;</a>' : '');
-			for($i = $from; $i <= $to; $i++) {
-				$multipage .= $i == $curpage ? '<strong>'.$i.'</strong>' :
-				'<a href="'.$mpurl.'page='.$i.($ajaxtarget && $i == $pages && $autogoto ? '#' : '').'"'.$ajaxtarget.'>'.$i.'</a>';
-			}
-
-			$multipage .= ($curpage < $pages && !$simple ? '<a href="'.$mpurl.'page='.($curpage + 1).'" class="next"'.$ajaxtarget.'>&rsaquo;&rsaquo;</a>' : '').
-			($to < $pages ? '<a href="'.$mpurl.'page='.$pages.'" class="last"'.$ajaxtarget.'>... '.$realpages.'</a>' : '').
-			(!$simple && $pages > $page && !$ajaxtarget ? '<kbd><input type="text" name="custompage" size="3" onkeydown="if(event.keyCode==13) {window.location=\''.$mpurl.'page=\'+this.value; return false;}" /></kbd>' : '');
-
-			$multipage = $multipage ? '<div class="pages">'.(!$simple ? '<em>&nbsp;'.$num.'&nbsp;</em>' : '').$multipage.'</div>' : '';
+			$this->view->assign('user', $this->user);
 		}
-		return $multipage;
 	}
-
-	function page_get_start($page, $ppp, $totalnum) {
-		$totalpage = ceil($totalnum / $ppp);
-		$page =  max(1, min($totalpage, intval($page)));
-		return ($page - 1) * $ppp;
+	
+	function sid_decode($sid) {
+		$ip = $this->input->ip_address();
+		$agent = $_SERVER['HTTP_USER_AGENT'];
+		$authkey = md5($ip.$agent.UC_KEY);
+		$s = authcode(rawurldecode($sid), 'DECODE', $authkey, 1800);
+		if(empty($s)) {
+			return FALSE;
+		}
+		@list($username, $check) = explode("\t", $s);
+		if($check == substr(md5($ip.$agent), 0, 8)) {
+			return $username;
+		} else {
+			return FALSE;
+		}
+	}
+	
+	function sid_encode($username) {
+		$ip = $this->input->ip_address();
+		$agent = $_SERVER['HTTP_USER_AGENT'];
+		$authkey = md5($ip.$agent.UC_KEY);
+		$check = substr(md5($ip.$agent), 0, 8);
+		return rawurlencode(authcode("$username\t$check", 'ENCODE', $authkey, 1800));
 	}
 
 	function message($message, $redirect = '', $type = 0, $vars = array()) {
-		include_once UC_ROOT.'view/default/messages.lang.php';
+		$this->load->language('message');
 		if(isset($lang[$message])) {
 			$message = $lang[$message] ? str_replace(array_keys($vars), array_values($vars), $lang[$message]) : $message;
 		}
@@ -160,14 +152,6 @@ class MY_Controller extends CI_Controller
 			$this->view->display('message_client');
 		}
 		exit;
-	}
-
-	function formhash() {
-		return substr(md5(substr($this->time, 0, -4).UC_KEY), 16);
-	}
-
-	function submitcheck() {
-		return @getgpc('formhash', 'P') == FORMHASH ? true : false;
 	}
 
 	function date($time, $type = 3) {
