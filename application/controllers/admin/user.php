@@ -115,14 +115,14 @@ class User extends MY_Controller {
 		}
 		$username = htmlspecialchars($username);
 		$password = htmlspecialchars($password);
-// 		$this->view->assign('seccodeinit', $seccodeinit);
-// 		$this->view->assign('username', $username);
-// 		$this->view->assign('password', $password);
-// 		$this->view->assign('isfounder', $isfounder);
-// 		$this->view->assign('errorcode', $errorcode);
-// 		$this->view->assign('iframe', $iframe);
-// 		$this->view->display('admin_login');
-		$this->load->view('admin/login');
+		$data['seccodeinit'] = $seccodeinit;
+		$data['username'] = $username;
+		$data['password'] = $password;
+		$data['isfounder'] = $isfounder;
+		$data['errorcode'] = $errorcode;
+		$data['iframe'] = $iframe;
+
+		$this->load->view('admin/login', $data);
 	}
 	
 	function onlogout() {

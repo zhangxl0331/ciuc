@@ -21,53 +21,53 @@ function $(id) {
 					</p>
 				</td>
 				<td class="login">
-					<!--{if $errorcode == UC_LOGIN_ERROR_FOUNDER_PW}-->
+					<?php if($errorcode == UC_LOGIN_ERROR_FOUNDER_PW):?>
 					<div class="errormsg loginmsg">
 						<p>
 							<?php echo $this->lang->line('login_founder_incorrect')?>
 						</p>
-					</div> <!--{elseif $errorcode == UC_LOGIN_ERROR_ADMIN_PW}-->
+					</div> <?php elseif($errorcode == UC_LOGIN_ERROR_ADMIN_PW):?>
 					<div class="errormsg loginmsg">
 						<p>
 							<?php echo $this->lang->line('login_incorrect')?>
 						</p>
-					</div> <!--{elseif $errorcode == UC_LOGIN_ERROR_ADMIN_NOT_EXISTS}-->
+					</div> <?php elseif($errorcode == UC_LOGIN_ERROR_ADMIN_NOT_EXISTS):?>
 					<div class="errormsg loginmsg">
 						<p>
 							<?php echo $this->lang->line('login_admin_noexists')?>
 						</p>
-					</div> <!--{elseif $errorcode == UC_LOGIN_ERROR_SECCODE}-->
+					</div> <?php elseif($errorcode == UC_LOGIN_ERROR_SECCODE):?>
 					<div class="errormsg loginmsg">
 						<p>
 							<?php echo $this->lang->line('login_seccode_error')?>
 						</p>
-					</div> <!--{elseif $errorcode == UC_LOGIN_ERROR_FAILEDLOGIN}-->
+					</div> <?php elseif($errorcode == UC_LOGIN_ERROR_FAILEDLOGIN):?>
 					<div class="errormsg loginmsg">
 						<p>
 							<?php echo $this->lang->line('login_failedlogin')?>
 						</p>
-					</div> <!--{/if}-->
+					</div> <?php endif;?>
 					<p>
 						<input type="radio" name="isfounder" value="1" class="radio"
-							{if (isset($_POST['isfounder']) && $isfounder) || !isset($_POST['isfounder'])}checked="checked"
-							{/if} onclick="$('username').value='UCenter Administrator'; $('username').readOnly = true; $('username').disabled = true; $('password').focus();"
+							<?php if((isset($_POST['isfounder']) && $isfounder) || !isset($_POST['isfounder'])):?>checked="checked"
+							<?php endif;?> onclick="$('username').value='UCenter Administrator'; $('username').readOnly = true; $('username').disabled = true; $('password').focus();"
 							id="founder" /><label for="founder"><?php echo $this->lang->line('founder')?>
 						</label> <input type="radio" name="isfounder" value="0"
 							class="radio"
-							{if (isset($_POST['isfounder']) && !$isfounder)}checked="checked"
-							{/if} onclick="$('username').value=''; $('username').readOnly = false; $('username').disabled = false; $('username').focus();"
+							<?php if(isset($_POST['isfounder']) && !$isfounder):?>checked="checked"
+							<?php endif;?> onclick="$('username').value=''; $('username').readOnly = false; $('username').disabled = false; $('username').focus();"
 							id="admin" /><label for="admin"><?php echo $this->lang->line('admin_admin')?>
 						</label>
 					</p>
 					<p id="usernamediv">
 						<?php echo $this->lang->line('login_username')?>
 						:<input type="text" name="username" class="txt" tabindex="1"
-							id="username" value="$username" />
+							id="username" value="<?php echo $username;?>" />
 					</p>
 					<p>
 						<?php echo $this->lang->line('login_password')?>
 						:<input type="password" name="password" class="txt" tabindex="2"
-							id="password" value="$password" />
+							id="password" value="<?php echo $password;?>" />
 					</p>
 					<p>
 						<?php echo $this->lang->line('login_seccode')?>
@@ -87,16 +87,16 @@ function $(id) {
 	</form>
 </div>
 <script type="text/javascript">
-{if (isset($_POST['isfounder']) && $isfounder) || !isset($_POST['isfounder'])}
+<?php if((isset($_POST['isfounder']) && $isfounder) || !isset($_POST['isfounder'])):?>
 	$('username').value='UCenter Administrator';
 	$('username').disabled = true;
 	$('username').readOnly = true;
 	$('password').focus();
-{else}
+<?php else:?>
 	$('username').readOnly = false;
 	$('username').readOnly = false;
 	$('username').focus();
-{/if}
+<?php endif;?>
 </script>
 <div class="footer">
 	Powered by UCenter
