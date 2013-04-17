@@ -31,7 +31,7 @@ class Frame extends MY_Controller {
 		$apps = count($applist);
 		$friends = $this->_get_uc_friends();
 		$data['members'] = $members;
-		$data['applist'] = applist;
+		$data['applist'] = $applist;
 		$data['apps'] = $apps;
 		$data['friends'] = $friends;
 		$data['notes'] = $notes;
@@ -41,13 +41,13 @@ class Frame extends MY_Controller {
 
 		$serverinfo = PHP_OS.' / PHP v'.PHP_VERSION;
 		$serverinfo .= @ini_get('safe_mode') ? ' Safe Mode' : NULL;
-		$dbversion = $this->db->result_first("SELECT VERSION()");
+		$dbversion = $this->db->query("SELECT VERSION()")->row();
 		$fileupload = @ini_get('file_uploads') ? ini_get('upload_max_filesize') : '<font color="red">'.$lang['no'].'</font>';
 		$dbsize = 0;
-		$tablepre = UC_DBTABLEPRE;
-		$query = $tables = $this->db->fetch_all("SHOW TABLE STATUS LIKE '$tablepre%'");
+		$tablepre = $this->db->dbprefix;
+		$query = $tables = $this->db->query("SHOW TABLE STATUS LIKE '$tablepre%'")->result();
 		foreach($tables as $table) {
-			$dbsize += $table['Data_length'] + $table['Index_length'];
+			$dbsize += $table->Data_length + $table->Index_length;
 		}
 		$dbsize = $dbsize ? $this->_sizecount($dbsize) : $lang['unknown'];
 		$dbversion = $this->db->version();
@@ -116,16 +116,16 @@ class Frame extends MY_Controller {
 	}
 
 	function _get_uc_notes() {
-		$notes = $this->db->result_first("SELECT COUNT(*) FROM ".UC_DBTABLEPRE."notelist WHERE closed='0'");
+		$notes = $this->db->where('closed', 0)->get('notelist')->num_rows();
 		return $notes;
 	}
 	
 	function _get_uc_errornotes($applist) {
-		$notelist = $this->db->fetch_all("SELECT * FROM ".UC_DBTABLEPRE."notelist ORDER BY dateline DESC LIMIT 20");
+		$notelist = $this->db->order_by('dateline', 'DESC')->get('notelist', 20)->result();
 		$error = array();
 		foreach($notelist as $note) {
 			foreach($applist as $k => $app) {
-				if($note['app'.$app['appid']] < 0) {
+				if($note->{'app'.$app['appid']} < 0) {
 					$error[$k]++;
 				}
 			}
