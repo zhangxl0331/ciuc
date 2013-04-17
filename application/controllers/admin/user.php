@@ -44,43 +44,62 @@ class User extends MY_Controller {
 		$rand = rand(100000, 999999);
 		$seccodeinit = rawurlencode(authcode($rand, 'ENCODE', $authkey, 180));
 		$errorcode = 0;
-		if(submitcheck()) {
+		if(submitcheck()) 
+		{
 			$failedlogin = $this->db->where('ip', $this->onlineip)->get('failedlogins')->first_row();
-			if($failedlogin['count'] > 4) {
-				if($this->time - $failedlogin['lastupdate'] < 15 * 60) {
+			if($failedlogin->count > 4) 
+			{
+				if($this->time - $failedlogin->lastupdate < 15 * 60) 
+				{
 					$errorcode = UC_LOGIN_ERROR_FAILEDLOGIN;
-				} else {
+				} 
+				else 
+				{
 					$expiration = $this->time - 15 * 60;
-					$this->db->query("DELETE FROM ".UC_DBTABLEPRE."failedlogins WHERE lastupdate<'$expiration'");
+					$this->db->delete('failedlogins', array('lastupdate<'=>$expiration));
 				}
-			} else {
-	
+			} 
+			else 
+			{	
 				$seccodehidden = urldecode(getgpc('seccodehidden', 'P'));
 				$seccode = strtoupper(getgpc('seccode', 'P'));
-				$seccodehidden = $this->authcode($seccodehidden, 'DECODE', $authkey);
-				require UC_ROOT.'./lib/seccode.class.php';
-				seccode::seccodeconvert($seccodehidden);
-				if(empty($seccodehidden) || $seccodehidden != $seccode) {
+				$seccodehidden = authcode($seccodehidden, 'DECODE', $authkey);
+				$this->load->library('seccode');
+				$this->seccode->seccodeconvert($seccodehidden);
+				if(empty($seccodehidden) || $seccodehidden != $seccode) 
+				{
 					$errorcode = UC_LOGIN_ERROR_SECCODE;
-				} else {
+				} 
+				else 
+				{
 					$errorcode = UC_LOGIN_SUCCEED;
 					$this->user['username'] = $username;
-					if($isfounder == 1) {
+					if($isfounder == 1) 
+					{
 						$this->user['username'] = 'UCenterAdministrator';
 						$md5password =  md5(md5($password).UC_FOUNDERSALT);
-						if($md5password == UC_FOUNDERPW) {
+						if($md5password == UC_FOUNDERPW) 
+						{
 							$username = $this->user['username'];
 							$this->view->sid = $this->sid_encode($this->user['username']);
-						} else {
+						} 
+						else 
+						{
 							$errorcode = UC_LOGIN_ERROR_FOUNDER_PW;
 						}
-					} else {
-						$admin = $this->db->fetch_first("SELECT a.uid,m.username,m.salt,m.password FROM ".UC_DBTABLEPRE."admins a LEFT JOIN ".UC_DBTABLEPRE."members m USING(uid) WHERE a.username='$username'");
-						if(!empty($admin)) {
-							$md5password =  md5(md5($password).$admin['salt']);
-							if($admin['password'] == $md5password) {
-								$this->view->sid = $this->sid_encode($admin['username']);
-							} else {
+					} 
+					else 
+					{
+						$admin = $this->db->select('a.uid,m.username,m.salt,m.password')->from('admins a')->join('members m', 'a.uid=m.uid', 'LEFT')->where('a.username', $username)->get()->first_row();
+						if(!empty($admin)) 
+						{
+							$md5password =  md5(md5($password).$admin->salt);
+							if($admin->password == $md5password) 
+							{
+								$this->view->sid = $this->sid_encode($admin->username);
+							} 
+							else 
+							{
 								$errorcode = UC_LOGIN_ERROR_ADMIN_PW;
 							}
 						} else {
@@ -88,13 +107,14 @@ class User extends MY_Controller {
 						}
 					}
 	
+					$pwlen = strlen($password);
 					if($errorcode == 0) {
 						$this->setcookie('sid', $this->view->sid, 86400);
-						$pwlen = strlen($password);
+						
 						$this->user['admin'] = 1;
 						$this->writelog('login', 'succeed');
 						if($iframe) {
-							header('location: admin.php?m=frame&a=main&iframe=1'.($this->cookie_status ? '' : '&sid='.$this->view->sid));
+							header('location: admin/frame/main?iframe=1'.($this->cookie_status ? '' : '&sid='.$this->view->sid));
 							exit;
 						} else {
 							header('location: admin.php'.($this->cookie_status ? '' : '?sid='.$this->view->sid));
@@ -104,10 +124,10 @@ class User extends MY_Controller {
 						$this->writelog('login', 'error: user='.$this->user['username'].'; password='.($pwlen > 2 ? preg_replace("/^(.{".round($pwlen / 4)."})(.+?)(.{".round($pwlen / 6)."})$/s", "\\1***\\3", $password) : $password));
 						if(empty($failedlogin)) {
 							$expiration = $this->time - 15 * 60;
-							$this->db->query("DELETE FROM ".UC_DBTABLEPRE."failedlogins WHERE lastupdate<'$expiration'");
-							$this->db->query("INSERT INTO ".UC_DBTABLEPRE."failedlogins SET ip='$this->onlineip', count=1, lastupdate='$this->time'");
+							$this->db->delete('failedlogins', array('lastupdate<'=>$expiration));
+							$this->db->insert('failedlogins', array('ip'=>$this->onlineip, 'count'=>1, 'lastupdate'=>$this->time));
 						} else {
-							$this->db->query("UPDATE ".UC_DBTABLEPRE."failedlogins SET count=count+1,lastupdate='$this->time' WHERE ip='$this->onlineip'");
+							$this->db->set('count', 'count+1', FALSE)->update('failedlogins', array('lastupdate'=>$this->time), array('ip'=>$this->onlineip));
 						}
 					}
 				}

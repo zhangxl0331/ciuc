@@ -8,10 +8,10 @@ function $(id) {
 <div class="container">
 	<form action="<?php echo $this->config->base_url('admin/user/login');?>"
 		method="post" id="loginform" <?php if($this->input->get_post('iframe')):?>target="_self"
-		<?php else:?>target="_top"<?php endif;?>
+		<?php else:?>target="_top"<?php endif;?>>
 		<input type="hidden" name="formhash" value="<?php echo formhash();?>" />
-		<input type="hidden" name="seccodehidden" value="$seccodeinit" /> <input
-			type="hidden" name="iframe" value="{$iframe}" />
+		<input type="hidden" name="seccodehidden" value="<?php echo $seccodeinit;?>" /> <input
+			type="hidden" name="iframe" value="<?php echo $iframe;?>" />
 		<table class="mainbox">
 			<tr>
 				<td class="loginbox">

@@ -1,5 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-
+define('UC_SERVER_VERSION', '1.5.0');
+define('UC_SERVER_RELEASE', '20090121');
 /**
  * Code here is run before ALL controllers
  * 
@@ -114,6 +115,40 @@ class MY_Controller extends CI_Controller
 		}
 	}
 	
+	function is_founder($username) {
+		return $this->user['isfounder'];
+	}
+	
+	function writelog($action, $extra = '') {
+		$log = htmlspecialchars($this->user['username']."\t".$this->onlineip."\t".$this->time."\t$action\t$extra");
+		$logfile = FCPATH.'data/logs/'.gmdate('Ym', $this->time).'.php';
+		if(@filesize($logfile) > 2048000) {
+			PHP_VERSION < '4.2.0' && mt_srand((double)microtime() * 1000000);
+			$hash = '';
+			$chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz';
+			for($i = 0; $i < 4; $i++) {
+				$hash .= $chars[mt_rand(0, 61)];
+			}
+			@rename($logfile, FCPATH.'data/logs/'.gmdate('Ym', $this->time).'_'.$hash.'.php');
+		}
+		if($fp = @fopen($logfile, 'a')) {
+			@flock($fp, 2);
+			@fwrite($fp, "<?PHP exit;?>\t".str_replace(array('<?', '?>'), '', $log)."\n");
+			@fclose($fp);
+		}
+	}
+	
+	function fetch_plugins() {
+		$plugindir = FCPATH.'plugin';
+		$d = opendir($plugindir);
+		while($f = readdir($d)) {
+			if($f != '.' && $f != '..' && is_dir($plugindir.'/'.$f)) {
+				$pluginxml = $plugindir.$f.'/plugin.xml';
+				$plugins[] = xml_unserialize($pluginxml);
+			}
+		}
+	}
+	
 	function sid_decode($sid) {
 		$ip = $this->input->ip_address();
 		$agent = $_SERVER['HTTP_USER_AGENT'];
@@ -197,20 +232,20 @@ class MY_Controller extends CI_Controller
 	}
 
 	function serialize($s, $htmlon = 0) {
-		if(file_exists(UC_ROOT.RELEASE_ROOT.'./lib/xml.class.php')) {
-			include_once UC_ROOT.RELEASE_ROOT.'./lib/xml.class.php';
+		if(file_exists(FCPATH.RELEASE_ROOT.'./lib/xml.class.php')) {
+			include_once FCPATH.RELEASE_ROOT.'./lib/xml.class.php';
 		} else {
-			include_once UC_ROOT.'./lib/xml.class.php';
+			include_once FCPATH.'./lib/xml.class.php';
 		}
 
 		return xml_serialize($s, $htmlon);
 	}
 
 	function unserialize($s) {
-		if(file_exists(UC_ROOT.RELEASE_ROOT.'./lib/xml.class.php')) {
-			include_once UC_ROOT.RELEASE_ROOT.'./lib/xml.class.php';
+		if(file_exists(FCPATH.RELEASE_ROOT.'./lib/xml.class.php')) {
+			include_once FCPATH.RELEASE_ROOT.'./lib/xml.class.php';
 		} else {
-			include_once UC_ROOT.'./lib/xml.class.php';
+			include_once FCPATH.'./lib/xml.class.php';
 		}
 
 		return xml_unserialize($s);

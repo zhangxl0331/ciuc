@@ -13,6 +13,7 @@ class Admin extends MY_Controller {
 		$this->time = time();
 		$seccodeauth = $this->input->get_post('seccodeauth');
 		$seccode = authcode($seccodeauth, 'DECODE', $authkey);
+		
 		//$seccode = rand(100000, 999999);
 		//$this->setcookie('uc_secc', $this->authcode($seccode."\t".$this->time, 'ENCODE'));
 
