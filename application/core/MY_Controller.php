@@ -81,10 +81,9 @@ class MY_Controller extends CI_Controller
 		//		$this->cron();
 		
 		$sid = $this->cookie_status ? getgpc('sid', 'C') : rawurlencode(getgpc('sid', 'R'));
-		$a = getgpc('a');
-		if($this->router->fetch_class() !='user' && $this->router->fetch_method() != 'login' && $this->router->fetch_method() != 'logout') {
-			$this->check_priv();
-		}
+// 		if($this->router->fetch_class() !='user' && $this->router->fetch_method() != 'login' && $this->router->fetch_method() != 'logout') {
+// 			$this->check_priv();
+// 		}
 	}
 	
 	function check_priv() {

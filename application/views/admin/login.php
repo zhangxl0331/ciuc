@@ -6,7 +6,7 @@ function $(id) {
 </script>
 
 <div class="container">
-	<form action="<?php $this->config->base_url('admin/user/login');?>"
+	<form action="<?php echo $this->config->base_url('admin/user/login');?>"
 		method="post" id="loginform" <?php if($this->input->get_post('iframe')):?>target="_self"
 		<?php else:?>target="_top"<?php endif;?>
 		<input type="hidden" name="formhash" value="<?php echo formhash();?>" />
@@ -71,10 +71,8 @@ function $(id) {
 					</p>
 					<p>
 						<?php echo $this->lang->line('login_seccode')?>
-						:<input type="text" name="seccode" class="txt" tabindex="2"
-							id="seccode" value="" style="margin-right: 5px; width: 85px;" /><img
-							width="70" height="21"
-							src="admin.php?m=seccode&seccodeauth=$seccodeinit&{eval echo rand();}" />
+						:<input type="text" name="seccode" class="txt" tabindex="2" id="seccode" value="" style="margin-right: 5px; width: 85px;" />
+						<img width="70" height="21" src="<?php echo $this->config->base_url("service/admin/seccode?seccodeauth=$seccodeinit&".rand());?>" />
 					</p>
 					<p class="loginbtn">
 						<input type="submit" name="submit"
