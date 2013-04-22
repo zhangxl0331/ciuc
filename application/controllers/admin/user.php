@@ -114,10 +114,12 @@ class User extends MY_Controller {
 						$this->user['admin'] = 1;
 						$this->writelog('login', 'succeed');
 						if($iframe) {
-							header('location: admin/frame/main?iframe=1'.($this->cookie_status ? '' : '&sid='.$this->view->sid));
+							$url = $this->config->base_url('admin/frame/main?iframe=1'.($this->cookie_status ? '' : '&sid='.$this->sid));
+							header('location: '.$url);
 							exit;
 						} else {
-							header('location: admin.php'.($this->cookie_status ? '' : '?sid='.$this->view->sid));
+							$url = $this->config->base_url('admin/frame/index'.($this->cookie_status ? '' : '?sid='.$this->sid));
+							header('location: '.$url);
 							exit;
 						}
 					} else {

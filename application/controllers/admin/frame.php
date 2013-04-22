@@ -9,14 +9,19 @@ class Frame extends MY_Controller {
 	public function __construct()
 	{
 		parent::__construct();
+		if($this->router->fetch_class() !='user' && $this->router->fetch_method() != 'login' && $this->router->fetch_method() != 'logout') {
+			$this->check_priv();
+		}
 	}
 	
-	function onindex() {
-		$this->view->assign('sid', $this->view->sid);
+	function index() {
+		$sid = $this->cookie_status ? getgpc('sid', 'C') : rawurlencode(getgpc('sid', 'R'));
 		$mainurl = getgpc('mainurl');
-		$mainurl = !empty($mainurl) && preg_match("/^admin\.php\?(&*\w+=\w+)*$/i", $mainurl) ? $mainurl : 'admin.php?m=frame&a=main&sid='.$this->view->sid;
-		$this->view->assign('mainurl', $mainurl);
-		$this->view->display('admin_frame_index');
+		$mainurl = !empty($mainurl) && preg_match("/^admin/frame/index?(&*\w+=\w+)*$/i", $mainurl) ? $this->config->base_url($mainurl) : $this->config->base_url('admin/frame/main?sid='.$sid);
+		
+		$data['sid'] = $sid;
+		$data['mainurl'] = $mainurl;
+		$this->load->view('admin/frame_index', $data);
 	}
 
 	function main() {
@@ -63,13 +68,13 @@ class Frame extends MY_Controller {
 		$this->load->view('admin/frame_main', $data);
 	}
 
-	function onmenu() {
-		$this->view->display('admin_frame_menu');
+	function menu() {
+		$this->load->view('admin/frame_menu');
 	}
 
-	function onheader() {
-		$this->load('app');
-		$applist = $_ENV['app']->get_apps();
+	function header() {
+		$this->load->model('applications_m');
+		$applist = $this->applications_m->get_applications();
 		$cparray = array(
 			'UCHOME' => 'admincp.php',
 			'DISCUZ' => 'admincp.php',
@@ -87,9 +92,10 @@ class Frame extends MY_Controller {
 				}
 			}
 		}
-		$this->view->assign('admincp', $admincp);
-		$this->view->assign('username', $this->user['username']);
-		$this->view->display('admin_frame_header');
+		
+		$data['admincp'] = $admincp;
+		$data['username'] = $this->user['username'];
+		$this->load->view('admin/frame_header', $data);
 	}
 
 	function _get_uc_members() {
@@ -147,7 +153,7 @@ class Frame extends MY_Controller {
 	}
 
 	function _get_uc_info() {
-		$update = array('uniqueid' => UC_SITEID, 'version' => UC_SERVER_VERSION, 'release' => UC_SERVER_RELEASE, 'php' => PHP_VERSION, 'mysql' => $this->db->version(), 'charset' => CHARSET);
+		$update = array('uniqueid' => UC_SITEID, 'version' => UC_SERVER_VERSION, 'release' => UC_SERVER_RELEASE, 'php' => PHP_VERSION, 'mysql' => $this->db->version(), 'charset' => UC_CHARSET);
 		$updatetime = @filemtime(UC_ROOT.'./data/updatetime.lock');
 		if(empty($updatetime) || ($this->time - $updatetime > 3600 * 4)) {
 			@touch(UC_ROOT.'./data/updatetime.lock');

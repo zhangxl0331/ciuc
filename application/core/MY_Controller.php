@@ -17,6 +17,8 @@ class MY_Controller extends CI_Controller
 	var $input = array();
 	
 	var $cookie_status = 1;
+	
+	var $sid;
 
 	function __construct() 
 	{
@@ -81,7 +83,9 @@ class MY_Controller extends CI_Controller
 		
 		//		$this->cron();
 		
-		$sid = $this->cookie_status ? getgpc('sid', 'C') : rawurlencode(getgpc('sid', 'R'));
+		$this->sid = $this->cookie_status ? getgpc('sid', 'C') : rawurlencode(getgpc('sid', 'R'));
+		$this->load->vars('sid', $this->sid);
+		$this->load->vars('iframe', getgpc('iframe'));
 // 		if($this->router->fetch_class() !='user' && $this->router->fetch_method() != 'login' && $this->router->fetch_method() != 'logout') {
 // 			$this->check_priv();
 // 		}
@@ -96,7 +100,8 @@ class MY_Controller extends CI_Controller
 		} else {
 			$this->user['isfounder'] = $username == 'UCenterAdministrator' ? 1 : 0;
 			if(!$this->user['isfounder']) {
-				$admin = $this->db->fetch_first("SELECT a.*, m.* FROM ".UC_DBTABLEPRE."admins a LEFT JOIN ".UC_DBTABLEPRE."members m USING(uid) WHERE a.username='$username'");
+				$admin = $this->db->select('a.*, m.*')->from('admins a')->join('members m', 'a.uid=m.uid', 'LEFT')->where('a.username', $username)->get()->row_array();
+				
 				if(empty($admin)) {
 					header('Location: '.$this->config->base_url().'admin/user/login?iframe='.getgpc('iframe', 'G').($this->cookie_status ? '' : '&sid='.$sid));
 					exit;
@@ -104,14 +109,15 @@ class MY_Controller extends CI_Controller
 					$this->user = $admin;
 					$this->user['username'] = $username;
 					$this->user['admin'] = 1;
-					$this->view->sid = $this->sid_encode($username);
+					$sid = $this->sid_encode($username);
+					$this->load->vars('sid', $sid);
 					$this->setcookie('sid', $this->view->sid, 86400);
 				}
 			} else {
 				$this->user['username'] = 'UCenterAdministrator';
 				$this->user['admin'] = 1;
 			}
-			$this->view->assign('user', $this->user);
+			$this->load->vars('user', $this->user);
 		}
 	}
 	

@@ -113,4 +113,4 @@
 
 $ucinfo
 
-{template footer}
+<?php $this->load->view('footer');?>

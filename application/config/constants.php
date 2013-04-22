@@ -56,7 +56,7 @@ define('SQLFILE', FCPATH.'data/uc.sql');
 define('LOCK_INSTALL', FCPATH.'data/install.lock');
 define('LOCK_UPGRADE', FCPATH.'data/upgrade.lock');
 
-define('CHARSET', 'utf-8');
+define('UC_CHARSET', 'utf-8');
 define('DBCHARSET', 'utf8');
 
 define('ORIG_TABLEPRE', 'uc_');
