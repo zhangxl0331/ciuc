@@ -163,13 +163,29 @@ class User_m extends CI_Model
 	}
 	
 	function get_total_num($sqladd = '') {
-		$data = $this->db->result_first("SELECT COUNT(*) FROM ".UC_DBTABLEPRE."members $sqladd");
+		if($sqladd)
+		{
+			$data = $this->db->where($sqladd)->get('members')->num_rows();
+		}
+		else 
+		{
+			$data = $this->db->get('members')->num_rows();
+		}
+		
 		return $data;
 	}
 
 	function get_list($page, $ppp, $totalnum, $sqladd) {
-		$start = $this->base->page_get_start($page, $ppp, $totalnum);
-		$data = $this->db->fetch_all("SELECT * FROM ".UC_DBTABLEPRE."members $sqladd LIMIT $start, $ppp");
+		$start = page_get_start($page, $ppp, $totalnum);
+		if($sqladd)
+		{
+			$data = $this->db->where($sqladd)->get('members', $ppp, $start)->result_array();
+		}
+		else 
+		{
+			$data = $this->db->get('members', $ppp, $start)->result_array();
+		}
+		
 		return $data;
 	}
 

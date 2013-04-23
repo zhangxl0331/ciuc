@@ -126,7 +126,7 @@ class User extends MY_Controller {
 						$this->writelog('login', 'error: user='.$this->user['username'].'; password='.($pwlen > 2 ? preg_replace("/^(.{".round($pwlen / 4)."})(.+?)(.{".round($pwlen / 6)."})$/s", "\\1***\\3", $password) : $password));
 						if(empty($failedlogin)) {
 							$expiration = $this->time - 15 * 60;
-							$this->db->delete('failedlogins', array('lastupdate<'=>$expiration));
+							$this->db->delete('failedlogins', array('lastupdate <'=>$expiration));
 							$this->db->insert('failedlogins', array('ip'=>$this->onlineip, 'count'=>1, 'lastupdate'=>$this->time));
 						} else {
 							$this->db->set('count', 'count+1', FALSE)->update('failedlogins', array('lastupdate'=>$this->time), array('ip'=>$this->onlineip));
@@ -184,10 +184,10 @@ class User extends MY_Controller {
 		$this->message('user_add_succeed', 'admin.php?m=user&a=ls');
 	}
 	
-	function onls() {
+	function ls() {
 		$this->check_priv();
 	
-		include_once UC_ROOT.'view/default/admin.lang.php';
+		$this->load->language('admin');
 	
 		$status = 0;
 		if(!empty($_POST['addname']) && $this->submitcheck()) {
@@ -204,7 +204,7 @@ class User extends MY_Controller {
 				}
 			}
 		}
-		$this->view->assign('status', $status);
+		$data['status'] = $status;
 	
 		if(!empty($_POST['delete'])) {
 			$_ENV['user']->delete_user($_POST['delete']);
@@ -221,47 +221,47 @@ class User extends MY_Controller {
 		$sqladd = '';
 		if($srchname) {
 			$sqladd .= " AND username LIKE '$srchname%'";
-			$this->view->assign('srchname', $srchname);
+			$data['srchname'] = $srchname;
 		}
 		if($srchuid) {
 			$sqladd .= " AND uid='$srchuid'";
-			$this->view->assign('srchuid', $srchuid);
+			$data['srchuid'] = $srchuid;
 		}
 		if($srchemail) {
 			$sqladd .= " AND email='$srchemail'";
-			$this->view->assign('srchemail', $srchemail);
+			$data['srchemail'] = $srchemail;
 		}
 		if($srchregdatestart) {
 			$sqladd .= " AND regdate>'".strtotime($srchregdatestart)."'";
-			$this->view->assign('srchregdatestart', $srchregdatestart);
+			$data['srchregdatestart'] = $srchregdatestart;
 		}
 		if($srchregdateend) {
 			$sqladd .= " AND regdate<'".strtotime($srchregdateend)."'";
-			$this->view->assign('srchregdateend', $srchregdateend);
+			$data['srchregdateend'] = $srchregdateend;
 		}
 		if($srchregip) {
 			$sqladd .= " AND regip='$srchregip'";
-			$this->view->assign('srchregip', $srchregip);
+			$data['srchregip'] = $srchregip;
 		}
-		$sqladd = $sqladd ? " WHERE 1 $sqladd" : '';
+		$sqladd = $sqladd ? "$sqladd" : '';
 	
-		$num = $_ENV['user']->get_total_num($sqladd);
-		$userlist = $_ENV['user']->get_list($_GET['page'], UC_PPP, $num, $sqladd);
+		$num = $this->user_m->get_total_num($sqladd);
+		$userlist = $this->user_m->get_list($_GET['page'], UC_PPP, $num, $sqladd);
 		foreach($userlist as $key => $user) {
 			$user['smallavatar'] = '<img src="avatar.php?uid='.$user['uid'].'&size=small">';
 			$userlist[$key] = $user;
 		}
-		$multipage = $this->page($num, UC_PPP, $_GET['page'], 'admin.php?m=user&a=ls&srchname='.$srchname.'&srchregdate='.$srchregdate);
+		$multipage = page($num, UC_PPP, $_GET['page'], $this->config->base_url('user/ls?srchname='.$srchname.'&srchregdatestart='.$srchregdatestart.'&srchregdateend='.$srchregdateend));
 	
 		$this->_format_userlist($userlist);
-		$this->view->assign('userlist', $userlist);
-		//$this->view->assign('apps', $this->cache['apps']);
+		$data['userlist'] = $userlist;
+		//$data['apps', $this->cache['apps']);
 		$adduser = getgpc('adduser');
 		$a = getgpc('a');
-		$this->view->assign('multipage', $multipage);
-		$this->view->assign('adduser', $adduser);
-		$this->view->assign('a', $a);
-		$this->view->display('admin_user');
+		$data['multipage'] = $multipage;
+		$data['adduser'] = $adduser;
+		$data['a'] = $a;
+		$this->load->view('user', $data);
 	
 	}
 	
@@ -312,10 +312,10 @@ class User extends MY_Controller {
 		$user = $this->db->fetch_first("SELECT * FROM ".UC_DBTABLEPRE."members WHERE uid='$uid'");
 		$user['bigavatar'] = '<img src="avatar.php?uid='.$uid.'&size=big">';
 		$user['bigavatarreal'] = '<img src="avatar.php?uid='.$uid.'&size=big&type=real">';
-		$this->view->assign('uid', $uid);
-		$this->view->assign('user', $user);
-		$this->view->assign('status', $status);
-		$this->view->display('admin_user');
+		$data['uid'] = $uid;
+		$data['user'] = $user;
+		$data['status'] = $status;
+		$this->load->view('admin_user', $data);
 	}
 	
 	

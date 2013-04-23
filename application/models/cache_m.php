@@ -38,7 +38,8 @@ class Cache_m extends CI_Model
 	}
 	
 	function getdata($cachefile) {
-		return $this->cache->get($cachefile);
+		$cache = $this->cache->get($cachefile);
+		return count($cache)==1?current($cache):$cache;
 	}
 
 	function updatetpl() {

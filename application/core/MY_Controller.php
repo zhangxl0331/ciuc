@@ -129,122 +129,8 @@ class MY_Controller extends CI_Controller
 		}
 	}
 	
-	function authcode($string, $operation = 'DECODE', $key = '', $expiry = 0) {
 	
-		$ckey_length = 4;	// �����Կ���� ȡֵ 0-32;
-		// ���������Կ���������������κι��ɣ�������ԭ�ĺ���Կ��ȫ��ͬ�����ܽ��Ҳ��ÿ�β�ͬ�������ƽ��Ѷȡ�
-		// ȡֵԽ�����ı䶯����Խ�����ı仯 = 16 �� $ckey_length �η�
-		// ����ֵΪ 0 ʱ���򲻲��������Կ
-	
-		$key = md5($key ? $key : UC_KEY);
-		$keya = md5(substr($key, 0, 16));
-		$keyb = md5(substr($key, 16, 16));
-		$keyc = $ckey_length ? ($operation == 'DECODE' ? substr($string, 0, $ckey_length): substr(md5(microtime()), -$ckey_length)) : '';
-	
-		$cryptkey = $keya.md5($keya.$keyc);
-		$key_length = strlen($cryptkey);
-	
-		$string = $operation == 'DECODE' ? base64_decode(substr($string, $ckey_length)) : sprintf('%010d', $expiry ? $expiry + time() : 0).substr(md5($string.$keyb), 0, 16).$string;
-		$string_length = strlen($string);
-	
-		$result = '';
-		$box = range(0, 255);
-	
-		$rndkey = array();
-		for($i = 0; $i <= 255; $i++) {
-			$rndkey[$i] = ord($cryptkey[$i % $key_length]);
-		}
-	
-		for($j = $i = 0; $i < 256; $i++) {
-			$j = ($j + $box[$i] + $rndkey[$i]) % 256;
-			$tmp = $box[$i];
-			$box[$i] = $box[$j];
-			$box[$j] = $tmp;
-		}
-	
-		for($a = $j = $i = 0; $i < $string_length; $i++) {
-			$a = ($a + 1) % 256;
-			$j = ($j + $box[$a]) % 256;
-			$tmp = $box[$a];
-			$box[$a] = $box[$j];
-			$box[$j] = $tmp;
-			$result .= chr(ord($string[$i]) ^ ($box[($box[$a] + $box[$j]) % 256]));
-		}
-	
-		if($operation == 'DECODE') {
-			if((substr($result, 0, 10) == 0 || substr($result, 0, 10) - time() > 0) && substr($result, 10, 16) == substr(md5(substr($result, 26).$keyb), 0, 16)) {
-				return substr($result, 26);
-			} else {
-				return '';
-			}
-		} else {
-			return $keyc.str_replace('=', '', base64_encode($result));
-		}
-	
-	}
-	
-	function page($num, $perpage, $curpage, $mpurl) {
-		$multipage = '';
-		$mpurl .= strpos($mpurl, '?') ? '&' : '?';
-		if($num > $perpage) {
-			$page = 10;
-			$offset = 2;
-	
-			$pages = @ceil($num / $perpage);
-	
-			if($page > $pages) {
-				$from = 1;
-				$to = $pages;
-			} else {
-				$from = $curpage - $offset;
-				$to = $from + $page - 1;
-				if($from < 1) {
-					$to = $curpage + 1 - $from;
-					$from = 1;
-					if($to - $from < $page) {
-						$to = $page;
-					}
-				} elseif($to > $pages) {
-					$from = $pages - $page + 1;
-					$to = $pages;
-				}
-			}
-	
-			$multipage = ($curpage - $offset > 1 && $pages > $page ? '<a href="'.$mpurl.'page=1" class="first"'.$ajaxtarget.'>1 ...</a>' : '').
-			($curpage > 1 && !$simple ? '<a href="'.$mpurl.'page='.($curpage - 1).'" class="prev"'.$ajaxtarget.'>&lsaquo;&lsaquo;</a>' : '');
-			for($i = $from; $i <= $to; $i++) {
-				$multipage .= $i == $curpage ? '<strong>'.$i.'</strong>' :
-				'<a href="'.$mpurl.'page='.$i.($ajaxtarget && $i == $pages && $autogoto ? '#' : '').'"'.$ajaxtarget.'>'.$i.'</a>';
-			}
-	
-			$multipage .= ($curpage < $pages && !$simple ? '<a href="'.$mpurl.'page='.($curpage + 1).'" class="next"'.$ajaxtarget.'>&rsaquo;&rsaquo;</a>' : '').
-			($to < $pages ? '<a href="'.$mpurl.'page='.$pages.'" class="last"'.$ajaxtarget.'>... '.$realpages.'</a>' : '').
-			(!$simple && $pages > $page && !$ajaxtarget ? '<kbd><input type="text" name="custompage" size="3" onkeydown="if(event.keyCode==13) {window.location=\''.$mpurl.'page=\'+this.value; return false;}" /></kbd>' : '');
-	
-			$multipage = $multipage ? '<div class="pages">'.(!$simple ? '<em>&nbsp;'.$num.'&nbsp;</em>' : '').$multipage.'</div>' : '';
-		}
-		return $multipage;
-	}
-	
-	function page_get_start($page, $ppp, $totalnum) {
-		$totalpage = ceil($totalnum / $ppp);
-		$page =  max(1, min($totalpage, intval($page)));
-		return ($page - 1) * $ppp;
-	}
-	
-	function load($model, $base = NULL, $release = '') {
-		$base = $base ? $base : $this;
-		if(empty($_ENV[$model])) {
-			$release = !$release ? RELEASE_ROOT : $release;
-			if(file_exists(UC_ROOT.$release."model/$model.php")) {
-				require_once UC_ROOT.$release."model/$model.php";
-			} else {
-				require_once UC_ROOT."model/$model.php";
-			}
-			eval('$_ENV[$model] = new '.$model.'model($base);');
-		}
-		return $_ENV[$model];
-	}
+
 	
 	function get_setting($k = array(), $decode = FALSE) {
 		$return = array();
@@ -278,13 +164,9 @@ class MY_Controller extends CI_Controller
 		exit;
 	}
 	
-	function formhash() {
-		return substr(md5(substr($this->time, 0, -4).UC_KEY), 16);
-	}
 	
-	function submitcheck() {
-		return @getgpc('formhash', 'P') == FORMHASH ? true : false;
-	}
+	
+	
 	
 	function date($time, $type = 3) {
 		$format[] = $type & 2 ? (!empty($this->settings['dateformat']) ? $this->settings['dateformat'] : 'Y-n-j') : '';
@@ -292,38 +174,7 @@ class MY_Controller extends CI_Controller
 		return gmdate(implode(' ', $format), $time + $this->settings['timeoffset']);
 	}
 	
-	function implode($arr) {
-		return "'".implode("','", (array)$arr)."'";
-	}
 	
-	function set_home($uid, $dir = '.') {
-		$uid = sprintf("%09d", $uid);
-		$dir1 = substr($uid, 0, 3);
-		$dir2 = substr($uid, 3, 2);
-		$dir3 = substr($uid, 5, 2);
-		!is_dir($dir.'/'.$dir1) && mkdir($dir.'/'.$dir1, 0777);
-		!is_dir($dir.'/'.$dir1.'/'.$dir2) && mkdir($dir.'/'.$dir1.'/'.$dir2, 0777);
-		!is_dir($dir.'/'.$dir1.'/'.$dir2.'/'.$dir3) && mkdir($dir.'/'.$dir1.'/'.$dir2.'/'.$dir3, 0777);
-	}
-	
-	function get_home($uid) {
-		$uid = sprintf("%09d", $uid);
-		$dir1 = substr($uid, 0, 3);
-		$dir2 = substr($uid, 3, 2);
-		$dir3 = substr($uid, 5, 2);
-		return $dir1.'/'.$dir2.'/'.$dir3;
-	}
-	
-	function get_avatar($uid, $size = 'big', $type = '') {
-		$size = in_array($size, array('big', 'middle', 'small')) ? $size : 'big';
-		$uid = abs(intval($uid));
-		$uid = sprintf("%09d", $uid);
-		$dir1 = substr($uid, 0, 3);
-		$dir2 = substr($uid, 3, 2);
-		$dir3 = substr($uid, 5, 2);
-		$typeadd = $type == 'real' ? '_real' : '';
-		return  $dir1.'/'.$dir2.'/'.$dir3.'/'.substr($uid, -2).$typeadd."_avatar_$size.jpg";
-	}
 	
 	function &cache($cachefile) {
 		$this->load->model('cache_m');
@@ -363,67 +214,17 @@ class MY_Controller extends CI_Controller
 		return xml_unserialize($s);
 	}
 	
-	function cutstr($string, $length, $dot = ' ...') {
-		if(strlen($string) <= $length) {
-			return $string;
-		}
 	
-		$string = str_replace(array('&amp;', '&quot;', '&lt;', '&gt;'), array('&', '"', '<', '>'), $string);
-	
-		$strcut = '';
-		if(strtolower(UC_CHARSET) == 'utf-8') {
-	
-			$n = $tn = $noc = 0;
-			while($n < strlen($string)) {
-	
-				$t = ord($string[$n]);
-				if($t == 9 || $t == 10 || (32 <= $t && $t <= 126)) {
-					$tn = 1; $n++; $noc++;
-				} elseif(194 <= $t && $t <= 223) {
-					$tn = 2; $n += 2; $noc += 2;
-				} elseif(224 <= $t && $t < 239) {
-					$tn = 3; $n += 3; $noc += 2;
-				} elseif(240 <= $t && $t <= 247) {
-					$tn = 4; $n += 4; $noc += 2;
-				} elseif(248 <= $t && $t <= 251) {
-					$tn = 5; $n += 5; $noc += 2;
-				} elseif($t == 252 || $t == 253) {
-					$tn = 6; $n += 6; $noc += 2;
-				} else {
-					$n++;
-				}
-	
-				if($noc >= $length) {
-					break;
-				}
-	
-			}
-			if($noc > $length) {
-				$n -= $tn;
-			}
-	
-			$strcut = substr($string, 0, $n);
-	
-		} else {
-			for($i = 0; $i < $length; $i++) {
-				$strcut .= ord($string[$i]) > 127 ? $string[$i].$string[++$i] : $string[$i];
-			}
-		}
-	
-		$strcut = str_replace(array('&', '"', '<', '>'), array('&amp;', '&quot;', '&lt;', '&gt;'), $strcut);
-	
-		return $strcut.$dot;
-	}
 	
 	function setcookie($key, $value, $life = 0, $httponly = false) {
 		(!defined('UC_COOKIEPATH')) && define('UC_COOKIEPATH', '/');
 		(!defined('UC_COOKIEDOMAIN')) && define('UC_COOKIEDOMAIN', '');
-	
+
 		if($value == '' || $life < 0) {
 			$value = '';
 			$life = -1;
 		}
-	
+
 		$life = $life > 0 ? $this->time + $life : ($life < 0 ? $this->time - 31536000 : 0);
 		$path = $httponly && PHP_VERSION < '5.2.0' ? UC_COOKIEPATH."; HttpOnly" : UC_COOKIEPATH;
 		$secure = $_SERVER['SERVER_PORT'] == 443 ? 1 : 0;
@@ -452,16 +253,7 @@ class MY_Controller extends CI_Controller
 		}
 	}
 	
-	function dstripslashes($string) {
-		if(is_array($string)) {
-			foreach($string as $key => $val) {
-				$string[$key] = $this->dstripslashes($val);
-			}
-		} else {
-			$string = stripslashes($string);
-		}
-		return $string;
-	}
+	
 	
 	function check_priv() {
 		$sid = $this->cookie_status ? getgpc('sid', 'C') : rawurlencode(getgpc('sid', 'R'));
