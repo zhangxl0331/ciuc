@@ -7,19 +7,22 @@ class Settings_m extends CI_Model
 		parent::__construct();
 	}
 	
-	public function get_settings() 
-	{
-		if($result = $this->db->get('settings')->result_array())
-		{
-			foreach($result as $v)
-			{
-				$return[$v['k']] = $v['v'];
-			}
-			
-			return $return;
+	function get_settings($keys = '') {
+		if($keys) {
+			$keys = $this->base->implode($keys);
+			$sqladd = "k IN ($keys)";
+		} else {
+			$sqladd = '1';
 		}
-		
-		return FALSE;
+		$arr = array();
+		$arr = $this->db->fetch_all("SELECT * FROM ".UC_DBTABLEPRE."settings WHERE $sqladd");
+		if($arr) {
+			foreach($arr as $k => $v) {
+				$arr[$v['k']] = $v['v'];
+				unset($arr[$k]);
+			}
+		}
+		return $arr;
 	}
 
 }
