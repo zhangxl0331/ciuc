@@ -15,13 +15,13 @@ class Domain_m extends CI_Model
 	}
 
 	function get_total_num() {
-		$data = $this->db->result_first("SELECT COUNT(*) FROM ".UC_DBTABLEPRE."domains");
+		$data = $this->db->count_all_results('domains');
 		return $data;
 	}
 
 	function get_list($page, $ppp, $totalnum) {
-		$start = $this->base->page_get_start($page, $ppp, $totalnum);
-		$data = $this->db->fetch_all("SELECT * FROM ".UC_DBTABLEPRE."domains LIMIT $start, $ppp");
+		$start = page_get_start($page, $ppp, $totalnum);
+		$data = $this->db->get('domains', $ppp, $start)->result_array();
 		return $data;
 	}
 
