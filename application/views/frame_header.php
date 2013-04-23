@@ -10,8 +10,8 @@
 <div class="mainhd">
 	<div class="logo">UCenter Administrator's Control Panel</div>
 	<div class="uinfo">
-		<p><?php echo $this->lang->line('welcome');?>, <em><?php echo $username;?></em> [ <a href="admin.php?m=user&a=logout" target="_top"><?php echo $this->lang->line('menu_logout');?></a> ]</p>
-		<!--{if $admincp}-->
+		<p><?php echo $this->lang->line('welcome');?>, <em><?php echo $username;?></em> [ <a href="<?php echo $this->config->base_url('user/logout');?>" target="_top"><?php echo $this->lang->line('menu_logout');?></a> ]</p>
+		<?php if($admincp):?>
 			<p id="others"><a href="#" class="othersoff" onclick="showmenu(this);"><?php echo $this->lang->line('menu_otheradmincp');?></a></p>
 			<script type="text/javascript">
 				function showmenu(ctrl) {
@@ -38,7 +38,7 @@
 					}
 				}
 			</script>
-		<!--{/if}-->
+		<?php endif;?>
 	</div>
 </div>
 </body>

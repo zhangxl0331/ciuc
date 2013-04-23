@@ -9,10 +9,10 @@
 <body scroll="no">
 <table cellpadding="0" cellspacing="0" width="100%" height="100%">
 	<tr>
-		<td colspan="2" height="69"><iframe src="<?php echo $this->config->base_url("admin/frame/header?sid=$sid");?>" name="header" width="100%" height="69" scrolling="no" frameborder="0"></iframe></td>
+		<td colspan="2" height="69"><iframe src="<?php echo $this->config->base_url("index/header?sid=$sid");?>" name="header" width="100%" height="69" scrolling="no" frameborder="0"></iframe></td>
 	</tr>
 	<tr>
-		<td valign="top" width="160"><iframe src="<?php echo $this->config->base_url("admin/frame/menu?sid=$sid");?>" name="menu" target="main" width="160" height="100%" scrolling="no" frameborder="0"></iframe></td>
+		<td valign="top" width="160"><iframe src="<?php echo $this->config->base_url("index/menu?sid=$sid");?>" name="menu" target="main" width="160" height="100%" scrolling="no" frameborder="0"></iframe></td>
 		<td valign="top" width="100%"><iframe src="<?php echo $mainurl;?>" name="main" width="100%" height="100%" frameborder="0" scrolling="yes" style="overflow:visible;"></iframe></td>
 	</tr>
 </table>

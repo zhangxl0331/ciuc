@@ -23,21 +23,21 @@ a{ color:#2366A8; text-decoration:none; }
 <body>
 <div class="menu">
 	<ul id="leftmenu">
-		<li><a href="admin.php?m=frame&a=main" target="main" class="tabon"><?php echo $this->lang->line('menu_index');?></a></li>
-		<?php if($user['isfounder'] || $user['allowadminsetting']):?><li><a href="admin.php?m=setting&a=ls" target="main"><?php echo $this->lang->line('menu_basic_setting');?></a></li><?php endif;?>
-		<?php if($user['isfounder'] || $user['allowadminsetting']):?><li><a href="admin.php?m=setting&a=register" target="main"><?php echo $this->lang->line('menu_register_setting');?></a></li><?php endif;?>
-		<?php if($user['isfounder'] || $user['allowadminsetting']):?><li><a href="admin.php?m=setting&a=mail" target="main"><?php echo $this->lang->line('menu_mail_setting');?></a></li><?php endif;?>
-		<?php if($user['isfounder'] || $user['allowadminapp']):?><li><a href="admin.php?m=app&a=ls" target="main"><?php echo $this->lang->line('menu_application');?></a></li><?php endif;?>
-		<?php if($user['isfounder'] || $user['allowadminuser']):?><li><a href="admin.php?m=user&a=ls" target="main"><?php echo $this->lang->line('menu_manager_user');?></a></li><?php endif;?>
-		<?php if($user['isfounder']):?><li><a href="admin.php?m=admin&a=ls" target="main"><?php echo $this->lang->line('menu_admin_user');?></a></li><?php endif;?>
-		<?php if($user['isfounder'] || $user['allowadminpm']):?><li><a href="admin.php?m=pm&a=ls" target="main"><?php echo $this->lang->line('menu_pm');?></a></li><?php endif;?>
-		<?php if($user['isfounder'] || $user['allowadmincredits']):?><li><a href="admin.php?m=credit&a=ls" target="main"><?php echo $this->lang->line('menu_credit_exchange');?></a></li><?php endif;?>
-		<?php if($user['isfounder'] || $user['allowadminbadword']):?><li><a href="admin.php?m=badword&a=ls" target="main"><?php echo $this->lang->line('menu_censor_word');?></a></li><?php endif;?>
-		<?php if($user['isfounder'] || $user['allowadmindomain']):?><li><a href="admin.php?m=domain&a=ls" target="main"><?php echo $this->lang->line('menu_domain_list');?></a></li><?php endif;?>
-		<?php if($user['isfounder'] || $user['allowadmindb']):?><li><a href="admin.php?m=db&a=ls" target="main"><?php echo $this->lang->line('menu_db');?></a></li><?php endif;?>
-		<?php if($user['isfounder']):?><li><a href="admin.php?m=feed&a=ls" target="main"><?php echo $this->lang->line('menu_data_list');?></a></li><?php endif;?>
-		<?php if($user['isfounder'] || $user['allowadmincache']):?><li><a href="admin.php?m=cache&a=update" target="main"><?php echo $this->lang->line('menu_update_cache');?></a></li><?php endif;?>
-		<?php if($user['isfounder']):?><li><a href="admin.php?m=plugin&a=filecheck" target="main"><?php echo $this->lang->line('plugin');?></a></li><?php endif;?>
+		<li><a href="<?php echo $this->config->base_url('index/main');?>" target="main" class="tabon"><?php echo $this->lang->line('menu_index');?></a></li>
+		<?php if($user['isfounder'] || $user['allowadminsetting']):?><li><a href="<?php echo $this->config->base_url('setting/ls');?>" target="main"><?php echo $this->lang->line('menu_basic_setting');?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadminsetting']):?><li><a href="<?php echo $this->config->base_url('setting/register');?>" target="main"><?php echo $this->lang->line('menu_register_setting');?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadminsetting']):?><li><a href="<?php echo $this->config->base_url('setting/mail');?>" target="main"><?php echo $this->lang->line('menu_mail_setting');?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadminapp']):?><li><a href="<?php echo $this->config->base_url('app/ls');?>" target="main"><?php echo $this->lang->line('menu_application');?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadminuser']):?><li><a href="<?php echo $this->config->base_url('user/ls');?>" target="main"><?php echo $this->lang->line('menu_manager_user');?></a></li><?php endif;?>
+		<?php if($user['isfounder']):?><li><a href="<?php echo $this->config->base_url('admin/ls');?>" target="main"><?php echo $this->lang->line('menu_admin_user');?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadminpm']):?><li><a href="<?php echo $this->config->base_url('pm/ls');?>" target="main"><?php echo $this->lang->line('menu_pm');?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadmincredits']):?><li><a href="<?php echo $this->config->base_url('credit/ls');?>" target="main"><?php echo $this->lang->line('menu_credit_exchange');?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadminbadword']):?><li><a href="<?php echo $this->config->base_url('badword/ls');?>" target="main"><?php echo $this->lang->line('menu_censor_word');?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadmindomain']):?><li><a href="<?php echo $this->config->base_url('domain/ls');?>" target="main"><?php echo $this->lang->line('menu_domain_list');?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadmindb']):?><li><a href="<?php echo $this->config->base_url('db/ls');?>" target="main"><?php echo $this->lang->line('menu_db');?></a></li><?php endif;?>
+		<?php if($user['isfounder']):?><li><a href="<?php echo $this->config->base_url('feed/ls');?>" target="main"><?php echo $this->lang->line('menu_data_list');?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadmincache']):?><li><a href="<?php echo $this->config->base_url('cache/update');?>" target="main"><?php echo $this->lang->line('menu_update_cache');?></a></li><?php endif;?>
+		<?php if($user['isfounder']):?><li><a href="<?php echo $this->config->base_url('plugin/filecheck');?>" target="main"><?php echo $this->lang->line('plugin');?></a></li><?php endif;?>
 	</ul>
 </div>
 <div class="footer">Powered by UCenter {UC_SERVER_VERSION}<br />&copy; 2001 - 2008 <a href="http://www.comsenz.com/" target="_blank">Comsenz</a> Inc.</div>
