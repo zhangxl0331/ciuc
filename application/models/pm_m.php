@@ -115,7 +115,7 @@ class Pm_m extends CI_Model
 	function get_pm_list($uid, $pmnum, $folder, $filter, $page, $ppp = 10, $new = 0) {
 		$ppp = $ppp ? $ppp : 10;
 		if($folder != 'searchbox') {
- 			$start_limit = $this->base->page_get_start($page, $ppp, $pmnum);
+ 			$start_limit = page_get_start($page, $ppp, $pmnum);
  		} else {
  			$start_limit = ($page - 1) * $ppp;
  		}
@@ -131,30 +131,24 @@ class Pm_m extends CI_Model
 				} elseif($filter == 'privatepm') {
 					$filteradd = "pm.msgtoid='$uid' AND pm.related='0' AND pm.msgfromid>'0' AND pm.folder='inbox'";
 				} elseif($filter == 'announcepm') {
-					$filteradd = "pm.msgtoid='0' AND pm.folder='inbox'";
+					$filteradd = array('pm.msgtoid'=>'0', 'pm.folder'=>'inbox');
 				} else {
 					$filteradd = "pm.msgtoid='$uid' AND pm.related='0' AND pm.folder='inbox'";
 				}
-				$sql = "SELECT pm.*,m.username as msgfrom FROM ".UC_DBTABLEPRE."pms pm
-					LEFT JOIN ".UC_DBTABLEPRE."members m ON pm.msgfromid = m.uid
-					WHERE $filteradd ORDER BY pm.dateline DESC LIMIT $start_limit, $ppp";
+
+				$rows = $this->db->select('pm.*,m.username as msgfrom')->from('pms pm')->join('members m', 'pm.msgfromid = m.uid', 'LEFT')->where($filteradd)->order_by('pm.dateline DESC')->get('', $ppp, $start_limit)->result_array();
 				break;
 			case 'searchbox':
 				$filteradd = "msgtoid='$uid' AND folder='inbox' AND message LIKE '%".(str_replace('_', '\_', addcslashes($filter, '%_')))."%'";
-				$sql = "SELECT * FROM ".UC_DBTABLEPRE."pms
-					WHERE $filteradd ORDER BY dateline DESC LIMIT $start_limit, $ppp";
+				$rows = $this->db->where($filteradd)->order_by('dateline DESC')->get('pms', $ppp, $start_limit)->result_array();
 				break;
 			case 'savebox':
-				$sql = "SELECT p.*, m.username AS msgto FROM ".UC_DBTABLEPRE."pms p
-					LEFT JOIN ".UC_DBTABLEPRE."members m ON m.uid=p.msgtoid
-					WHERE p.related='0' AND p.msgfromid='$uid' AND p.folder='outbox'
-					ORDER BY p.dateline DESC LIMIT $start_limit, $ppp";
+				$rows = $this->db->select('p.*, m.username AS msgto')->from('pms p')->join('members m', 'm.uid=p.msgtoid')->where("p.related='0' AND p.msgfromid='$uid' AND p.folder='outbox'")->order_by('p.dateline DESC')->get('', $ppp, $start_limit)->result_array();
 				break;
 		}
-		$query = $this->db->query($sql);
 		$array = array();
-		$today = $this->base->time - ($this->base->time + $this->base->settings['timeoffset']) % 86400;
-		while($data = $this->db->fetch_array($query)) {
+		$today = time() - (time() + $this->base->settings['timeoffset']) % 86400;
+		foreach($rows as $data) {
 			$daterange = 5;
 			if($data['dateline'] >= $today) {
 				$daterange = 1;
@@ -177,7 +171,7 @@ class Pm_m extends CI_Model
 			$array[] = $data;
 		}
 		if(in_array($folder, array('inbox', 'outbox'))) {
-			$this->db->query("DELETE FROM ".UC_DBTABLEPRE."newpm WHERE uid='$uid'", 'UNBUFFERED');
+			$this->db->delete('newpm', array('uid'=>$uid));
 		}
 		return $array;
 	}
