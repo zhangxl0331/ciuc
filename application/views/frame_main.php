@@ -1,5 +1,5 @@
 <?php $this->load->view('header');?>
-{if $iframe}
+<?php if($iframe):?>
 <script type="text/javascript">
 	var uc_menu_data = new Array();
 	o = document.getElementById('header_menu_menu');
@@ -13,40 +13,40 @@
 		parent.uc_modify_sid('{$sid}');
 	} catch(e) {}
 </script>
-{/if}
+<?php endif;?>
 <div class="container">
-	<h3>{lang home_stats}</h3>
+	<h3><?php echo $this->lang->line('home_stats');?></h3>
 	<ul class="memlist fixwidth">
-		<li><em><!--{if $user['allowadminapp'] || $user['isfounder']}--><a href="admin.php?m=app&a=ls">{lang home_app_count}</a><!--{else}-->{lang home_app_count}<!--{/if}-->:</em>$apps</li>
-		<li><em><!--{if $user['allowadminuser'] || $user['isfounder']}--><a href="admin.php?m=user&a=ls">{lang home_member_count}</a><!--{else}-->{lang home_member_count}<!--{/if}-->:</em>$members</li>
-		<li><em><!--{if $user['allowadminpm'] || $user['isfounder']}--><a href="admin.php?m=pm&a=ls">{lang home_pm_count}</a><!--{else}-->{lang home_pm_count}<!--{/if}-->:</em>$pms</li>
-		<li><em>{lang home_friend_count}:</em>$friends</li>
+		<li><em><?php if($user['isfounder'] || $user['allowadminapp']):?><a href="<?php echo $this->config->base_url('app/ls');?>"><?php echo $this->lang->line('home_app_count');?></a><?php else:?><?php echo $this->lang->line('home_app_count');?><?php endif;?>:</em><?php echo $apps;?></li>
+		<li><em><?php if($user['isfounder'] || $user['allowadminuser']):?><a href="<?php echo $this->config->base_url('user/ls');?>"><?php echo $this->lang->line('home_member_count');?></a><?php else:?><?php echo $this->lang->line('home_member_count');?><?php endif;?>:</em><?php echo $members;?></li>
+		<li><em><?php if($user['isfounder'] || $user['allowadminpm']):?><a href="<?php echo $this->config->base_url('pm/ls');?>"><?php echo $this->lang->line('home_pm_count');?></a><?php else:?><?php echo $this->lang->line('home_pm_count');?><?php endif;?>:</em><?php echo $pms;?></li>
+		<li><em><?php echo $this->lang->line('home_friend_count');?>:</em><?php echo $friends;?></li>
 	</ul>
 	
-	<h3>{lang note_status}</h3>
+	<h3><?php echo $this->lang->line('note_status');?></h3>
 	<ul class="memlist fixwidth">
-		<li><em><!--{if $user['allowadminnote'] || $user['isfounder']}--><a href="admin.php?m=note&a=ls">{lang home_note_count}</a><!--{else}-->{lang home_note_count}<!--{/if}-->:</em>$notes</li>
-		<!--{if $errornotes}-->
-			<li><em><!--{if $user['allowadminnote'] || $user['isfounder']}--><a href="admin.php?m=note&a=ls">{lang note_fail_apps}</a><!--{else}-->{lang note_fail_apps}<!--{/if}-->:</em>		
-			<!--{loop $errornotes $appid $error}-->
-				$applist[$appid][name]&nbsp;
-			<!--{/loop}-->
-		<!--{/if}-->
+		<li><em><?php if($user['isfounder'] || $user['allowadminnote']):?><a href="admin.php?m=note&a=ls"><?php echo $this->lang->line('home_note_count');?></a><?php else:?><?php echo $this->lang->line('home_note_count');?><?php endif;?>:</em><?php echo $notes;?></li>
+		<?php if($errornotes):?>
+			<li><em><?php if($user['isfounder'] || $user['allowadminnote']):?><a href="admin.php?m=note&a=ls"><?php echo $this->lang->line('home_note_count');?><?php echo $this->lang->line('note_fail_apps');?></a><?php else:?><?php echo $this->lang->line('note_fail_apps');?><?php endif;?>:</em>		
+			<?php foreach($errornotes as $appid=>$error):?>
+				<?php echo $applist[$appid]['name'];?>&nbsp;
+			<?php endforeach;?>
+		<?php endif;?>
 	</ul>
 	
-	<h3>{lang home_env}</h3>
+	<h3><?php echo $this->lang->line('home_env');?></h3>
 	<ul class="memlist fixwidth">
-		<li><em>{lang home_version}:</em>UCenter {UC_SERVER_VERSION} Release {UC_SERVER_RELEASE} <a href="http://www.discuz.net/forumdisplay.php?fid=151" target="_blank">{lang view_new_version}</a> 
-		<li><em>{lang home_environment}:</em>$serverinfo</li>
-		<li><em>{lang home_server_software}:</em>$_SERVER[SERVER_SOFTWARE]</li>
-		<li><em>{lang home_database}:</em>$dbversion</li>
-		<li><em>{lang home_upload_perm}:</em>$fileupload</li>
-		<li><em>{lang home_database_size}:</em>$dbsize</li>		
-		<li><em>{lang home_server_ip}:</em>$_SERVER[SERVER_NAME] ($_SERVER[SERVER_ADDR]:$_SERVER[SERVER_PORT])</li>
-		<li><em>magic_quote_gpc:</em>$magic_quote_gpc</li>
-		<li><em>allow_url_fopen:</em>$allow_url_fopen</li>		
+		<li><em><?php echo $this->lang->line('home_version');?>:</em>UCenter {UC_SERVER_VERSION} Release {UC_SERVER_RELEASE} <a href="http://www.discuz.net/forumdisplay.php?fid=151" target="_blank"><?php echo $this->lang->line('view_new_version');?></a> 
+		<li><em><?php echo $this->lang->line('home_environment');?>:</em><?php echo $serverinfo;?></li>
+		<li><em><?php echo $this->lang->line('home_server_software');?>:</em><?php echo $_SERVER['SERVER_SOFTWARE'];?></li>
+		<li><em><?php echo $this->lang->line('home_database');?>:</em><?php echo $dbversion;?></li>
+		<li><em><?php echo $this->lang->line('home_upload_perm');?>:</em><?php echo $fileupload;?></li>
+		<li><em><?php echo $this->lang->line('home_database_size');?>:</em><?php echo $dbsize;?></li>		
+		<li><em><?php echo $this->lang->line('home_server_ip');?>:</em><?php echo $_SERVER['SERVER_NAME'].' ('.$_SERVER['SERVER_ADDR'].':'.$_SERVER['SERVER_PORT'].')';?></li>
+		<li><em>magic_quote_gpc:</em><?php echo $magic_quote_gpc;?></li>
+		<li><em>allow_url_fopen:</em><?php echo $allow_url_fopen;?></li>		
 	</ul>
-	<h3>{lang home_team}</h3>
+	<!--<h3>{lang home_team}</h3>
 	<ul class="memlist fixwidth">
 		<li>
 			<em>{lang home_dev_copyright}:</em>
@@ -108,9 +108,9 @@
 			<em>{lang home_dev_community}:</em>
 			<em class="memcont"><a href="http://www.discuz.net" target="_blank">http://www.Discuz.net</a></em>
 		</li>
-	</ul>
+	</ul>-->
 </div>
 
-$ucinfo
+<?php echo $ucinfo;?>
 
 <?php $this->load->view('footer');?>
