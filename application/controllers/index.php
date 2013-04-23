@@ -73,8 +73,8 @@ class Index extends MY_Controller {
 	}
 
 	function header() {
-		$this->load->model('applications_m');
-		$applist = $this->applications_m->get_applications();
+		$this->load->model('app_m');
+		$applist = $this->app_m->get_apps();
 		$cparray = array(
 			'UCHOME' => 'admincp.php',
 			'DISCUZ' => 'admincp.php',

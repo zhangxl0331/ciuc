@@ -6,7 +6,7 @@ function $(id) {
 </script>
 
 <div class="container">
-	<form action="<?php echo $this->config->base_url('admin/user/login');?>"
+	<form action="<?php echo $this->config->base_url('user/login');?>"
 		method="post" id="loginform" <?php if($this->input->get_post('iframe')):?>target="_self"
 		<?php else:?>target="_top"<?php endif;?>>
 		<input type="hidden" name="formhash" value="<?php echo formhash();?>" />

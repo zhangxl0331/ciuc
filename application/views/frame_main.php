@@ -1,4 +1,4 @@
-{template header}
+<?php $this->load->view('header');?>
 {if $iframe}
 <script type="text/javascript">
 	var uc_menu_data = new Array();

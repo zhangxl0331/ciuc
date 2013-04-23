@@ -56,8 +56,8 @@ class MY_Controller extends CI_Controller
 		$this->settings = $this->cache('settings');
 		$this->caches['apps'] = $this->cache('apps');
 		if(PHP_VERSION > '5.1') {
-			$timeoffset = intval($this->settings['timeoffset'] / 3600);
-			@date_default_timezone_set('Etc/GMT'.($timeoffset > 0 ? '-' : '+').(abs($timeoffset)));
+// 			$timeoffset = intval($this->settings['timeoffset'] / 3600);
+// 			@date_default_timezone_set('Etc/GMT'.($timeoffset > 0 ? '-' : '+').(abs($timeoffset)));
 		}
 	}
 	
