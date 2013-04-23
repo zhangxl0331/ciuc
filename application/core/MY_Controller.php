@@ -95,7 +95,7 @@ class MY_Controller extends CI_Controller
 		$sid = $this->cookie_status ? getgpc('sid', 'C') : rawurlencode(getgpc('sid', 'R'));
 		$username = $this->sid_decode($sid);
 		if(empty($username)) {
-			header('Location: '.$this->config->base_url().'admin/user/login?iframe='.getgpc('iframe', 'G').($this->cookie_status ? '' : '&sid='.$sid));
+			header('Location: '.$this->config->base_url().'user/login?iframe='.getgpc('iframe', 'G').($this->cookie_status ? '' : '&sid='.$sid));
 			exit;
 		} else {
 			$this->user['isfounder'] = $username == 'UCenterAdministrator' ? 1 : 0;
@@ -103,7 +103,7 @@ class MY_Controller extends CI_Controller
 				$admin = $this->db->select('a.*, m.*')->from('admins a')->join('members m', 'a.uid=m.uid', 'LEFT')->where('a.username', $username)->get()->row_array();
 				
 				if(empty($admin)) {
-					header('Location: '.$this->config->base_url().'admin/user/login?iframe='.getgpc('iframe', 'G').($this->cookie_status ? '' : '&sid='.$sid));
+					header('Location: '.$this->config->base_url().'user/login?iframe='.getgpc('iframe', 'G').($this->cookie_status ? '' : '&sid='.$sid));
 					exit;
 				} else {
 					$this->user = $admin;
