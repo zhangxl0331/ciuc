@@ -7,27 +7,27 @@
 <meta content="Comsenz Inc." name="Copyright" />
 </head>
 <body><div id="append"></div>
-<!--{if !empty($iframe) && !empty($user)}-->
+<?php if(!empty($iframe) && !empty($user)):?>
 	<a class="othersoff" style="float:right;text-align:center" id="header_menu" onclick="headermenu(this)"><?php echo $this->lang->line('menu')?></a>
 	<ul id="header_menu_menu" style="display: none">
-		<li><a href="admin.php?m=frame&a=main&iframe=1" target="main" class="tabon"><?php echo $this->lang->line('menu_index')?></a></li>
-		<!--{if $user['allowadminsetting'] || $user['isfounder']}--><li><a href="admin.php?m=setting&a=ls&iframe=1" target="main"><?php echo $this->lang->line('menu_basic_setting')?></a></li><!--{/if}-->
-		<!--{if $user['allowadminsetting'] || $user['isfounder']}--><li><a href="admin.php?m=setting&a=register&iframe=1" target="main"><?php echo $this->lang->line('menu_register_setting')?></a></li><!--{/if}-->
-		<!--{if $user['allowadminsetting'] || $user['isfounder']}--><li><a href="admin.php?m=setting&a=mail&iframe=1" target="main"><?php echo $this->lang->line('menu_mail_setting')?></a></li><!--{/if}-->
-		<!--{if $user['allowadminapp'] || $user['isfounder']}--><li><a href="admin.php?m=app&a=ls&iframe=1" target="main"><?php echo $this->lang->line('menu_application')?></a></li><!--{/if}-->
-		<!--{if $user['allowadminuser'] || $user['isfounder']}--><li><a href="admin.php?m=user&a=ls&iframe=1" target="main"><?php echo $this->lang->line('menu_manager_user')?></a></li><!--{/if}-->
-		<!--{if $user['isfounder']}--><li><a href="admin.php?m=admin&a=ls&iframe=1" target="main"><?php echo $this->lang->line('menu_admin_user')?></a></li><!--{/if}-->
-		<!--{if $user['allowadminpm'] || $user['isfounder']}--><li><a href="admin.php?m=pm&a=ls&iframe=1" target="main"><?php echo $this->lang->line('menu_pm')?></a></li><!--{/if}-->
-		<!--{if $user['allowadmincredits'] || $user['isfounder']}--><li><a href="admin.php?m=credit&a=ls&iframe=1" target="main"><?php echo $this->lang->line('menu_credit_exchange')?></a></li><!--{/if}-->
-		<!--{if $user['allowadminbadword'] || $user['isfounder']}--><li><a href="admin.php?m=badword&a=ls&iframe=1" target="main"><?php echo $this->lang->line('menu_censor_word')?></a></li><!--{/if}-->
-		<!--{if $user['allowadmindomain'] || $user['isfounder']}--><li><a href="admin.php?m=domain&a=ls&iframe=1" target="main"><?php echo $this->lang->line('menu_domain_list')?></a></li><!--{/if}-->
-		<!--{if $user['allowadmindb'] || $user['isfounder']}--><li><a href="admin.php?m=db&a=ls&iframe=1" target="main"><?php echo $this->lang->line('menu_db')?></a></li><!--{/if}-->
-		<!--{if $user['isfounder']}--><li><a href="admin.php?m=feed&a=ls&iframe=1" target="main"><?php echo $this->lang->line('menu_data_list')?></a></li><!--{/if}-->
-		<!--{if $user['allowadmincache'] || $user['isfounder']}--><li><a href="admin.php?m=cache&a=update&iframe=1" target="main"><?php echo $this->lang->line('menu_update_cache')?></a></li><!--{/if}-->
-		<!--{if $user['isfounder']}--><li><a href="admin.php?m=plugin&a=filecheck&iframe=1" target="main"><?php echo $this->lang->line('plugin')?></a></li><!--{/if}-->
-		<a href="admin.php?m=user&a=logout" target="main"><?php echo $this->lang->line('menu_logout')?></a>
+		<li><a href="<?php echo $this->config->base_url('index/main?iframe=1');?>" target="main" class="tabon"><?php echo $this->lang->line('menu_index')?></a></li>
+		<?php if($user['isfounder'] || $user['allowadminsetting']):?><li><a href="<?php echo $this->config->base_url('setting/ls?iframe=1');?>" target="main"><?php echo $this->lang->line('menu_basic_setting')?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadminsetting']):?><li><a href="<?php echo $this->config->base_url('setting/register?iframe=1');?>" target="main"><?php echo $this->lang->line('menu_register_setting')?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadminsetting']):?><li><a href="<?php echo $this->config->base_url('setting/mail?iframe=1');?>" target="main"><?php echo $this->lang->line('menu_mail_setting')?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadminapp']):?><li><a href="<?php echo $this->config->base_url('app/ls?iframe=1');?>" target="main"><?php echo $this->lang->line('menu_application')?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadminuser']):?><li><a href="<?php echo $this->config->base_url('user/ls?iframe=1');?>" target="main"><?php echo $this->lang->line('menu_manager_user')?></a></li><?php endif;?>
+		<?php if($user['isfounder']):?><li><a href="<?php echo $this->config->base_url('admin/ls?iframe=1');?>" target="main"><?php echo $this->lang->line('menu_admin_user')?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadminpm']):?><li><a href="<?php echo $this->config->base_url('pm/ls?iframe=1');?>" target="main"><?php echo $this->lang->line('menu_pm')?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadmincredits']):?><li><a href="<?php echo $this->config->base_url('credit/ls?iframe=1');?>" target="main"><?php echo $this->lang->line('menu_credit_exchange')?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadminbadword']):?><li><a href="<?php echo $this->config->base_url('badword/ls?iframe=1');?>" target="main"><?php echo $this->lang->line('menu_censor_word')?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadmindomain']):?><li><a href="<?php echo $this->config->base_url('domain/ls?iframe=1');?>" target="main"><?php echo $this->lang->line('menu_domain_list')?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadmindb']):?><li><a href="<?php echo $this->config->base_url('db/ls?iframe=1');?>" target="main"><?php echo $this->lang->line('menu_db')?></a></li><?php endif;?>
+		<?php if($user['isfounder']):?><li><a href="<?php echo $this->config->base_url('feed/ls?iframe=1');?>" target="main"><?php echo $this->lang->line('menu_data_list')?></a></li><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadmincache']):?><li><a href="<?php echo $this->config->base_url('cache/update?iframe=1');?>" target="main"><?php echo $this->lang->line('menu_update_cache')?></a></li><?php endif;?>
+		<?php if($user['isfounder']):?><li><a href="<?php echo $this->config->base_url('plugin/filecheck?iframe=1');?>" target="main"><?php echo $this->lang->line('plugin')?></a></li><?php endif;?>
+		<a href="<?php echo $this->config->base_url('user/logout');?>" target="main"><?php echo $this->lang->line('menu_logout')?></a>
 	</ul>
-<!--{/if}-->
+<?php endif;?>
 <script type="text/javascript">
 	function headermenu(ctrl) {
 		ctrl.className = ctrl.className == 'otherson' ? 'othersoff' : 'otherson';

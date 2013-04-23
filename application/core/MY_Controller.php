@@ -266,12 +266,12 @@ class MY_Controller extends CI_Controller
 		if(isset($lang[$message])) {
 			$message = $lang[$message] ? str_replace(array_keys($vars), array_values($vars), $lang[$message]) : $message;
 		}
-		$this->view->assign('message', $message);
-		$this->view->assign('redirect', $redirect);
+		$this->load->vars('message', $message);
+		$this->load->vars('redirect', $redirect);
 		if($type == 0) {
-			$this->view->display('message');
+			$this->load->view('message');
 		} elseif($type == 1) {
-			$this->view->display('message_client');
+			$this->load->view('message_client');
 		}
 		exit;
 	}
