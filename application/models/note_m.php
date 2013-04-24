@@ -32,19 +32,32 @@ class Note_m extends CI_Model
 	}
 
 	function get_total_num($all = TRUE) {
-		$closedadd = $all ? '' : ' WHERE closed=\'0\'';
-		$data = $this->db->result_first("SELECT COUNT(*) FROM ".UC_DBTABLEPRE."notelist $closedadd");
+		if($all)
+		{
+			$data = $this->db->count_all_results('notelist');
+		}
+		else
+		{
+			$data = $this->db->where('closed', 0)->get('notelist')->num_rows();
+		}
+		
 		return $data;
 	}
 
 	function get_list($page, $ppp, $totalnum, $all = TRUE) {
-		$start = $this->base->page_get_start($page, $ppp, $totalnum);
-		$closedadd = $all ? '' : ' WHERE closed=\'0\'';
-		$data = $this->db->fetch_all("SELECT * FROM ".UC_DBTABLEPRE."notelist $closedadd ORDER BY dateline DESC LIMIT $start, $ppp");
+		$start = page_get_start($page, $ppp, $totalnum);
+		if($all)
+		{
+			$data = $this->db->order_by('dateline DESC')->get('notelist', $ppp, $start)->result_array();
+		}
+		else
+		{
+			$data = $this->db->where('closed', 0)->order_by('dateline DESC')->get('notelist', $ppp, $start);
+		}
 		foreach((array)$data as $k => $v) {
 			$data[$k]['postdata2'] = addslashes(str_replace('"', '', $data[$k]['postdata']));
 			$data[$k]['getdata2'] = addslashes(str_replace('"', '', $v['getdata']));
-			$data[$k]['dateline'] = $v['dateline'] ? $this->base->date($data[$k]['dateline']) : '';
+			$data[$k]['dateline'] = $v['dateline'] ? $data[$k]['dateline'] : '';
 		}
 		return $data;
 	}

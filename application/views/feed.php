@@ -4,7 +4,7 @@
 <div class="container">
 	<h3 class="marginbot">
 		<?php echo $this->lang->line('feed_list');?>
-		<?php if($user['isfounder'] || $user['allowadminnote']):?><a href="<?php echo $this->config->base_url('note/ls');?>admin.php?m=note&a=ls" class="sgbtn"><?php echo $this->lang->line('note_list');?></a><?php endif;?>
+		<?php if($user['isfounder'] || $user['allowadminnote']):?><a href="<?php echo $this->config->base_url('note/ls');?>" class="sgbtn"><?php echo $this->lang->line('note_list');?></a><?php endif;?>
 		<?php if($user['isfounder'] || $user['allowadminlog']):?><a href="<?php echo $this->config->base_url('log/ls');?>" class="sgbtn"><?php echo $this->lang->line('menu_log');?></a><?php endif;?>
 		<a href="<?php echo $this->config->base_url('mail/ls');?>" class="sgbtn"><?php echo $this->lang->line('mail_queue');?></a>
 	</h3>

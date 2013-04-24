@@ -7,14 +7,14 @@ class Mail_m extends CI_Model
 		parent::__construct();
 	}
 	
-function get_total_num() {
-		$data = $this->db->result_first("SELECT COUNT(*) FROM ".UC_DBTABLEPRE."mailqueue");
+	function get_total_num() {
+		$data = $this->db->count_all_results('mailqueue');
 		return $data;
 	}
 
 	function get_list($page, $ppp, $totalnum) {
-		$start = $this->base->page_get_start($page, $ppp, $totalnum);
-		$data = $this->db->fetch_all("SELECT m.*, u.username, u.email FROM ".UC_DBTABLEPRE."mailqueue m LEFT JOIN ".UC_DBTABLEPRE."members u ON m.touid=u.uid ORDER BY dateline DESC LIMIT $start, $ppp");
+		$start = page_get_start($page, $ppp, $totalnum);
+		$data = $this->db->select('m.*, u.username, u.email')->from('mailqueue m')->join('members u', 'm.touid=u.uid', 'LEFT')->order_by('dateline DESC')->get('', $ppp, $start)->result_array();
 		foreach((array)$data as $k => $v) {
 			$data[$k]['subject'] = htmlspecialchars($v['subject']);
 			$data[$k]['tomail'] = empty($v['tomail']) ? $v['email'] : $v['tomail'];
