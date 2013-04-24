@@ -147,13 +147,13 @@ class User extends MY_Controller {
 		$this->load->view('login', $data);
 	}
 	
-	function onlogout() {
+	function logout() {
 		$this->writelog('logout');
 		$this->setcookie('sid', '');
 		header('location: admin.php');
 	}
 	
-	function onadd() {
+	function add() {
 		$this->check_priv();
 		if(!$this->submitcheck('submit')) {
 			exit;
@@ -218,30 +218,31 @@ class User extends MY_Controller {
 		$srchregip = trim(getgpc('srchregip', 'R'));
 		$srchemail = trim(getgpc('srchemail', 'R'));
 	
+		$data['srchname'] = $srchname;
+		$data['srchuid'] = $srchuid;
+		$data['srchemail'] = $srchemail;
+		$data['srchregdatestart'] = $srchregdatestart;
+		$data['srchregdateend'] = $srchregdateend;
+		$data['srchregip'] = $srchregip;
+		
 		$sqladd = '';
 		if($srchname) {
-			$sqladd .= " AND username LIKE '$srchname%'";
-			$data['srchname'] = $srchname;
+			$sqladd .= " AND username LIKE '$srchname%'";			
 		}
 		if($srchuid) {
-			$sqladd .= " AND uid='$srchuid'";
-			$data['srchuid'] = $srchuid;
+			$sqladd .= " AND uid='$srchuid'";			
 		}
 		if($srchemail) {
-			$sqladd .= " AND email='$srchemail'";
-			$data['srchemail'] = $srchemail;
+			$sqladd .= " AND email='$srchemail'";			
 		}
 		if($srchregdatestart) {
-			$sqladd .= " AND regdate>'".strtotime($srchregdatestart)."'";
-			$data['srchregdatestart'] = $srchregdatestart;
+			$sqladd .= " AND regdate>'".strtotime($srchregdatestart)."'";			
 		}
 		if($srchregdateend) {
-			$sqladd .= " AND regdate<'".strtotime($srchregdateend)."'";
-			$data['srchregdateend'] = $srchregdateend;
+			$sqladd .= " AND regdate<'".strtotime($srchregdateend)."'";			
 		}
 		if($srchregip) {
-			$sqladd .= " AND regip='$srchregip'";
-			$data['srchregip'] = $srchregip;
+			$sqladd .= " AND regip='$srchregip'";			
 		}
 		$sqladd = $sqladd ? "$sqladd" : '';
 	
@@ -265,7 +266,7 @@ class User extends MY_Controller {
 	
 	}
 	
-	function onedit() {
+	function edit() {
 		$uid = getgpc('uid');
 		$status = 0;
 		if(!$this->user['isfounder']) {
