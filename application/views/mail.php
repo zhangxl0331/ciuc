@@ -9,7 +9,7 @@
 		<?php echo $this->lang->line('mail_queue');?>
 	</h3>
 	<?php if($status == 2):?>
-		<div class="correctmsg"><p><?php echo $this->lang->line('note_list');?>{lang mail_list_updated}</p></div>
+		<div class="correctmsg"><p><?php echo $this->lang->line('mail_list_updated');?></p></div>
 	<?php endif;?>
 	<div class="mainbox">
 		<?php if($maillist):?>
