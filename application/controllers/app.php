@@ -38,16 +38,16 @@ class App extends MY_Controller {
 		$this->load->view('app', $data);
 	}
 
-	function onadd() {
-		if(!$this->submitcheck()) {
+	function add() {
+		if(!submitcheck()) {
 			$md5ucfounderpw = md5(UC_FOUNDERPW);
 			$data['md5ucfounderpw'] = $md5ucfounderpw;
 
 			$a = getgpc('a');
 			$data['a'] = $a;
-			$typelist = array('UCHOME'=>'UCenter Home','XSPACE'=>'X-Space','DISCUZ'=>'Discuz!','SUPESITE'=>'SupeSite','SUPEV'=>'SupeV','ECSHOP'=>'ECShop','ECMALL'=>'ECMall','OTHER'=>$this->lang['other']);
+			$typelist = array('UCHOME'=>'UCenter Home','XSPACE'=>'X-Space','DISCUZ'=>'Discuz!','SUPESITE'=>'SupeSite','SUPEV'=>'SupeV','ECSHOP'=>'ECShop','ECMALL'=>'ECMall','OTHER'=>$this->lang->line('other'));
 			$data['typelist'] = $typelist;
-			$this->load->view('admin_app', $data);
+			$this->load->view('app', $data);
 		} else {
 			$type = getgpc('type', 'P');
 			$name = getgpc('name', 'P');

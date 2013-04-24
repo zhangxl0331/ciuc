@@ -1,9 +1,9 @@
 <?php $this->load->view('header');?>
 
-<script src="js/common.js" type="text/javascript"></script>
-<script src="js/calendar.js" type="text/javascript"></script>
+<script src="<?php echo $this->config->base_url('js/common.js');?>" type="text/javascript"></script>
+<script src="<?php echo $this->config->base_url('js/calendar.js');?>" type="text/javascript"></script>
 
-<!--{if $a == 'ls'}-->
+<?php if($method == 'ls'):?>
 
 	<script type="text/javascript">
 		function switchbtn(btn) {
@@ -19,7 +19,7 @@
 	<div class="container">
 		<!--{if $status}-->
 			<div class="{if $status > 0}correctmsg{else}errormsg{/if}"><p>{if $status < 0}<em>{lang user_add_failed}:</em> {/if}{if $status == 2}{lang user_delete_succeed}{elseif $status == 1}{lang user_add_succeed}{elseif $status == -1}{lang user_add_username_ignore}{elseif $status == -2}{lang user_add_username_badwords}{elseif $status == -3}{lang user_add_username_exists}{elseif $status == -4}{lang user_add_email_formatinvalid}{elseif $status == -5}{lang user_add_email_ignore}{elseif $status == -6}{lang user_add_email_exists}{/if}</p></div>
-		<!--{/if}-->
+		<?php endif;?>
 		<div class="hastabmenu">
 			<ul class="tabmenu">
 				<li id="srchuserbtn" class="tabcurrent"><a href="#" onclick="switchbtn('srch')">{lang user_search}</a></li>
@@ -65,7 +65,7 @@
 			</div>
 		</div>
 
-		<!--{if $adduser}--><script type="text/javascript">switchbtn('add');</script><!--{/if}-->
+		<!--{if $adduser}--><script type="text/javascript">switchbtn('add');</script><?php endif;?>
 <br />
 		<h3>{lang user_list}</h3>
 		<div class="mainbox">
@@ -97,15 +97,15 @@
 					</tr>
 				</table>
 				</form>
-			<!--{else}-->
+			<?php else:?>
 				<div class="note">
 					<p class="i">{lang list_empty}</p>
 				</div>
-			<!--{/if}-->
+			<?php endif;?>
 		</div>
 	</div>
 
-<!--{else}-->
+<?php else:?>
 
 	<div class="container">
 		<h3 class="marginbot">{lang user_edit_profile}
@@ -119,9 +119,9 @@
 			<div class="correctmsg"><p>{lang user_edit_profile_sucessfully}</p></div>
 		<!--{elseif $status == -1}-->
 			<div class="correctmsg"><p>{lang user_edit_profile_failed}</p></div>
-		<!--{else}-->
+		<?php else:?>
 			<div class="note"><p class="i">{lang user_keep_blank}</p></div>
-		<!--{/if}-->
+		<?php endif;?>
 		<div class="mainbox">
 			<form action="admin.php?m=user&a=edit&uid=$uid" method="post">
 			<input type="hidden" name="formhash" value="{FORMHASH}">
@@ -174,5 +174,5 @@
 			</form>
 		</div>
 	</div>
-<!--{/if}-->
+<?php endif;?>
 <?php $this->load->view('footer');?>
