@@ -16,9 +16,10 @@ class Feed_m extends CI_Model
 		$start = page_get_start($page, $ppp, $totalnum);
 		$data = $this->db->get('feeds', $ppp, $start)->result_array();
 
+		$this->load->model('misc_m');
 		foreach((array)$data as $k=> $v) {
 			$searchs = $replaces = array();
-			$title_data = $_ENV['misc']->string2array($v['title_data']);
+			$title_data = $this->misc_m->string2array($v['title_data']);
 			foreach(array_keys($title_data) as $key) {
 				$searchs[] = '{'.$key.'}';
 				$replaces[] = $title_data[$key];

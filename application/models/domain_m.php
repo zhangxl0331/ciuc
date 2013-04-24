@@ -9,9 +9,8 @@ class Domain_m extends CI_Model
 
 	function add_domain($domain, $ip) {
 		if($domain) {
-			$this->db->query("INSERT INTO ".UC_DBTABLEPRE."domains SET domain='$domain', ip='$ip'");
+			return $this->db->insert('domains', array('domain'=>$domain, 'ip'=>$ip));
 		}
-		return $this->db->insert_id();
 	}
 
 	function get_total_num() {
@@ -27,13 +26,11 @@ class Domain_m extends CI_Model
 
 	function delete_domain($arr) {
 		$domainids = $this->base->implode($arr);
-		$this->db->query("DELETE FROM ".UC_DBTABLEPRE."domains WHERE id IN ($domainids)");
-		return $this->db->affected_rows();
+		return $this->db->delete('domains', array('id IN'=>$domainids));
 	}
 
 	function update_domain($domain, $ip, $id) {
-		$this->db->query("UPDATE ".UC_DBTABLEPRE."domains SET domain='$domain', ip='$ip' WHERE id='$id'");
-		return $this->db->affected_rows();
+		return $this->db->update('domains', array('domain'=>$domain, 'ip'=>$ip), array('id'=>$id));
 	}
 
 }

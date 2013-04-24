@@ -38,7 +38,11 @@ class Cache_m extends CI_Model
 	}
 	
 	function getdata($cachefile) {
-		$cache = $this->cache->get($cachefile);
+		if($cache = $this->cache->get($cachefile))
+		{
+			$this->updatedata($cachefile);
+			$cache = $this->cache->get($cachefile);
+		}
 		return count($cache)==1?current($cache):$cache;
 	}
 
@@ -54,7 +58,7 @@ class Cache_m extends CI_Model
 
 	//private
 	function _get_badwords() {
-		$data = $this->db->fetch_all("SELECT * FROM ".UC_DBTABLEPRE."badwords");
+		$data = $this->db->get('badwords')->result_array();
 		$return = array();
 		if(is_array($data)) {
 			foreach($data as $k => $v) {
@@ -86,8 +90,8 @@ class Cache_m extends CI_Model
 
 	//private
 	function _get_plugins() {
-		$this->base->load('plugin');
-		return $_ENV['plugin']->get_plugins();
+		$this->load->model('plugin_m');
+		return $this->plugin_m->get_plugins();
 	}
 
 }

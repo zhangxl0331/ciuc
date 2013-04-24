@@ -29,15 +29,15 @@ class App_m extends CI_Model
 
 	function get_app_by_appid($appid, $includecert = FALSE) {
 		$appid = intval($appid);
-		$arr = $this->db->fetch_first("SELECT * FROM ".UC_DBTABLEPRE."applications WHERE appid='$appid'");
+		$arr = $this->db->where('appid', $appid)->get('applications')->first_row('array');
 		$arr['extra'] = unserialize($arr['extra']);
-		if($tmp = $this->base->authcode($arr['authkey'], 'DECODE', UC_MYKEY)) {
+		if($tmp = authcode($arr['authkey'], 'DECODE', UC_MYKEY)) {
 			$arr['authkey'] = $tmp;
 		}
 		if($includecert) {
-			$this->load('plugin');
-			$certfile = $_ENV['plugin']->cert_get_file();
-			$appdata = $_ENV['plugin']->cert_dump_decode($certfile);
+			$this->load->model('plugin_m');
+			$certfile = $this->plugin_m->cert_get_file();
+			$appdata = $this->plugin_m->cert_dump_decode($certfile);
 			if(is_array($appdata[$appid])) {
 				$arr += $appdata[$appid];
 			}
@@ -47,8 +47,7 @@ class App_m extends CI_Model
 
 	function delete_apps($appids) {
 		$appids = $this->base->implode($appids);
-		$this->db->query("DELETE FROM ".UC_DBTABLEPRE."applications WHERE appid IN ($appids)");
-		return $this->db->affected_rows();
+		return $this->db->delete('applications', array('appid IN'=>$appids));
 	}
 
 /*	function update_app($appid, $name, $url, $authkey, $charset, $dbcharset) {
@@ -62,22 +61,22 @@ class App_m extends CI_Model
 	//private
 	function alter_app_table($appid, $operation = 'ADD') {
 		if($operation == 'ADD') {
-			$this->db->query("ALTER TABLE ".UC_DBTABLEPRE."notelist ADD COLUMN app$appid tinyint NOT NULL", 'SILENT');
+			$this->db->query("ALTER TABLE ".$this->db->dbprefix."notelist ADD COLUMN app$appid tinyint NOT NULL", 'SILENT');
 		} else {
-			$this->db->query("ALTER TABLE ".UC_DBTABLEPRE."notelist DROP COLUMN app$appid", 'SILENT');
+			$this->db->query("ALTER TABLE ".$this->db->dbprefix."notelist DROP COLUMN app$appid", 'SILENT');
 		}
 	}
 
 	function test_api($url, $ip = '') {
-		$this->base->load('misc');
+		$this->load->model('misc_m');
 		if(!$ip) {
-			$ip = $_ENV['misc']->get_host_by_url($url);
+			$ip = $this->misc_m->get_host_by_url($url);
 		}
 
 		if($ip < 0) {
 			return FALSE;
 		}
-		return $_ENV['misc']->dfopen($url, 0, '', '', 1, $ip);
+		return $this->misc_m->dfopen($url, 0, '', '', 1, $ip);
 	}
 
 }

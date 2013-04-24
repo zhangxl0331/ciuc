@@ -10,8 +10,8 @@ class Friend_m extends CI_Model
 	function add($uid, $friendid, $comment='') {
 		$direction = $this->db->result_first("SELECT direction FROM ".UC_DBTABLEPRE."friends WHERE uid='$friendid' AND friendid='$uid' LIMIT 1");
 		if($direction == 1) {
-			$this->db->query("INSERT INTO ".UC_DBTABLEPRE."friends SET uid='$uid', friendid='$friendid', comment='$comment', direction='3'", 'SILENT');
-			$this->db->query("UPDATE ".UC_DBTABLEPRE."friends SET direction='3' WHERE uid='$friendid' AND friendid='$uid'");
+			$this->db->insert('friends', array('uid'=>$uid, 'friendid'=>$friendid, 'comment'=>$comment, 'direction'=>'3'));
+			$this->db->update('friends', array('direction'=>'3'), array('uid'=>$friendid, 'friendid'=>$uid));
 			return 1;
 		} elseif($direction == 2) {
 			return 1;

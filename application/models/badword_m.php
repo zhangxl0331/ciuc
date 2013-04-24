@@ -7,18 +7,18 @@ class Badword_m extends CI_Model
 		parent::__construct();
 	}
 	
-function add_badword($find, $replacement, $admin, $type = 1) {
+	function add_badword($find, $replacement, $admin, $type = 1) {
 		if($find) {
 			$find = trim($find);
 			$replacement = trim($replacement);
 			$findpattern = $this->pattern_find($find);
 			if($type == 1) {
-				$this->db->query("REPLACE INTO ".UC_DBTABLEPRE."badwords SET find='$find', replacement='$replacement', admin='$admin', findpattern='$findpattern'");
+				$this->db->replace('badwords', array('find'=>$find, 'replacement'=>$replacement, 'admin'=>$admin, 'findpattern'=>$findpattern));
 			} elseif($type == 2) {
-				$this->db->query("INSERT INTO ".UC_DBTABLEPRE."badwords SET find='$find', replacement='$replacement', admin='$admin', findpattern='$findpattern'", 'SILENT');
+				$this->db->insert('badwords', array('find'=>$find, 'replacement'=>$replacement, 'admin'=>$admin, 'findpattern'=>$findpattern));
 			}
 		}
-		return $this->db->insert_id();
+		return;
 	}
 
 	function get_total_num() {
@@ -34,18 +34,16 @@ function add_badword($find, $replacement, $admin, $type = 1) {
 
 	function delete_badword($arr) {
 		$badwordids = $this->base->implode($arr);
-		$this->db->query("DELETE FROM ".UC_DBTABLEPRE."badwords WHERE id IN ($badwordids)");
-		return $this->db->affected_rows();
+		return $this->db->delete('badwords', array('id IN', $badwordids));
 	}
 
 	function truncate_badword() {
-		$this->db->query("TRUNCATE ".UC_DBTABLEPRE."badwords");
+		$this->db->query("TRUNCATE ".$this->db->dbprefix."badwords");
 	}
 
 	function update_badword($find, $replacement, $id) {
 		$findpattern = $this->pattern_find($find);
-		$this->db->query("UPDATE ".UC_DBTABLEPRE."badwords SET find='$find', replacement='$replacement', findpattern='$findpattern' WHERE id='$id'");
-		return $this->db->affected_rows();
+		return $this->db->update('badwords', array('find'=>$find, 'replacement'=>$replacement, 'findpattern'=>$findpattern), array('id'=>$id));
 	}
 
 	function pattern_find($find) {
