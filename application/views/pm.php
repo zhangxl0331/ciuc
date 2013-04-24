@@ -1,66 +1,66 @@
 <?php $this->load->view('header');?>
 
-<script src="js/common.js" type="text/javascript"></script>
-<!--{if $a == 'ls'}-->
+<script src="<?php $this->config->base_url('js/common.js');?>" type="text/javascript"></script>
+<?php if($method == 'ls'):?>
 <div class="container">
-	<!--{if $status}-->
-		<div class="correctmsg"><p>{if $status == 1}{lang announcepm_deleted}{/if}</p></div>
-	<!--{/if}-->
+	<?php if($status):?>
+		<div class="correctmsg"><p><?php if($status == 1):?><?php echo $this->lang->line('announcepm_deleted');?><?php endif;?></p></div>
+	<?php endif;?>
 	<h3 class="marginbot">
-		{lang announcepm}
-		<a href="admin.php?m=pm&a=send" class="sgbtn">{lang pm_send_announce}</a>
-		<a href="admin.php?m=pm&a=clear" class="sgbtn">{lang clear_pm}</a>
+		<?php echo $this->lang->line('announcepm');?>
+		<a href="<?php echo $this->config->base_url('pm/send');?>" class="sgbtn"><?php echo $this->lang->line('pm_send_announce');?></a>
+		<a href="<?php echo $this->config->base_url('pm/clear');?>" class="sgbtn"><?php echo $this->lang->line('clear_pm');?></a>
 	</h3>
 	<div class="mainbox">
-	<!--{if $pmlist}-->
-		<form action="admin.php?m=pm&a=ls" method="post">
-			<input type="hidden" name="formhash" value="{FORMHASH}">
+	<?php if($pmlist):?>
+		<form action="<?php echo $this->config->base_url('pm/ls');?>" method="post">
+			<input type="hidden" name="formhash" value="<?php echo formhash();?>">
 			<table class="datalist fixwidth" onmouseover="addMouseEvent(this);">
 				<tr>
-					<th><input type="checkbox" name="chkall" id="chkall" onclick="checkall('delete[]')" class="checkbox" /><label for="chkall">{lang badword_delete}</label></th>
-					<th>{lang title}</th>
-					<th>{lang pm_from}</th>
-					<th>{lang dateline}</th>
+					<th><input type="checkbox" name="chkall" id="chkall" onclick="checkall('delete[]')" class="checkbox" /><label for="chkall"><?php echo $this->lang->line('announcepm_deleted');?>{lang badword_delete}</label></th>
+					<th><?php echo $this->lang->line('title');?></th>
+					<th><?php echo $this->lang->line('pm_from');?></th>
+					<th><?php echo $this->lang->line('dateline');?></th>
 				</tr>
-				<!--{loop $pmlist $pm}-->
+				<?php foreach($pmlist as $pm):?>
 					<tr>
-						<td class="option"><input type="checkbox" name="delete[]" value="$pm[pmid]" class="checkbox" /></td>
-						<td><a href="admin.php?m=pm&a=view&pmid=$pm[pmid]&$extra">{if $pm['subject']}$pm[subject]{else}{lang pm_notitle}{/if}</a></td>
-						<td>$pm[msgfrom]</td>
-						<td>$pm[dateline]</td>
+						<td class="option"><input type="checkbox" name="delete[]" value="<?php echo $pm['pmid'];?>" class="checkbox" /></td>
+						<td><a href="<?php echo $this->config->base_url('pm/view?pmid='.$pm['pmid'].'&$extra');?>"><?php if($pm['subject']):?><?php echo $pm[subject];?><?php else:?><?php echo $this->lang->line('pm_notitle');?><?php endif;?></a></td>
+						<td><?php echo $pm['msgfrom'];?></td>
+						<td><?php echo $pm['dateline'];?></td>
 					</tr>
-				<!--{/loop}-->
+				<?php endforeach;?>
 				<tr class="nobg">
-					<td><input type="submit" value="{lang submit}" class="btn" /></td>
-					<td class="tdpage" colspan="4">$multipage</td>
+					<td><input type="submit" value="<?php echo $this->lang->line('submit');?>" class="btn" /></td>
+					<td class="tdpage" colspan="4"><?php echo $multipage;?></td>
 				</tr>
 			</table>
 		</form>
-	<!--{else}-->
+	<?php else:?>
 		<div class="note">
-			<p class="i">{lang list_empty}</p>
+			<p class="i"><?php echo $this->lang->line('list_empty');?></p>
 		</div>
-	<!--{/if}-->
+	<?php endif;?>
 	</div>
 </div>
-<!--{elseif $a == 'view'}-->
+<?php elseif($method == 'view'):?>
 <div class="container">
-	<h3 class="marginbot">{lang announcepm}<a href="admin.php?m=pm&a=ls&$extra" class="sgbtn">{lang return}</a></h3>
+	<h3 class="marginbot"><?php echo $this->lang->line('announcepm');?><a href="<?php echo $this->config->base_url('pm/ls?'.$extra);?>" class="sgbtn"><?php echo $this->lang->line('return');?></a></h3>
 	<div class="mainbox">
-	<!--{if $pms}-->
+	<?php if($pms):?>
 		<table class="datalist fixwidth">
-			<tr><th>{lang pm_from}</th><td>$pms[msgfrom]</td></tr>
-			<tr><th>{lang dateline}</th><td>$pms[dateline]</td></tr>
-			<tr><th>{lang title}</th><td>{if $pms['subject']}$pms[subject]{else}{lang pm_notitle}{/if}</td></tr>
-		<tr class="nobg"><td colspan="2">$pms[message]</td></tr>
+			<tr><th><?php echo $this->lang->line('pm_from');?></th><td><?php echo $pms['msgfrom'];?></td></tr>
+			<tr><th><?php echo $this->lang->line('dateline');?></th><td><?php echo $pms['dateline'];?></td></tr>
+			<tr><th><?php echo $this->lang->line('title');?></th><td><?php if($pms['subject']):?><?php echo $pms['subject'];?><?php else:?><?php echo $this->lang->line('pm_notitle');?><?php endif;?></td></tr>
+		<tr class="nobg"><td colspan="2"><?php echo $pms['message'];?></td></tr>
 		</table>
-	<!--{else}-->
+	<?php else:?>
 		<div class="note">
-			<p class="i">{lang list_empty}</p>
+			<p class="i"><?php echo $this->lang->line('list_empty');?></p>
 		</div>
-	<!--{/if}-->
+	<?php endif;?>
 	</div>
 </div>
-<!--{/if}-->
+<?php endif;?>
 
 <?php $this->load->view('footer');?>

@@ -60,7 +60,7 @@ class Pm extends MY_Controller {
 
 	function send() {
 		$status = 0;
-		if($this->submitcheck()) {
+		if(submitcheck()) {
 			$lastpmid = $_ENV['pm']->sendpm($_POST['subject'], $_POST['message'], $this->user['isfounder'] ? '' : $this->user, 0);
 			$status = 1;
 			$this->writelog('pm_send', "subject=".htmlspecialchars($_POST['subject']));
@@ -71,7 +71,7 @@ class Pm extends MY_Controller {
 
 	function clear() {
 		$delnum = 0;
-		if($this->submitcheck()) {
+		if(submitcheck()) {
 			$cleardays = intval(getgpc('cleardays', 'P'));
 			$unread = getgpc('unread') ? 1 : 0;
 			$usernames = trim(getgpc('usernames', 'P'));
@@ -102,7 +102,7 @@ class Pm extends MY_Controller {
 			}
 		}
 
-		$pmnum = $this->db->result_first("SELECT COUNT(*) FROM ".UC_DBTABLEPRE."pms");
+		$pmnum = $this->db->count_all_results('pms');
 		$data['pmnum'] = $pmnum;
 		$data['delnum'] = $delnum;
 		$data['status'] = $status;
