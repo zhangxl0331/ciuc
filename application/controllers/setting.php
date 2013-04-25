@@ -94,7 +94,6 @@ class Setting extends MY_Controller {
 			$this->_add_note_for_setting($settings);
 		}
 
-		$data['a'] = getgpc('a');
 		$doubleechecked = array($settings['doublee'] => 'checked="checked"');
 		$data['doublee'] = $doubleechecked;
 		$data['accessemail'] = $settings['accessemail'];

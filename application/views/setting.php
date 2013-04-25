@@ -131,8 +131,8 @@
 					</tr>
 					<tr>
 						<td>
-							<input type="radio" id="yes" class="radio" name="doublee" value="1" <?php echo isset($doublee[1])?:'$doublee[1]'?> /><label for="yes"><?php echo $this->lang->line('yes');?></label>
-							<input type="radio" id="no" class="radio" name="doublee" value="0" <?php echo isset($doublee[0])?:'$doublee[0]'?> /><label for="no"><?php echo $this->lang->line('no');?></label>
+							<input type="radio" id="yes" class="radio" name="doublee" value="1" <?php echo isset($doublee[1])?$doublee[1]:''?> /><label for="yes"><?php echo $this->lang->line('yes');?></label>
+							<input type="radio" id="no" class="radio" name="doublee" value="0" <?php echo isset($doublee[0])?$doublee[0]:''?> /><label for="no"><?php echo $this->lang->line('no');?></label>
 						</td>
 					</tr>
 					<tr>

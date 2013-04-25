@@ -132,7 +132,7 @@ class Index extends MY_Controller {
 		foreach($notelist as $note) {
 			foreach($applist as $k => $app) {
 				if($note->{'app'.$app['appid']} < 0) {
-					$error[$k]++;
+					@$error[$k]++;
 				}
 			}
 		}

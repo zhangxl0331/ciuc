@@ -11,18 +11,18 @@ class App extends MY_Controller {
 		}
 		$this->load->model('app_m');
 		$this->load->model('misc_m');
+		$this->load->model('cache_m');
 	}
 	
 	function ls() {
 		$status = $affectedrows = 0;
 		if(!empty($_POST['delete'])) {
-			$affectedrows += $_ENV['app']->delete_apps($_POST['delete']);
+			$affectedrows += $this->app_m->delete_apps($_POST['delete']);
 			foreach($_POST['delete'] as $k => $appid) {
-				$_ENV['app']->alter_app_table($appid, 'REMOVE');
+				$this->app_m->alter_app_table($appid, 'REMOVE');
 				unset($_POST['name'][$k]);
 			}
-			$this->load('cache');
-			$_ENV['cache']->updatedata();
+			$this->cache_m->updatedata();
 			$this->writelog('app_delete', 'appid='.implode(',', $_POST['delete']));
 			$status = 2;
 
@@ -55,7 +55,7 @@ class App extends MY_Controller {
 			$ip = getgpc('ip', 'P');
 			$viewprourl = getgpc('viewprourl', 'P');
 			$authkey = getgpc('authkey', 'P');
-			$authkey = $this->authcode($authkey, 'ENCODE', UC_MYKEY);
+			$authkey = authcode($authkey, 'ENCODE', UC_MYKEY);
 			$synlogin = getgpc('synlogin', 'P');
 			$recvnote = getgpc('recvnote', 'P');
 			$apifilename = trim(getgpc('apifilename', 'P'));
@@ -72,46 +72,45 @@ class App extends MY_Controller {
 			}
 			$tagtemplates = $this->serialize($tagtemplates, 1);
 
-			if(!$_ENV['misc']->check_url($_POST['url'])) {
+			if(!$this->misc_m->check_url($_POST['url'])) {
 				$this->message('app_add_url_invalid', 'BACK');
 			}
-			if(!empty($_POST['ip']) && !$_ENV['misc']->check_ip($_POST['ip'])) {
+			if(!empty($_POST['ip']) && !$this->misc_m->check_ip($_POST['ip'])) {
 				$this->message('app_add_ip_invalid', 'BACK');
 			}
-			$app = $this->db->result_first("SELECT COUNT(*) FROM ".UC_DBTABLEPRE."applications WHERE name='$name'");
+			$app = $this->db->where('name', $name)->get('applications')->num_rows();
 			if($app) {
-				$this->db->query("UPDATE ".UC_DBTABLEPRE."applications SET name='$name', url='$url', ip='$ip', viewprourl='$viewprourl', apifilename='$apifilename', authkey='$authkey', synlogin='$synlogin', type='$type', tagtemplates='$tagtemplates' WHERE appid='$app[appid]'");
+				$this->db->update('applications', array('name'=>$name, 'url'=>$url, 'ip'=>$ip, 'viewprourl'=>$viewprourl, 'apifilename'=>$apifilename, 'authkey'=>$authkey, 'synlogin'=>$synlogin, 'type'=>$type, 'tagtemplates'=>$tagtemplates), array('appid'=>$app[appid]));
 				$appid = $app['appid'];
 			} else {
 				$extra = serialize(array('apppath'=> getgpc('apppath', 'P')));
-				$this->db->query("INSERT INTO ".UC_DBTABLEPRE."applications SET name='$name', url='$url', ip='$ip', viewprourl='$viewprourl', apifilename='$apifilename', authkey='$authkey', synlogin='$synlogin', type='$type', recvnote='$recvnote', extra='$extra', tagtemplates='$tagtemplates'");
+				$this->db->insert('applications', array('name'=>$name, 'url'=>$url, 'ip'=>$ip, 'viewprourl'=>$viewprourl, 'apifilename'=>$apifilename, 'authkey'=>$authkey, 'synlogin'=>$synlogin, 'type'=>$type, 'recvnote'=>$recvnote, 'extra'=>$extra, 'tagtemplates'=>$tagtemplates));
 				$appid = $this->db->insert_id();
 			}
 
 			$this->_add_note_for_app();
 
-			$this->load('cache');
-			$_ENV['cache']->updatedata('apps');
+			$this->cache_m->updatedata('apps');
 
-			$_ENV['app']->alter_app_table($appid, 'ADD');
+			$this->app_m->alter_app_table($appid, 'ADD');
 			$this->writelog('app_add', "appid=$appid; appname=$_POST[name]");
 			header("location: admin.php?m=app&a=detail&appid=$appid&addapp=yes&sid=".$this->view->sid);
 		}
 	}
 
-	function onping() {
+	function ping() {
 		$ip = getgpc('ip');
 		$url = getgpc('url');
 		$appid = intval(getgpc('appid'));
-		$app = $_ENV['app']->get_app_by_appid($appid);
+		$app = $this->app_m->get_app_by_appid($appid);
 		$status = '';
 		if($app['extra']['apppath'] && @include $app['extra']['apppath'].'./api/'.$app['apifilename']) {
 			$uc_note = new uc_note();
 			$status = $uc_note->test($note['getdata'], $note['postdata']);
 		} else {
-			$this->load('note');
-			$url = $_ENV['note']->get_url_code('test', '', $appid);
-			$status = $_ENV['app']->test_api($url, $ip);
+			$this->load->model('note_m');
+			$url = $this->note_m->get_url_code('test', '', $appid);
+			$status = $this->app_m->test_api($url, $ip);
 		}
 		if($status == '1') {
 			echo 'document.getElementById(\'status_'.$appid.'\').innerHTML = "<img src=\'images/correct.gif\' border=\'0\' class=\'statimg\' \/><span class=\'green\'>'.$this->lang['app_connent_ok'].'</span>";testlink();';
@@ -121,11 +120,11 @@ class App extends MY_Controller {
 
 	}
 
-	function ondetail() {
+	function detail() {
 		$appid = getgpc('appid');
 		$updated = false;
-		$app = $_ENV['app']->get_app_by_appid($appid);
-		if($this->submitcheck()) {
+		$app = $this->app_m->get_app_by_appid($appid);
+		if(submitcheck()) {
 			$type = getgpc('type', 'P');
 			$name = getgpc('name', 'P');
 			$url = getgpc('url', 'P');
@@ -133,7 +132,7 @@ class App extends MY_Controller {
 			$viewprourl = getgpc('viewprourl', 'P');
 			$apifilename = trim(getgpc('apifilename', 'P'));
 			$authkey = getgpc('authkey', 'P');
-			$authkey = $this->authcode($authkey, 'ENCODE', UC_MYKEY);
+			$authkey = authcode($authkey, 'ENCODE', UC_MYKEY);
 			$synlogin = getgpc('synlogin', 'P');
 			$recvnote = getgpc('recvnote', 'P');
 			if(getgpc('apppath', 'P')) {
@@ -171,15 +170,14 @@ class App extends MY_Controller {
 			$tagtemplates = $this->serialize($tagtemplates, 1);
 
 			$extra = addslashes(serialize($app['extra']));
-			$this->db->query("UPDATE ".UC_DBTABLEPRE."applications SET appid='$appid', name='$name', url='$url', type='$type', ip='$ip', viewprourl='$viewprourl', apifilename='$apifilename', authkey='$authkey', synlogin='$synlogin', recvnote='$recvnote', extra='$extra', tagtemplates='$tagtemplates' WHERE appid='$appid'");
+			$this->db->update('applications', array('appid'=>$appid, 'name'=>$name, 'url'=>$url, 'type'=>$type, 'ip'=>$ip, 'viewprourl'=>$viewprourl, 'apifilename'=>$apifilename, 'authkey'=>$authkey, 'synlogin'=>$synlogin, 'recvnote'=>$recvnote, 'extra'=>$extra, 'tagtemplates'=>$tagtemplates), array('appid'=>$appid));
 			$updated = true;
-			$this->load('cache');
-			$_ENV['cache']->updatedata('apps');
-			$this->cache('settings');
+			$this->cache_m->updatedata('apps');
+			$this->cache_m->updatedata('settings');
 			$this->writelog('app_edit', "appid=$appid");
 
 			$this->_add_note_for_app();
-			$app = $_ENV['app']->get_app_by_appid($appid);
+			$app = $this->app_m->get_app_by_appid($appid);
 		}
 		$tagtemplates = $this->unserialize($app['tagtemplates']);
 		$template = htmlspecialchars($tagtemplates['template']);
@@ -192,7 +190,7 @@ class App extends MY_Controller {
 		$tagtemplates['fields'] = $tmp;
 		$a = getgpc('a');
 		$data['a'] = $a;
-		$app = $_ENV['app']->get_app_by_appid($appid);
+		$app = $this->app_m->get_app_by_appid($appid);
 		$data['isfounder'] = $this->user['isfounder'];
 		$data['appid'] = $app['appid'];
 		$data['name'] = $app['name'];
@@ -220,11 +218,11 @@ class App extends MY_Controller {
 
 	function _add_note_for_app() {
 		$this->load('note');
-		$notedata = $this->db->fetch_all("SELECT appid, type, name, url, ip, viewprourl, apifilename, charset, synlogin, extra, recvnote FROM ".UC_DBTABLEPRE."applications");
+		$notedata = $this->db->select('appid, type, name, url, ip, viewprourl, apifilename, charset, synlogin, extra, recvnote')->get("applications")->result_array();
 		$notedata = $this->_format_notedata($notedata);
 		$notedata['UC_API'] = UC_API;
-		$_ENV['note']->add('updateapps', '', $this->serialize($notedata, 1));
-		$_ENV['note']->send();	
+		$this->note_m->add('updateapps', '', $this->serialize($notedata, 1));
+		$this->note_m->send();	
 	}
 
 	function _format_notedata($notedata) {

@@ -1,33 +1,38 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+define('UC_NOTE_REPEAT', 5);
+define('UC_NOTE_TIMEOUT', 15);
+define('UC_NOTE_GC', 10000);
+
+define('API_RETURN_FAILED', '-1');
+
 class Note_m extends CI_Model
 {
-	public function __construct()
-	{
-		parent::__construct();
-	}
-
 	var $apps;
 	var $operations = array();
 	var $notetype = 'HTTP';
-	function notemodel(&$base) {
-
-		$this->apps = $this->base->cache('apps');
+	
+	public function __construct()
+	{
+		parent::__construct();
+		$this->load->model('cache_m');
+		$this->apps = $this->cache_m->getdata('apps');
+		$this->load->model('misc_m');
 		$this->operations = array(
-			'test'=>array('', 'action=test'),
-			'deleteuser'=>array('', 'action=deleteuser'),
-			'renameuser'=>array('', 'action=renameuser'),
-			'deletefriend'=>array('', 'action=deletefriend'),
-			'gettag'=>array('', 'action=gettag', 'tag', 'updatedata'),
-			'getcreditsettings'=>array('', 'action=getcreditsettings'),
-			'getcredit'=>array('', 'action=getcredit'),
-			'updatecreditsettings'=>array('', 'action=updatecreditsettings'),
-			'updateclient'=>array('', 'action=updateclient'),
-			'updatepw'=>array('', 'action=updatepw'),
-			'updatebadwords'=>array('', 'action=updatebadwords'),
-			'updatehosts'=>array('', 'action=updatehosts'),
-			'updateapps'=>array('', 'action=updateapps'),
-			'updatecredit'=>array('', 'action=updatecredit'),
+				'test'=>array('', 'action=test'),
+				'deleteuser'=>array('', 'action=deleteuser'),
+				'renameuser'=>array('', 'action=renameuser'),
+				'deletefriend'=>array('', 'action=deletefriend'),
+				'gettag'=>array('', 'action=gettag', 'tag', 'updatedata'),
+				'getcreditsettings'=>array('', 'action=getcreditsettings'),
+				'getcredit'=>array('', 'action=getcredit'),
+				'updatecreditsettings'=>array('', 'action=updatecreditsettings'),
+				'updateclient'=>array('', 'action=updateclient'),
+				'updatepw'=>array('', 'action=updatepw'),
+				'updatebadwords'=>array('', 'action=updatebadwords'),
+				'updatehosts'=>array('', 'action=updatehosts'),
+				'updateapps'=>array('', 'action=updateapps'),
+				'updatecredit'=>array('', 'action=updatecredit'),
 		);
 	}
 
@@ -68,30 +73,34 @@ class Note_m extends CI_Model
 	}
 
 	function add($operation, $getdata='', $postdata='', $appids=array(), $pri = 0) {
-		$extra = $varextra = '';
+		$set = $varsets = array();
 		foreach((array)$this->apps as $appid => $app) {
 			$appid = $app['appid'];
 			if($appid == intval($appid)) {
 				if($appids && !in_array($appid, $appids)) {
-					$appadd[] = 'app'.$appid."='1'";
+					$set['app'.$appid] = 1;
 				} else {
-					$varadd[] = "('noteexists{$appid}', '1')";
+					$varsets[] = array('name'=>'noteexists'.$appid, 'value'=>1);
 				}
 			}
 		}
-		if($appadd) {
-			$extra = implode(',', $appadd);
-			$extra = $extra ? ', '.$extra : '';
-		}
-		if($varadd) {
-			$varextra = implode(', ', $varadd);
-			$varextra = $varextra ? ', '.$varextra : '';
-		}
+		
 		$getdata = addslashes($getdata);
 		$postdata = addslashes($postdata);
-// 		$insert_id = $this->db->insert('notelist', array('getdata'=>$getdata, 'operation'=>$operation, 'pri'=>$pri, 'postdata'=>$postdata)$extra");
-// 		$insert_id = $this->db->insert_id();
-// 		$insert_id && $this->db->query("REPLACE INTO ".UC_DBTABLEPRE."vars (name, value) VALUES ('noteexists', '1')$varextra");
+		$set['getdata'] = $getdata;
+		$set['operation'] = $operation;
+		$set['pri'] = $pri;
+		$set['postdata'] = $postdata;
+		$insert_id = $this->db->insert('notelist', $set);
+		if($insert_id){
+			$this->db->replace('vars', array('name'=>'noteexists', 'value'=>1));
+			if($varsets){
+				foreach($varsets as $varset)
+				{
+					$this->db->replace('vars', $varset);
+				}
+			}
+		}
 		return $insert_id;
 	}
 
@@ -112,7 +121,7 @@ class Note_m extends CI_Model
 		foreach((array)$this->apps as $appid => $app) {
 			$appnotes = $note['app'.$appid];
 			if($app['recvnote'] && $appnotes != 1 && $appnotes > -UC_NOTE_REPEAT) {
-				$this->sendone($appid, 0, $note);
+// 				$this->sendone($appid, 0, $note);
 				$closenote = FALSE;
 				break;
 			}
@@ -125,15 +134,15 @@ class Note_m extends CI_Model
 	}
 
 	function sendone($appid, $noteid = 0, $note = '') {
-		require_once UC_ROOT.'./lib/xml.class.php';
+// 		$this->load->library('xml');
 		$return = FALSE;
 		$app = $this->apps[$appid];
 		if($noteid) {
 			$note = $this->_get_note_by_id($noteid);
 		}
-		$this->base->load('misc');
+		
 		$apifilename = isset($app['apifilename']) && $app['apifilename'] ? $app['apifilename'] : 'uc.php';
-		if($app['extra']['apppath'] && @include $app['extra']['apppath'].'./api/'.$apifilename) {
+		if(isset($app['extra']['apppath']) && $app['extra']['apppath'] && @include $app['extra']['apppath'].'./api/'.$apifilename) {
 			$uc_note = new uc_note();
 			$method = $note['operation'];
 			if(is_string($method) && !empty($method)) {
@@ -148,12 +157,12 @@ class Note_m extends CI_Model
 		} else {
 			$url = $this->get_url_code($note['operation'], $note['getdata'], $appid);
 			$note['postdata'] = str_replace(array("\n", "\r"), '', $note['postdata']);
-			$response = trim($_ENV['misc']->dfopen2($url, 0, $note['postdata'], '', 1, $app['ip'], UC_NOTE_TIMEOUT, TRUE));
+			$response = trim($this->misc_m->dfopen2($url, 0, $note['postdata'], '', 1, $app['ip'], UC_NOTE_TIMEOUT, TRUE));
 		}
 
 		$returnsucceed = $response != '' && ($response == 1 || is_array(xml_unserialize($response)));
 
-		$closedsqladd = $this->_close_note($note, $this->apps, $returnsucceed, $appid) ? ",closed='1'" : '';//
+		$closed = $this->_close_note($note, $this->apps, $returnsucceed, $appid) ? 1 : 0;//
 
 		if($returnsucceed) {
 			if($this->operations[$note['operation']][2]) {
@@ -161,17 +170,17 @@ class Note_m extends CI_Model
 				$func = $this->operations[$note['operation']][3];
 				$_ENV[$this->operations[$note['operation']][2]]->$func($appid, $response);
 			}
-// 			$this->db->set('totalnum', 'totalnum+1', FALSE)->set('succeednum', 'succeednum+1', FALSE)->update('notelist', array('app{$appid}'=>'1', 'dateline'=>time()) $closedsqladd, array('noteid'=>$note[noteid]));
+			$this->db->set('totalnum', 'totalnum+1', FALSE)->set('succeednum', 'succeednum+1', FALSE)->update('notelist', array('app'.$appid=>'1', 'dateline'=>time(), 'closed'=>$closed), array('noteid'=>$note[noteid]));
 			$return = TRUE;
 		} else {
-			$this->db->query("UPDATE ".UC_DBTABLEPRE."notelist SET app$appid = app$appid-'1', totalnum=totalnum+1, dateline='{$this->base->time}' $closedsqladd WHERE noteid='$note[noteid]'", 'SILENT');
+			$this->db->set('totalnum', 'totalnum+1', FALSE)->set('app'.$appid, 'app'.$appid.'-1', FALSE)->update('notelist', array('dateline'=>time(), 'closed'=>$closed), array('noteid'=>$note[noteid]));
 			$return = FALSE;
 		}
 		return $return;
 	}
 
 	function _get_note() {
-		$data = $this->db->where('closed', 0)->order_by('pri DESC, noteid ASC')->get('notelist', 1)->first_row();
+		$data = $this->db->where('closed', 0)->order_by('pri DESC, noteid ASC')->get('notelist', 1)->first_row('array');
 		return $data;
 	}
 
@@ -205,7 +214,8 @@ class Note_m extends CI_Model
 		$url = $app['url'];
 		$apifilename = isset($app['apifilename']) && $app['apifilename'] ? $app['apifilename'] : 'uc.php';
 		$action = $this->operations[$operation][1];
-		$code = urlencode(authcode("$action&".($getdata ? "$getdata&" : '')."time=".$this->base->time, 'ENCODE', $authkey));
+		$code = urlencode(authcode("$action&".($getdata ? "$getdata&" : '')."time=".time(), 'ENCODE', $authkey));
+		
 		return $url."/api/$apifilename?code=$code";
 	}
 

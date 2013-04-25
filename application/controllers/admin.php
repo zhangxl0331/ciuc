@@ -14,14 +14,14 @@ class Admin extends MY_Controller {
 	
 	function ls() {
 
-		//include_once UC_ROOT.'view/default/admin.lang.php';
+		$this->load->language('admin');
 		$status = 0;
-		if(!empty($_POST['addname']) && $this->submitcheck()) {
+		if(!empty($_POST['addname']) && submitcheck()) {
 			$addname = getgpc('addname', 'P');
 			$data['addname'] = $addname;
-			$uid = $this->db->result_first("SELECT uid FROM ".UC_DBTABLEPRE."members WHERE username='$addname'");
+			$uid = $this->db->select('uid')->where('username', $addname)->get('members')->first_row('array');
 			if($uid) {
-				$adminuid = $this->db->result_first("SELECT uid FROM ".UC_DBTABLEPRE."admins WHERE username='$addname'");
+				$adminuid = $this->dbselect('uid')->where('username', $addname)->get('admins')->first_row('array');
 				if($adminuid) {
 					$status = -1;
 				} else {
@@ -37,22 +37,23 @@ class Admin extends MY_Controller {
 					$allowadminnote = getgpc('allowadminnote', 'P');
 					$allowadmincache = getgpc('allowadmincache', 'P');
 					$allowadminlog = getgpc('allowadminlog', 'P');
-					$this->db->query("INSERT INTO ".UC_DBTABLEPRE."admins SET
-						uid='$uid',
-						username='$addname',
-						allowadminsetting='$allowadminsetting',
-						allowadminapp='$allowadminapp',
-						allowadminuser='$allowadminuser',
-						allowadminbadword='$allowadminbadword',
-						allowadmincredits='$allowadmincredits',
-						allowadmintag='$allowadmintag',
-						allowadminpm='$allowadminpm',
-						allowadmindomain='$allowadmindomain',
-						allowadmindb='$allowadmindb',
-						allowadminnote='$allowadminnote',
-						allowadmincache='$allowadmincache',
-						allowadminlog='$allowadminlog'");
-					$insertid = $this->db->insert_id();
+					$insertid = $this->db->insert('admins', array(
+						'uid'=>$uid,
+						'username'=>$addname,
+						'allowadminsetting'=>$allowadminsetting,
+						'allowadminapp'=>$allowadminapp,
+						'allowadminuser'=>$allowadminuser,
+						'allowadminbadword'=>$allowadminbadword,
+						'allowadmincredits'=>$allowadmincredits,
+						'allowadmintag'=>$allowadmintag,
+						'allowadminpm'=>$allowadminpm,
+						'allowadmindomain'=>$allowadmindomain,
+						'allowadmindb'=>$allowadmindb,
+						'allowadminnote'=>$allowadminnote,
+						'allowadmincache'=>$allowadmincache,
+						'allowadminlog'=>$allowadminlog
+						)
+					);
 					if($insertid) {
 						$this->writelog('admin_add', 'username='.htmlspecialchars($addname));
 						$status = 1;
@@ -65,7 +66,7 @@ class Admin extends MY_Controller {
 			}
 		}
 
-		if(!empty($_POST['editpwsubmit']) && $this->submitcheck()) {
+		if(!empty($_POST['editpwsubmit']) && submitcheck()) {
 			$oldpw = getgpc('oldpw', 'P');
 			$newpw = getgpc('newpw', 'P');
 			$newpw2 = getgpc('newpw2', 'P');
@@ -98,7 +99,7 @@ class Admin extends MY_Controller {
 
 		if(!empty($_POST['delete'])) {
 			$uids = $this->implode(getgpc('delete', 'P'));
-			$this->db->query("DELETE FROM ".UC_DBTABLEPRE."admins WHERE uid IN ($uids)");
+			$this->db->delete('admins', array('uid IN'=>$uids));
 		}
 
 		$page = max(1, getgpc('page'));
@@ -125,7 +126,7 @@ class Admin extends MY_Controller {
 	function edit() {
 		$uid = getgpc('uid');
 		$status = 0;
-		if($this->submitcheck()) {
+		if(submitcheck()) {
 			$allowadminsetting = getgpc('allowadminsetting', 'P');
 			$allowadminapp = getgpc('allowadminapp', 'P');
 			$allowadminuser = getgpc('allowadminuser', 'P');
@@ -138,28 +139,28 @@ class Admin extends MY_Controller {
 			$allowadminnote = getgpc('allowadminnote', 'P');
 			$allowadmincache = getgpc('allowadmincache', 'P');
 			$allowadminlog = getgpc('allowadminlog', 'P');
-			$this->db->query("UPDATE ".UC_DBTABLEPRE."admins SET
-				allowadminsetting='$allowadminsetting',
-				allowadminapp='$allowadminapp',
-				allowadminuser='$allowadminuser',
-				allowadminbadword='$allowadminbadword',
-				allowadmincredits='$allowadmincredits',
-				allowadmintag='$allowadmintag',
-				allowadminpm='$allowadminpm',
-				allowadmindomain='$allowadmindomain',
-				allowadmindb='$allowadmindb',
-				allowadminnote='$allowadminnote',
-				allowadmincache='$allowadmincache',
-				allowadminlog='$allowadminlog'
-				WHERE uid='$uid'");
+			$this->db->update('admins', array(
+				'allowadminsetting'=>$allowadminsetting,
+				'allowadminapp'=>$allowadminapp,
+				'allowadminuser'=>$allowadminuser,
+				'allowadminbadword'=>$allowadminbadword,
+				'allowadmincredits'=>$allowadmincredits,
+				'allowadmintag'=>$allowadmintag,
+				'allowadminpm'=>$allowadminpm,
+				'allowadmindomain'=>$allowadmindomain,
+				'allowadmindb'=>$allowadmindb,
+				'allowadminnote'=>$allowadminnote,
+				'allowadmincache'=>$allowadmincache,
+				'allowadminlog'=>$allowadminlog),
+				array('uid'=>$uid));
 			$status = $this->db->errno() ? -1 : 1;
 			$this->writelog('admin_priv_edit', 'username='.htmlspecialchars($admin));
 		}
-		$admin = $this->db->fetch_first("SELECT * FROM ".UC_DBTABLEPRE."admins WHERE uid='$uid'");
+		$admin = $this->db->where('uid', $uid)->get('admins')->first_row('array');
 		$data['uid'] = $uid;
 		$data['admin'] = $admin;
 		$data['status'] = $status;
-		$this->load->view('admin_admin', $data);
+		$this->load->view('admin', $data);
 	}
 }
 
