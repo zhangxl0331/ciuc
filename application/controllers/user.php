@@ -150,7 +150,7 @@ class User extends MY_Controller {
 	function logout() {
 		$this->writelog('logout');
 		$this->setcookie('sid', '');
-		header('location: admin.php');
+		header('location: '.$this->config->base_url());
 	}
 	
 	function add() {

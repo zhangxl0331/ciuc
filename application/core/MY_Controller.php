@@ -195,21 +195,15 @@ class MY_Controller extends CI_Controller
 	}
 	
 	function serialize($s, $htmlon = 0) {
-		if(file_exists(UC_ROOT.RELEASE_ROOT.'./lib/xml.class.php')) {
-			include_once UC_ROOT.RELEASE_ROOT.'./lib/xml.class.php';
-		} else {
-			include_once UC_ROOT.'./lib/xml.class.php';
-		}
+		
+		$this->load->library('xml');
 	
 		return xml_serialize($s, $htmlon);
 	}
 	
 	function unserialize($s) {
-		if(file_exists(UC_ROOT.RELEASE_ROOT.'./lib/xml.class.php')) {
-			include_once UC_ROOT.RELEASE_ROOT.'./lib/xml.class.php';
-		} else {
-			include_once UC_ROOT.'./lib/xml.class.php';
-		}
+		
+		$this->load->library('xml');
 	
 		return xml_unserialize($s);
 	}

@@ -18,14 +18,14 @@ class Setting extends MY_Controller {
 		$this->load->model('setting_m');
 		$updated = false;
 		if(submitcheck()) {
-			$timeformat = getgpc('timeformat', 'P');
-			$dateformat = getgpc('dateformat', 'P');
-			$timeoffset = getgpc('timeoffset', 'P');
-			$pmlimit1day = getgpc('pmlimit1day', 'P');
-			$pmfloodctrl = getgpc('pmfloodctrl', 'P');
-			$pmsendregdays = getgpc('pmsendregdays', 'P');
-			$pmcenter = getgpc('pmcenter', 'P');
-			$sendpmseccode = getgpc('sendpmseccode', 'P');
+			$timeformat = $this->input->post('timeformat');
+			$dateformat = $this->input->post('dateformat');
+			$timeoffset = $this->input->post('timeoffset');
+			$pmlimit1day = $this->input->post('pmlimit1day');
+			$pmfloodctrl = $this->input->post('pmfloodctrl');
+			$pmsendregdays = $this->input->post('pmsendregdays');
+			$pmcenter = $this->input->post('pmcenter');
+			$sendpmseccode = $this->input->post('sendpmseccode');
 			$dateformat = str_replace(array('yyyy', 'mm', 'dd'), array('y', 'n', 'j'), strtolower($dateformat));
 			$timeformat = $timeformat == 1 ? 'H:i' : 'h:i A';
 			$timeoffset = in_array($timeoffset, array('-12', '-11', '-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3.5', '-3', '-2', '-1', '0', '1', '2', '3', '3.5', '4', '4.5', '5', '5.5', '5.75', '6', '6.5', '7', '8', '9', '9.5', '10', '11', '12')) ? $timeoffset : 8;
@@ -73,8 +73,8 @@ class Setting extends MY_Controller {
 	}
 
 	function updatecache() {
-		$this->load('cache');
-		$_ENV['cache']->updatedata('settings');
+		$this->load->model('cache_m');
+		$this->cache_m->updatedata('settings');
 	}
 
 	function register() {
@@ -130,9 +130,9 @@ class Setting extends MY_Controller {
 	}
 
 	function _add_note_for_setting($settings) {
-		$this->load('note');
-		$_ENV['note']->add('updateclient', '', $this->serialize($settings, 1));
-		$_ENV['note']->send();
+		$this->load->model('note_m');
+		$this->note_m->add('updateclient', '', $this->serialize($settings, 1));
+		$this->note_m->send();
 	}
 }
 

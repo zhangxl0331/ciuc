@@ -1,6 +1,6 @@
 <?php $this->load->view('header');?>
 
-<script src="js/common.js" type="text/javascript"></script>
+<script src="<?php echo $this->config->base_url('js/common.js');?>" type="text/javascript"></script>
 
 <div class="container">
 	<?php if($updated):?>
