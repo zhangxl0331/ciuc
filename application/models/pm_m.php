@@ -12,7 +12,7 @@ class Pm_m extends CI_Model
 	}
 
 	function get_pm_by_pmid($uid, $pmid) {
-		$arr = $this->db->fetch_all("SELECT * FROM ".UC_DBTABLEPRE."pms WHERE pmid='$pmid' AND (msgtoid IN ('$uid','0') OR msgfromid='$uid')");
+		$arr = $this->db->where('pmid', $pmid)->where_in('msgtoid', $uid)->or_where('msgfromid', $uid)->get('pms')->result_array();
 		return $arr;
 	}
 

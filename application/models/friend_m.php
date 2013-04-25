@@ -18,19 +18,16 @@ class Friend_m extends CI_Model
 		} elseif($direction == 3) {
 			return -1;
 		} else {
-			$this->db->query("INSERT INTO ".UC_DBTABLEPRE."friends SET uid='$uid', friendid='$friendid', comment='$comment', direction='1'", 'SILENT');
-			return $this->db->insert_id();
+			return $this->db->insert('friends', array('uid'=>$uid, 'friendid'=>$friendid, 'comment'=>$comment, 'direction'=>'1'));
 		}
 	}
 
 	function delete($uid, $friendids) {
 		$friendids = $this->base->implode($friendids);
-		$this->db->query("DELETE FROM ".UC_DBTABLEPRE."friends WHERE uid='$uid' AND friendid IN ($friendids)");
-		$affectedrows = $this->db->affected_rows();
-		if($affectedrows > 0) {
-			$this->db->query("UPDATE ".UC_DBTABLEPRE."friends SET direction=1 WHERE uid IN ($friendids) AND friendid='$uid' AND direction='3'");
+		if($this->db->delete('friends', array('uid'=>$uid, 'friendid IN'=>$friendids))) {
+			return $this->db->update('friends', array('direction'=>1), array('uid IN'=> $friendids, 'friendid'=>$uid, 'direction'=>'3'));
 		}
-		return $affectedrows;
+		return FALSE;
 	}
 
 	function get_totalnum_by_uid($uid, $direction = 0) {
@@ -44,12 +41,12 @@ class Friend_m extends CI_Model
 		} elseif($direction == 3) {
 			$sqladd = "uid='$uid' AND direction='3'";
 		}
-		$totalnum = $this->db->result_first("SELECT COUNT(*) FROM ".UC_DBTABLEPRE."friends WHERE $sqladd");
+		$totalnum = $this->db->where($sqladd)->get('friends')->num_rows();
 		return $totalnum;
 	}
 
 	function get_list($uid, $page, $pagesize, $totalnum, $direction = 0) {
-		$start = $this->base->page_get_start($page, $pagesize, $totalnum);
+		$start = page_get_start($page, $pagesize, $totalnum);
 		$sqladd = '';
 		if($direction == 0) {
 			$sqladd = "f.uid='$uid'";
@@ -61,7 +58,7 @@ class Friend_m extends CI_Model
 			$sqladd = "f.uid='$uid' AND f.direction='3'";
 		}
 		if($sqladd) {
-			$data = $this->db->fetch_all("SELECT f.*, m.username FROM ".UC_DBTABLEPRE."friends f LEFT JOIN ".UC_DBTABLEPRE."members m ON f.friendid=m.uid WHERE $sqladd LIMIT $start, $pagesize");
+			$data = $this->db->select('f.*, m.username')->from('friends f')->join('members m', 'f.friendid=m.uid', 'LEFT')->where($sqladd)->get('', $pagesize, $start)->result_array();
 			return $data;
 		} else {
 			return array();
@@ -80,7 +77,7 @@ class Friend_m extends CI_Model
 		} elseif($direction == 3) {
 			$sqladd = "uid='$uid' AND friendid IN ('$friendid_str') AND direction='3'";
 		}
-		if($this->db->result_first("SELECT COUNT(*) FROM ".UC_DBTABLEPRE."friends WHERE $sqladd") == count($friendids)) {
+		if($this->db->where($sqladd)->get('friends')->num_rows() == count($friendids)) {
 			return true;
 		} else {
 			return false;

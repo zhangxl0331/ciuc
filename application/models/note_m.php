@@ -64,8 +64,7 @@ class Note_m extends CI_Model
 
 	function delete_note($ids) {
 		$ids = $this->base->implode($ids);
-		$this->db->query("DELETE FROM ".UC_DBTABLEPRE."notelist WHERE noteid IN ($ids)");
-		return $this->db->affected_rows();
+		return $this->db->delete('notelist', array('noteid IN'=>$ids));
 	}
 
 	function add($operation, $getdata='', $postdata='', $appids=array(), $pri = 0) {
@@ -90,9 +89,9 @@ class Note_m extends CI_Model
 		}
 		$getdata = addslashes($getdata);
 		$postdata = addslashes($postdata);
-		$this->db->query("INSERT INTO ".UC_DBTABLEPRE."notelist SET getdata='$getdata', operation='$operation', pri='$pri', postdata='$postdata'$extra");
-		$insert_id = $this->db->insert_id();
-		$insert_id && $this->db->query("REPLACE INTO ".UC_DBTABLEPRE."vars (name, value) VALUES ('noteexists', '1')$varextra");
+// 		$insert_id = $this->db->insert('notelist', array('getdata'=>$getdata, 'operation'=>$operation, 'pri'=>$pri, 'postdata'=>$postdata)$extra");
+// 		$insert_id = $this->db->insert_id();
+// 		$insert_id && $this->db->query("REPLACE INTO ".UC_DBTABLEPRE."vars (name, value) VALUES ('noteexists', '1')$varextra");
 		return $insert_id;
 	}
 
@@ -119,7 +118,7 @@ class Note_m extends CI_Model
 			}
 		}
 		if($closenote) {
-			$this->db->query("UPDATE ".UC_DBTABLEPRE."notelist SET closed='1' WHERE noteid='$note[noteid]'");
+			$this->db->update('notelist', array('closed'=>'1'), array('noteid'=>$note['noteid']));
 		}
 
 		$this->_gc();
@@ -162,7 +161,7 @@ class Note_m extends CI_Model
 				$func = $this->operations[$note['operation']][3];
 				$_ENV[$this->operations[$note['operation']][2]]->$func($appid, $response);
 			}
-			$this->db->query("UPDATE ".UC_DBTABLEPRE."notelist SET app$appid='1', totalnum=totalnum+1, succeednum=succeednum+1, dateline='{$this->base->time}' $closedsqladd WHERE noteid='$note[noteid]'", 'SILENT');
+// 			$this->db->set('totalnum', 'totalnum+1', FALSE)->set('succeednum', 'succeednum+1', FALSE)->update('notelist', array('app{$appid}'=>'1', 'dateline'=>time()) $closedsqladd, array('noteid'=>$note[noteid]));
 			$return = TRUE;
 		} else {
 			$this->db->query("UPDATE ".UC_DBTABLEPRE."notelist SET app$appid = app$appid-'1', totalnum=totalnum+1, dateline='{$this->base->time}' $closedsqladd WHERE noteid='$note[noteid]'", 'SILENT');
@@ -177,7 +176,7 @@ class Note_m extends CI_Model
 	}
 
 	function _gc() {
-		rand(0, UC_NOTE_GC) == 0 && $this->db->query("DELETE FROM ".UC_DBTABLEPRE."notelist WHERE closed='1'");
+		rand(0, UC_NOTE_GC) == 0 && $this->db->delete('notelist', array('closed'=>'1'));
 	}
 
 	function _close_note($note, $apps, $returnsucceed, $appid) {
@@ -196,7 +195,7 @@ class Note_m extends CI_Model
 	}
 
 	function _get_note_by_id($noteid) {
-		$data = $this->db->fetch_first("SELECT * FROM ".UC_DBTABLEPRE."notelist WHERE noteid='$noteid'");
+		$data = $this->db->where('noteid', $noteid)->get('notelist')->first_row();
 		return $data;
 	}
 
@@ -206,7 +205,7 @@ class Note_m extends CI_Model
 		$url = $app['url'];
 		$apifilename = isset($app['apifilename']) && $app['apifilename'] ? $app['apifilename'] : 'uc.php';
 		$action = $this->operations[$operation][1];
-		$code = urlencode($this->base->authcode("$action&".($getdata ? "$getdata&" : '')."time=".$this->base->time, 'ENCODE', $authkey));
+		$code = urlencode(authcode("$action&".($getdata ? "$getdata&" : '')."time=".$this->base->time, 'ENCODE', $authkey));
 		return $url."/api/$apifilename?code=$code";
 	}
 

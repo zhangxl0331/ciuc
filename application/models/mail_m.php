@@ -26,26 +26,38 @@ class Mail_m extends CI_Model
 
 	function delete_mail($ids) {
 		$ids = $this->base->implode($ids);
-		$this->db->query("DELETE FROM ".UC_DBTABLEPRE."mailqueue WHERE mailid IN ($ids)");
-		return $this->db->affected_rows();
+		return $this->db->delete('mailqueue', array('mailid IN'=>$ids));
 	}
 
 	function add($mail) {
 		if($mail['level']) {
-			$sql = "INSERT INTO ".UC_DBTABLEPRE."mailqueue (touid, tomail, subject, message, frommail, charset, htmlon, level, dateline, failures, appid) VALUES ";
+			$sql = "INSERT INTO ".UC_DBTABLEPRE." () VALUES ";
 			$values_arr = array();
 			foreach($mail['uids'] as $uid) {
 				if(empty($uid)) continue;
-				$values_arr[] = "('$uid', '', '$mail[subject]', '$mail[message]', '$mail[frommail]', '$mail[charset]', '$mail[htmlon]', '$mail[level]', '$mail[dateline]', '0', '$mail[appid]')";
+				$email = '';
 			}
 			foreach($mail['emails'] as $email) {
 				if(empty($email)) continue;
-				$values_arr[] = "('', '$email', '$mail[subject]', '$mail[message]', '$mail[frommail]', '$mail[charset]', '$mail[htmlon]', '$mail[level]', '$mail[dateline]', '0', '$mail[appid]')";
+				$uid = '';
+				$mail['message'] = '';
 			}
-			$sql .= implode(',', $values_arr);
-			$this->db->query($sql);
-			$insert_id = $this->db->insert_id();
-			$insert_id && $this->db->query("REPLACE INTO ".UC_DBTABLEPRE."vars SET name='mailexists', value='1'");
+			$insert_id = $this->db->insert('mailqueue',
+				array(
+					'touid' => $uid, 
+					'tomail' => $email, 
+					'subject' => $mail['subject'], 
+					'message' => $mail['message'], 
+					'frommail' => $mail['frommail'], 
+					'charset' => $mail['charset'], 
+					'htmlon' => $mail['htmlon'], 
+					'level' => $mail['level'], 
+					'dateline' => $mail['dateline'], 
+					'failures' => 0, 
+					'appid' => $mail['appid']
+				)
+			);
+			$insert_id && $this->db->replace('vars', array('name'=>'mailexists', 'value'=>'1'));
 			return $insert_id;
 		} else {
 			$mail['email_to'] = array();
@@ -54,7 +66,7 @@ class Mail_m extends CI_Model
 				if(empty($uid)) continue;
 				$uids .= ','.$uid;
 			}
-			$users = $this->db->fetch_all("SELECT uid, username, email FROM ".UC_DBTABLEPRE."members WHERE uid IN ($uids)");
+			$users = $this->db->select('uid, username, email')->where('uid IN', $uids)->get('members')->result_array();
 			foreach($users as $v) {
 				$mail['email_to'][] = $v['username'].'<'.$v['email'].'>';
 			}
@@ -76,7 +88,7 @@ class Mail_m extends CI_Model
 
 		$mail = $this->_get_mail();
 		if(empty($mail)) {
-			$this->db->query("REPLACE INTO ".UC_DBTABLEPRE."vars SET name='mailexists', value='0'");
+			$this->db->replace('vars', array('name'=>'mailexists', 'value'=>'0'));
 			return NULL;
 		} else {
 			$mail['email_to'] = $mail['tomail'] ? $mail['tomail'] : $mail['username'].'<'.$mail['email'].'>';
@@ -106,23 +118,23 @@ class Mail_m extends CI_Model
 	}
 
 	function _get_mail() {
-		$data = $this->db->fetch_first("SELECT m.*, u.username, u.email FROM ".UC_DBTABLEPRE."mailqueue m LEFT JOIN ".UC_DBTABLEPRE."members u ON m.touid=u.uid WHERE failures<'".UC_MAIL_REPEAT."' ORDER BY level DESC, mailid ASC LIMIT 1");
+		$data = $this->db->select('m.*, u.username, u.email')->from('mailqueue m')->join('members u', 'm.touid=u.uid', 'LEFT')->where('failures<', UC_MAIL_REPEAT)->order_by('level DESC, mailid ASC')->get('', 1)->first_row();
 		return $data;
 	}
 
 	function _get_mail_by_id($mailid) {
-		$data = $this->db->fetch_first("SELECT m.*, u.username, u.email FROM ".UC_DBTABLEPRE."mailqueue m LEFT JOIN ".UC_DBTABLEPRE."members u ON m.touid=u.uid WHERE mailid='$mailid'");
+		$data = $this->db->select('m.*, u.username, u.email')->from('mailqueue m')->join('members u', 'm.touid=u.uid', 'LEFT')->where('mailid', $mailid)->get()->first_row();
 		return $data;
 	}
 
 	function _delete_one_mail($mailid) {
 		$mailid = intval($mailid);
-		return $this->db->query("DELETE FROM ".UC_DBTABLEPRE."mailqueue WHERE mailid='$mailid'");
+		return $this->db->delete('mailqueue', array('mailid'=>$mailid));
 	}
 
 	function _update_failures($mailid) {
 		$mailid = intval($mailid);
-		return $this->db->query("UPDATE ".UC_DBTABLEPRE."mailqueue SET failures=failures+1 WHERE mailid='$mailid'");
+		return $this->db->set('failures', 'failures+1', FALSE)->update('mailqueue', array(), array('mailid'=>$mailid'));
 	}
 
 }
