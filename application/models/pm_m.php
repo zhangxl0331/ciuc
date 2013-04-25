@@ -17,8 +17,8 @@ class Pm_m extends CI_Model
 	}
 
 	function get_pm_by_touid($uid, $touid, $starttime, $endtime) {
-		$arr1 = $this->db->fetch_all("SELECT * FROM ".UC_DBTABLEPRE."pms WHERE msgfromid='$uid' AND msgtoid='$touid' AND dateline>='$starttime' AND dateline<'$endtime' AND related>'0' AND delstatus IN (0,2) ORDER BY dateline");
-		$arr2 = $this->db->fetch_all("SELECT * FROM ".UC_DBTABLEPRE."pms WHERE msgfromid='$touid' AND msgtoid='$uid' AND dateline>='$starttime' AND dateline<'$endtime' AND related>'0' AND delstatus IN (0,1) ORDER BY dateline");
+		$arr1 = $this->db->where("msgfromid='$uid' AND msgtoid='$touid' AND dateline>='$starttime' AND dateline<'$endtime' AND related>'0' AND delstatus IN (0,2)")->order_by('dateline')->get('pms')->result_array();
+		$arr2 = $this->db->where("msgfromid='$touid' AND msgtoid='$uid' AND dateline>='$starttime' AND dateline<'$endtime' AND related>'0' AND delstatus IN (0,1)")->order_by('dateline')->get('pms')->result_array();
 		$arr = array_merge($arr1, $arr2);
 		uasort($arr, 'pm_datelinesort');
 		return $arr;
@@ -27,11 +27,11 @@ class Pm_m extends CI_Model
 	function get_pmnode_by_pmid($uid, $pmid, $type = 0) {
 		$arr = array();
 		if($type == 1) {
-			$arr = $this->db->fetch_first("SELECT * FROM ".UC_DBTABLEPRE."pms WHERE msgfromid='$uid' and folder='inbox' ORDER BY dateline DESC LIMIT 1");
+			$arr = $this->db->where(array('msgfromid'=>$uid, 'folder'=>'inbox'))->order_by('dateline DESC')->get('pms', 1)->first_row();
 		} elseif($type == 2) {
-			$arr = $this->db->fetch_first("SELECT * FROM ".UC_DBTABLEPRE."pms WHERE msgtoid='$uid' and folder='inbox' ORDER BY dateline DESC LIMIT 1");
+			$arr = $this->db->where(array('msgtoid'=>$uid, 'folder'=>'inbox'))->order_by('dateline DESC')->get('pms', 1)->first_row();
 		} else {
-			$arr = $this->db->fetch_first("SELECT * FROM ".UC_DBTABLEPRE."pms WHERE pmid='$pmid'");
+			$arr = $this->db->where('pmid', $pmid)->get('pms')->first_row();
 		}
 		return $arr;
 	}
@@ -46,11 +46,11 @@ class Pm_m extends CI_Model
 		}
 		if($touid) {
 			$ids = is_array($touid) ? $this->base->implode($touid) : $touid;
-			$this->db->query("UPDATE ".UC_DBTABLEPRE."pms SET new='$newstatus' WHERE msgfromid IN ($ids) AND msgtoid='$uid' AND new='$oldstatus'", 'UNBUFFERED');
+			$this->db->update('pms', array('new'=>$newstatus), array('msgfromid IN'=>$ids, 'msgtoid'=>$uid, 'new'=>$oldstatus));
 		}
 		if($pmid) {
 			$ids = is_array($pmid) ? $this->base->implode($pmid) : $pmid;
-			$this->db->query("UPDATE ".UC_DBTABLEPRE."pms SET new='$newstatus' WHERE pmid IN ($ids) AND msgtoid='$uid' AND new='$oldstatus'", 'UNBUFFERED');
+			$this->db->update('pms', array('new'=>$newstatus), array('pmid IN'=>$ids, 'msgtoid'=>$uid, 'new'=>$oldstatus));
 		}
 	}
 
@@ -87,28 +87,25 @@ class Pm_m extends CI_Model
 	function get_num($uid, $folder, $filter = '') {
 		switch($folder) {
 			case 'newbox':
-				$sql = "SELECT count(*) FROM ".UC_DBTABLEPRE."pms WHERE msgtoid='$uid' AND (related='0' AND msgfromid>'0' OR msgfromid='0') AND folder='inbox' AND new='1'";
-				$num = $this->db->result_first($sql);
+				$num = $this->db->where(array('msgtoid'=>$uid, 'related'=>0, 'msgfromid>='=>0, 'folder'=>'inbox', 'new'=>'1'))->get('pms')->num_rows();
 				return $num;
 			case 'inbox':
 				if($filter == 'newpm') {
-					$filteradd = "msgtoid='$uid' AND (related='0' AND msgfromid>'0' OR msgfromid='0') AND folder='inbox' AND new='1'";
+					$num = $this->db->where(array('msgtoid'=>$uid, 'related'=>0, 'msgfromid>='=>0, 'folder'=>'inbox', 'new'=>'1'))->get('pms')->num_rows();
 				} elseif($filter == 'systempm') {
-					$filteradd = "msgtoid='$uid' AND msgfromid='0' AND folder='inbox'";
+					$num = $this->db->where(array('msgtoid'=>$uid, 'msgfromid'=>0, 'folder'=>'inbox'))->get('pms')->num_rows();
 				} elseif($filter == 'privatepm') {
-					$filteradd = "msgtoid='$uid' AND related='0' AND msgfromid>'0' AND folder='inbox'";
+					$num = $this->db->where(array('msgtoid'=>$uid, 'related'=>0, 'msgfromid>'=>0, 'folder'=>'inbox'))->get('pms')->num_rows();
 				} elseif($filter == 'announcepm') {
-					$filteradd = "msgtoid='0' AND folder='inbox'";
+					$num = $this->db->where(array('msgtoid'=>0, 'folder'=>'inbox'))->get('pms')->num_rows();
 				} else {
-					$filteradd = "msgtoid='$uid' AND related='0' AND folder='inbox'";
+					$num = $this->db->where(array('msgtoid'=>$uid, 'related'=>0, 'folder'=>'inbox'))->get('pms')->num_rows();
 				}
-				$sql = "SELECT count(*) FROM ".UC_DBTABLEPRE."pms WHERE $filteradd";
 				break;
 			case 'savebox':
-				$sql = "SELECT count(*) FROM ".UC_DBTABLEPRE."pms WHERE related='0' AND msgfromid='$uid' AND folder='outbox'";
+				$num = $this->db->where(array('msgfromid'=>$uid, 'related'=>0, 'folder'=>'outbox'))->get('pms')->num_rows();
 				break;
 		}
-		$num = $this->db->result_first($sql);
 		return $num;
 	}
 

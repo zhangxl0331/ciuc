@@ -8,12 +8,12 @@ class User_m extends CI_Model
 	}
 
 	function get_user_by_uid($uid) {
-		$arr = $this->db->fetch_first("SELECT * FROM ".UC_DBTABLEPRE."members WHERE uid='$uid'");
+		$arr = $this->db->where('uid', $uid)->get('members')->first_row('array');
 		return $arr;
 	}
 
 	function get_user_by_username($username) {
-		$arr = $this->db->fetch_first("SELECT * FROM ".UC_DBTABLEPRE."members WHERE username='$username'");
+		$arr = $this->db->where('username', $username)->get('members')->first_row('array');
 		return $arr;
 	}
 
@@ -28,7 +28,7 @@ class User_m extends CI_Model
 	}
 
 	function check_mergeuser($username) {
-		$data = $this->db->result_first("SELECT count(*) FROM ".UC_DBTABLEPRE."mergemembers WHERE appid='".$this->base->app['appid']."' AND username='$username'");
+		$data = $this->db->where(array('appid'=>$this->base->app['appid'], 'username'=>$username))->get('mergemembers')->num_rows();
 		return $data;
 	}
 
@@ -46,7 +46,7 @@ class User_m extends CI_Model
 	}
 
 	function check_usernameexists($username) {
-		$data = $this->db->result_first("SELECT username FROM ".UC_DBTABLEPRE."members WHERE username='$username'");
+		$data = $this->db->select('username')->where('username', $username)->get('members')->first_row('array');
 		return $data;
 	}
 
@@ -73,7 +73,15 @@ class User_m extends CI_Model
 
 	function check_emailexists($email, $username = '') {
 		$sqladd = $username !== '' ? "AND username<>'$username'" : '';
-		$email = $this->db->result_first("SELECT email FROM  ".UC_DBTABLEPRE."members WHERE email='$email' $sqladd");
+		if($username !== '')
+		{
+			$email = $this->db->select('email')->where(array('email'=>$email, 'username'=>$username))->get('members')->first_row();
+		}
+		else 
+		{
+			$email = $this->db->select('email')->where(array('email'=>$email))->get('members')->first_row();
+		}
+		
 		return $email;
 	}
 
@@ -90,19 +98,26 @@ class User_m extends CI_Model
 	function add_user($username, $password, $email, $uid = 0, $questionid = '', $answer = '') {
 		$salt = substr(uniqid(rand()), -6);
 		$password = md5(md5($password).$salt);
-		$sqladd = $uid ? "uid='".intval($uid)."'," : '';
-		$sqladd .= $questionid > 0 ? " secques='".$this->quescrypt($questionid, $answer)."'," : " secques='',";
-		$this->db->query("INSERT INTO ".UC_DBTABLEPRE."members SET $sqladd username='$username', password='$password', email='$email', regip='".$this->base->onlineip."', regdate='".$this->base->time."', salt='$salt'");
+		$update = array();
+		$uid && $update['uid'] = intval($uid);
+		$update['secques'] = $questionid > 0 ? $this->quescrypt($questionid, $answer) : '';
+		$update['username'] = $username;
+		$update['password'] = $password;
+		$update['email'] = $email;
+		$update['regip'] = $regip;
+		$update['regdate'] = $this->base->time;
+		$update['salt'] = $salt;
+		$this->db->insert('members', $update);
 		$uid = $this->db->insert_id();
-		$this->db->query("INSERT INTO ".UC_DBTABLEPRE."memberfields SET uid='$uid'");
+		$this->db->insert('memberfields', array('uid'=>$uid));
 		return $uid;
 	}
 
 	function edit_user($username, $oldpw, $newpw, $email, $ignoreoldpw = 0, $questionid = '', $answer = '') {
-		$data = $this->db->fetch_first("SELECT username, uid, password, salt FROM ".UC_DBTABLEPRE."members WHERE username='$username'");
+		$data = $this->db->select('username, uid, password, salt')->where('username', $username)->get('members')->first_row('array');
 
 		if($ignoreoldpw) {
-			$isprotected = $this->db->result_first("SELECT COUNT(*) FROM ".UC_DBTABLEPRE."protectedmembers WHERE uid = '$data[uid]'");
+			$isprotected = $this->db->where('uid', $data[uid])->get('protectedmembers')->num_rows();
 			if($isprotected) {
 				return -8;
 			}
@@ -112,18 +127,18 @@ class User_m extends CI_Model
 			return -1;
 		}
 
-		$sqladd = $newpw ? "password='".md5(md5($newpw).$data['salt'])."'" : '';
-		$sqladd .= $email ? ($sqladd ? ',' : '')." email='$email'" : '';
+		$update = array();
+		$update['password'] = $newpw ? md5(md5($newpw).$data['salt']) : '';
+		$update['email'] = $email ? $email : '';
 		if($questionid !== '') {
 			if($questionid > 0) {
-				$sqladd .= ($sqladd ? ',' : '')." secques='".$this->quescrypt($questionid, $answer)."'";
+				$update['secques'] = $this->quescrypt($questionid, $answer);
 			} else {
-				$sqladd .= ($sqladd ? ',' : '')." secques=''";
+				$update['secques'] = '';
 			}
 		}
-		if($sqladd || $emailadd) {
-			$this->db->query("UPDATE ".UC_DBTABLEPRE."members SET $sqladd WHERE username='$username'");
-			return $this->db->affected_rows();
+		if($update || $emailadd) {
+			return $this->db->update('members', $update, array('username'=>$username));
 		} else {
 			return -7;
 		}
@@ -131,20 +146,18 @@ class User_m extends CI_Model
 
 	function delete_user($uidsarr) {
 		$uidsarr = (array)$uidsarr;
-		$uids = $this->base->implode($uidsarr);
-		$arr = $this->db->fetch_all("SELECT uid FROM ".UC_DBTABLEPRE."protectedmembers WHERE uid IN ($uids)");
+		$arr = $this->db->select('uid')->where_in('uid', $uidsarr)->get('protectedmembers')->result_array();
 		$puids = array();
 		foreach((array)$arr as $member) {
 			$puids[] = $member['uid'];
 		}
 		$uids = $this->base->implode(array_diff($uidsarr, $puids));
 		if($uids) {
-			$this->db->query("DELETE FROM ".UC_DBTABLEPRE."members WHERE uid IN($uids)");
-			$this->db->query("DELETE FROM ".UC_DBTABLEPRE."memberfields WHERE uid IN($uids)");
+			$this->db->delete('members', array('uid IN'=>$uids));
+			$this->db->query('memberfields', array('uid IN'=>$uids));
 			$this->delete_useravatar($uidsarr);
-			$this->base->load('note');
-			$_ENV['note']->add('deleteuser', "ids=$uids");
-			return $this->db->affected_rows();
+			$this->load->model('note_m');
+			return $this->note_m->add('deleteuser', "ids=$uids");
 		} else {
 			return 0;
 		}
@@ -191,10 +204,9 @@ class User_m extends CI_Model
 
 	function name2id($usernamesarr) {
 		$usernamesarr = daddslashes($usernamesarr, 1, TRUE);
-		$usernames = $this->base->implode($usernamesarr);
-		$query = $this->db->query("SELECT uid FROM ".UC_DBTABLEPRE."members WHERE username IN($usernames)");
+		$users = $this->db->select('uid')->where_in('username', $usernamesarr)->get('members')->result_array();
 		$arr = array();
-		while($user = $this->db->fetch_array($query)) {
+		foreach($users as $user) {
 			$arr[] = $user['uid'];
 		}
 		return $arr;
