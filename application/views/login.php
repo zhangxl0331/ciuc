@@ -98,7 +98,7 @@ function $(id) {
 </script>
 <div class="footer">
 	Powered by UCenter
-	<?php echo SOFT_VERSION;?>
+	<?php echo UC_VERSION;?>
 	&copy; 2001 - 2008 <a href="http://www.comsenz.com/" target="_blank">Comsenz</a>
 	Inc.
 </div>

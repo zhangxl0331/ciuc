@@ -25,9 +25,9 @@
 	
 	<h3><?php echo $this->lang->line('note_status');?></h3>
 	<ul class="memlist fixwidth">
-		<li><em><?php if($user['isfounder'] || $user['allowadminnote']):?><a href="admin.php?m=note&a=ls"><?php echo $this->lang->line('home_note_count');?></a><?php else:?><?php echo $this->lang->line('home_note_count');?><?php endif;?>:</em><?php echo $notes;?></li>
+		<li><em><?php if($user['isfounder'] || $user['allowadminnote']):?><a href="<?php echo $this->config->base_url('note/ls');?>"><?php echo $this->lang->line('home_note_count');?></a><?php else:?><?php echo $this->lang->line('home_note_count');?><?php endif;?>:</em><?php echo $notes;?></li>
 		<?php if($errornotes):?>
-			<li><em><?php if($user['isfounder'] || $user['allowadminnote']):?><a href="admin.php?m=note&a=ls"><?php echo $this->lang->line('home_note_count');?><?php echo $this->lang->line('note_fail_apps');?></a><?php else:?><?php echo $this->lang->line('note_fail_apps');?><?php endif;?>:</em>		
+			<li><em><?php if($user['isfounder'] || $user['allowadminnote']):?><a href="<?php echo $this->config->base_url('note/ls');?>"><?php echo $this->lang->line('home_note_count');?><?php echo $this->lang->line('note_fail_apps');?></a><?php else:?><?php echo $this->lang->line('note_fail_apps');?><?php endif;?>:</em>		
 			<?php foreach($errornotes as $appid=>$error):?>
 				<?php echo $applist[$appid]['name'];?>&nbsp;
 			<?php endforeach;?>
@@ -36,7 +36,7 @@
 	
 	<h3><?php echo $this->lang->line('home_env');?></h3>
 	<ul class="memlist fixwidth">
-		<li><em><?php echo $this->lang->line('home_version');?>:</em>UCenter {UC_SERVER_VERSION} Release {UC_SERVER_RELEASE} <a href="http://www.discuz.net/forumdisplay.php?fid=151" target="_blank"><?php echo $this->lang->line('view_new_version');?></a> 
+		<li><em><?php echo $this->lang->line('home_version');?>:</em>UCenter <?php echo UC_VERSION;?> Release <?php echo UC_RELEASE;?> <a href="http://www.discuz.net/forumdisplay.php?fid=151" target="_blank"><?php echo $this->lang->line('view_new_version');?></a> 
 		<li><em><?php echo $this->lang->line('home_environment');?>:</em><?php echo $serverinfo;?></li>
 		<li><em><?php echo $this->lang->line('home_server_software');?>:</em><?php echo $_SERVER['SERVER_SOFTWARE'];?></li>
 		<li><em><?php echo $this->lang->line('home_database');?>:</em><?php echo $dbversion;?></li>

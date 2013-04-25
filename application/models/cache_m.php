@@ -7,10 +7,10 @@ class Cache_m extends CI_Model
 		parent::__construct();
 		$this->load->driver('cache');
 		$this->map = array(
-			'settings' => array('settings'),
-			'badwords' => array('badwords'),
-			'plugins' => array('plugins'),
-			'apps' => array('apps'),
+			'settings' => 'settings',
+			'badwords' => 'badwords',
+			'plugins' => 'plugins',
+			'apps' => 'apps',
 		);
 		
 	}
@@ -19,31 +19,22 @@ class Cache_m extends CI_Model
 	function updatedata($cachefile = '') {
 		$cache = array();
 		if($cachefile) {
-			foreach((array)$this->map[$cachefile] as $modules) {
-				foreach((array)$modules as $m) {
-					$method = "_get_$m";
-					$cache[$m] = $this->$method();
-				}
+			foreach((array)$this->map[$cachefile] as $file) {
+				$method = "_get_$file";
+				$cache = $this->$method();
 				$this->cache->save($cachefile, $cache);
 			}
 		} else {
 			foreach((array)$this->map as $file => $modules) {
-				foreach($modules as $m) {
-					$method = "_get_$m";
-					$cache[$m] = $this->$method();
-				}
+				$method = "_get_$file";
+				$cache = $this->$method();
 				$this->cache->save($file, $cache);
 			}
 		}
 	}
 	
 	function getdata($cachefile) {
-		if($cache = $this->cache->get($cachefile))
-		{
-			$this->updatedata($cachefile);
-			$cache = $this->cache->get($cachefile);
-		}
-		return count($cache)==1?current($cache):$cache;
+		return $this->cache->get($cachefile);		 
 	}
 
 	function updatetpl() {

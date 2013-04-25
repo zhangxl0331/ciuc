@@ -45,9 +45,9 @@ define('FOPEN_READ_WRITE_CREATE_STRICT',		'x+b');
 |
 */
 
-define('SOFT_NAME', 'UCenter');
-define('SOFT_VERSION', '1.5.0');
-define('SOFT_RELEASE', '20090121');
+define('UC_NAME', 'UCenter');
+define('UC_VERSION', '1.5.0');
+define('UC_RELEASE', '20090121');
 define('INSTALL_LANG', 'SC_UTF8');
 
 define('CONSTANTS', APPPATH.'config/constants.php');

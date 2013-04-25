@@ -270,12 +270,12 @@ class MY_Controller extends CI_Controller
 					header('Location: '.$this->config->base_url().'user/login?iframe='.getgpc('iframe', 'G').($this->cookie_status ? '' : '&sid='.$sid));
 					exit;
 				} else {
-					$this->user = $admin;
+					$this->user += $admin;
 					$this->user['username'] = $username;
 					$this->user['admin'] = 1;
 					$sid = $this->sid_encode($username);
 					$this->load->vars('sid', $sid);
-					$this->setcookie('sid', $this->view->sid, 86400);
+					$this->setcookie('sid', $this->sid, 86400);
 				}
 			} else {
 				$this->user['username'] = 'UCenterAdministrator';

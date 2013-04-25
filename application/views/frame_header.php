@@ -20,7 +20,7 @@
 					if(!menu) {
 						menu = parent.document.createElement('div');
 						menu.id = 'toggle';
-						menu.innerHTML = '<ul>$admincp</ul>';
+						menu.innerHTML = '<ul><?php echo $admincp;?></ul>';
 						var obj = ctrl;
 						var x = ctrl.offsetLeft;
 						var y = ctrl.offsetTop;

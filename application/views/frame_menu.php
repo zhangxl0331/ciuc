@@ -40,7 +40,7 @@ a{ color:#2366A8; text-decoration:none; }
 		<?php if($user['isfounder']):?><li><a href="<?php echo $this->config->base_url('plugin/filecheck');?>" target="main"><?php echo $this->lang->line('plugin');?></a></li><?php endif;?>
 	</ul>
 </div>
-<div class="footer">Powered by UCenter {UC_SERVER_VERSION}<br />&copy; 2001 - 2008 <a href="http://www.comsenz.com/" target="_blank">Comsenz</a> Inc.</div>
+<div class="footer">Powered by UCenter <?php echo UC_VERSION;?><br />&copy; 2001 - 2008 <a href="http://www.comsenz.com/" target="_blank">Comsenz</a> Inc.</div>
 <script type="text/javascript">
 	function cleartabon() {
 		if(lastmenu) {

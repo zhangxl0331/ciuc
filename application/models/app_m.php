@@ -16,15 +16,15 @@ class App_m extends CI_Model
 		{
 			$arr = $this->db->select($col)->get('applications')->result_array();
 		}
-			
+		$return = array();
 		foreach($arr as $k => $v) {
 			isset($v['extra']) && !empty($v['extra']) && $v['extra'] = unserialize($v['extra']);
 			if($tmp = authcode($v['authkey'], 'DECODE', UC_MYKEY)) {
 				$v['authkey'] = $tmp;
 			}
-			$arr[$v['appid']] = $v;
+			$return[$v['appid']] = $v;
 		}
-		return $arr;
+		return $return;
 	}
 
 	function get_app_by_appid($appid, $includecert = FALSE) {
