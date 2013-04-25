@@ -122,21 +122,21 @@ class Pm_m extends CI_Model
 				$filter = 'newpm';
 			case 'inbox':
 				if($filter == 'newpm') {
-					$filteradd = "pm.msgtoid='$uid' AND (pm.related='0' AND pm.msgfromid>'0' OR pm.msgfromid='0') AND pm.folder='inbox' AND pm.new='1'";
+					$filteradd = array('pm.msgtoid'=>$uid, 'pm.related'=>'0', 'pm.msgfromid>='=>'0', 'pm.folder'=>'inbox', 'pm.new'=>'1');
 				} elseif($filter == 'systempm') {
-					$filteradd = "pm.msgtoid='$uid' AND pm.msgfromid='0' AND pm.folder='inbox'";
+					$filteradd = array('pm.msgtoid'=>$uid, 'pm.msgfromid'=>'0', 'pm.folder'=>'inbox');
 				} elseif($filter == 'privatepm') {
-					$filteradd = "pm.msgtoid='$uid' AND pm.related='0' AND pm.msgfromid>'0' AND pm.folder='inbox'";
+					$filteradd = array('pm.msgtoid'=>$uid, 'pm.related'=>'0', 'pm.msgfromid>'=>'0', 'pm.folder'=>'inbox');
 				} elseif($filter == 'announcepm') {
 					$filteradd = array('pm.msgtoid'=>'0', 'pm.folder'=>'inbox');
 				} else {
-					$filteradd = "pm.msgtoid='$uid' AND pm.related='0' AND pm.folder='inbox'";
+					$filteradd = array('pm.msgtoid'=>$uid, 'pm.related'=>'0', 'pm.folder'=>'inbox');
 				}
 
 				$rows = $this->db->select('pm.*,m.username as msgfrom')->from('pms pm')->join('members m', 'pm.msgfromid = m.uid', 'LEFT')->where($filteradd)->order_by('pm.dateline DESC')->get('', $ppp, $start_limit)->result_array();
 				break;
 			case 'searchbox':
-				$filteradd = "msgtoid='$uid' AND folder='inbox' AND message LIKE '%".(str_replace('_', '\_', addcslashes($filter, '%_')))."%'";
+				$filteradd = array('msgtoid'=>$uid, 'folder'=>'inbox', 'message LIKE'=>'%'.(str_replace('_', '\_', addcslashes($filter, '%_'))).'%');
 				$rows = $this->db->where($filteradd)->order_by('dateline DESC')->get('pms', $ppp, $start_limit)->result_array();
 				break;
 			case 'savebox':
@@ -181,8 +181,8 @@ class Pm_m extends CI_Model
 		}
 
 		if($savebox && $pmid) {
-			$this->db->query("UPDATE ".UC_DBTABLEPRE."pms SET msgtoid= '$msgto', subject='$subject', dateline='".$this->base->time."', related='$related', message='$message'
-				WHERE pmid='$pmid' AND folder='outbox' AND msgfromid='".$msgfrom['uid']."'");
+			$this->db->update('pms', array('msgtoid'=>$msgto, 'subject'=>$subject, 'dateline'=>$this->base->time, 'related'=>$related, 'message'=>$message),
+				array('pmid'=>$pmid, 'folder'=>'outbox', 'msgfromid'=>$msgfrom['uid']));
 		} else {
 			if($msgfrom['uid'] && $msgfrom['uid'] == $msgto) {
 				return 0;
@@ -197,37 +197,81 @@ class Pm_m extends CI_Model
 
 			if($msgfrom['uid']) {
 				if($msgto) {
-					$sessionexist = $this->db->result_first("SELECT count(*) FROM ".UC_DBTABLEPRE."pms WHERE msgfromid='$msgfrom[uid]' AND msgtoid='$msgto' AND folder='inbox' AND related='0'");
+					$sessionexist = $this->db->where(array('msgfromid'=>$msgfrom[uid], 'msgtoid'=>$msgto, 'folder'=>'inbox', 'related'=>'0'))->get('pms')->num_rows();
 				} else {
 					$sessionexist = 0;
 				}
 				if(!$sessionexist || $sessionexist > 1) {
 					if($sessionexist > 1) {
-						$this->db->query("DELETE FROM ".UC_DBTABLEPRE."pms WHERE msgfromid='$msgfrom[uid]' AND msgtoid='$msgto' AND folder='inbox' AND related='0'");
+						$this->db->insert('pms', array('msgfromid'=>$msgfrom[uid], 'msgtoid'=>$msgto, 'folder'=>'inbox', 'related'=>'0'));
 					}
-					$this->db->query("INSERT INTO ".UC_DBTABLEPRE."pms (msgfrom,msgfromid,msgtoid,folder,new,subject,dateline,related,message,fromappid) VALUES
-						('".$msgfrom['username']."','".$msgfrom['uid']."','$msgto','$box','1','$subject','".$this->base->time."','0','$message','".$this->base->app['appid']."')");
+					$this->db->insert('pms',
+							 array('msgfrom'=>$msgfrom['username'],
+							 		'msgfromid'=>$msgfrom['uid'],
+							 		'msgtoid'=>$msgto,
+							 		'folder'=>$box,
+							 		'new'=>1,
+							 		'subject'=>$subject,
+							 		'dateline'=>$this->base->time,
+							 		'related'=>0,
+							 		'message'=>$message,
+							 		'fromappid'=>$this->base->app['appid']
+							 )
+					);
 					$lastpmid = $this->db->insert_id();
 				} else {
-					$this->db->query("UPDATE ".UC_DBTABLEPRE."pms SET subject='$subject', message='$message', dateline='".$this->base->time."', new='1', fromappid='".$this->base->app['appid']."'
-						WHERE msgfromid='$msgfrom[uid]' AND msgtoid='$msgto' AND folder='inbox' AND related='0'");
+					$this->db->update('pms', array('subject'=>$subject, 'message'=>$message, 'dateline'=>$this->base->time, 'new'=>'1', 'fromappid'=>$this->base->app['appid']),
+						array('msgfromid'=>$msgfrom[uid], 'msgtoid'=>$msgto, 'folder'=>'inbox', 'related'=>'0'));
 				}
 				if($msgto && !$savebox) {
-					$sessionexist = $this->db->result_first("SELECT count(*) FROM ".UC_DBTABLEPRE."pms WHERE msgfromid='$msgto' AND msgtoid='$msgfrom[uid]' AND folder='inbox' AND related='0'");
+					$sessionexist = $this->db->where(array('msgfromid'=>$msgto, 'msgtoid'=>$msgfrom[uid], 'folder'=>'inbox', 'related'=>'0'))->get('pms')->num_rows();
 					if($msgfrom['uid'] && !$sessionexist) {
-						$this->db->query("INSERT INTO ".UC_DBTABLEPRE."pms (msgfrom,msgfromid,msgtoid,folder,new,subject,dateline,related,message,fromappid) VALUES
-							('".$msgfrom['username']."','$msgto','".$msgfrom['uid']."','$box','0','$subject','".$this->base->time."','0','$message','0')");
+						$this->db->insert('pms',
+								 array('msgfrom'=>$msgfrom['username'],
+								 		'msgfromid'=>$msgto,
+								 		'msgtoid'=>$msgfrom['uid'],
+								 		'folder'=>$box,
+								 		'new'=>0,
+								 		'subject'=>$subject,
+								 		'dateline'=>$this->base->time,
+								 		'related'=>0,
+								 		'message'=>$message,
+								 		'fromappid'=>o
+								 )
+						);
 					}
-					$this->db->query("INSERT INTO ".UC_DBTABLEPRE."pms (msgfrom,msgfromid,msgtoid,folder,new,subject,dateline,related,message,fromappid) VALUES
-						('".$msgfrom['username']."','".$msgfrom['uid']."','$msgto','$box','1','$subject','".$this->base->time."','".($msgfrom['uid'] ? 1 : 0)."','$message','".$this->base->app['appid']."')");
+					$this->db->insert('pms', 
+							array(
+									'msgfrom'=>$msgfrom['username'],
+									'msgfromid'=>$msgfrom['uid'],
+									'msgtoid'=>$msgto,
+									'folder'=>$box,
+									'new'=>1,
+									'subject'=>$subject,
+									'dateline'=>$this->base->time,
+									'related'=>$msgfrom['uid'] ? 1 : 0,
+									'message'=>$message,
+									'fromappid'=>$this->base->app['appid']
+									));
 					$lastpmid = $this->db->insert_id();
 				}
 				if($msgto) {
-					$this->db->query("REPLACE INTO ".UC_DBTABLEPRE."newpm (uid) VALUES ('$msgto')");
+					$this->db->replace('newpm', array('uid'=>$msgto));
 				}
 			} else {
-				$this->db->query("INSERT INTO ".UC_DBTABLEPRE."pms (msgfrom,msgfromid,msgtoid,folder,new,subject,dateline,related,message,fromappid) VALUES
-					('".$msgfrom['username']."','".$msgfrom['uid']."','$msgto','$box','1','$subject','".$this->base->time."','0','$message','".$this->base->app['appid']."')");
+				$this->db->insert('pms', 
+						array(
+								'msgfrom'=>$msgfrom['username'],
+								'msgfromid'=>$msgfrom['uid'],
+								'msgtoid'=>$msgto,
+								'folder'=>$box,
+								'new'=>1,
+								'subject'=>$subject,
+								'dateline'=>$this->base->time,
+								'related'=>0,
+								'message'=>$message,
+								'fromappid'=>$this->base->app['appid']
+								));
 				$lastpmid = $this->db->insert_id();
 			}
 		}
@@ -235,41 +279,41 @@ class Pm_m extends CI_Model
 	}
 
 	function set_ignore($uid) {
-		$this->db->query("DELETE FROM ".UC_DBTABLEPRE."newpm WHERE uid='$uid'");
+		$this->db->delete('newpm', array('uid'=>$uid));
 	}
 
 	function check_newpm($uid, $more) {
 		if($more < 2) {
-			$newpm = $this->db->result_first("SELECT count(*) FROM ".UC_DBTABLEPRE."newpm WHERE uid='$uid'");
+			$newpm = $this->db->where('uid', $uid)->get('newpm')->num_rows();
 			if($newpm) {
-				$newpm = $this->db->result_first("SELECT count(*) FROM ".UC_DBTABLEPRE."pms WHERE (related='0' AND msgfromid>'0' OR msgfromid='0') AND msgtoid='$uid' AND folder='inbox' AND new='1'");
+				$newpm = $this->db->where(array('related'=>'0', 'msgfromid>='=>'0', 'msgtoid'=>$uid, 'folder'=>'inbox', 'new'=>'1'))->get('pms')->num_rows();
 				if($more) {
-					$newprvpm = $this->db->result_first("SELECT count(*) FROM ".UC_DBTABLEPRE."pms WHERE related='0' AND msgfromid>'0' AND msgtoid='$uid' AND folder='inbox' AND new='1'");
+					$newprvpm = $this->db->where(array('related'=>'0', 'msgfromid>'=>'0', 'msgtoid'=>$uid, 'folder'=>'inbox', 'new'=>'1'))->get('pms')->num_rows();
 					return array('newpm' => $newpm, 'newprivatepm' => $newprvpm);
 				} else {
 					return $newpm;
 				}
 			}
 		} else {
-			$newpm = $this->db->result_first("SELECT count(*) FROM ".UC_DBTABLEPRE."pms WHERE (related='0' AND msgfromid>'0' OR msgfromid='0') AND msgtoid='$uid' AND folder='inbox' AND new='1'");
-			$newprvpm = $this->db->result_first("SELECT count(*) FROM ".UC_DBTABLEPRE."pms WHERE related='0' AND msgfromid>'0' AND msgtoid='$uid' AND folder='inbox' AND new='1'");
+			$newpm = $this->db->where(array('related'=>'0', 'msgfromid>='=>'0', 'msgtoid'=>$uid, 'folder'=>'inbox', 'new'=>'1'))->get('pms')->num_rows();
+			$newprvpm = $this->db->where(array('related'=>'0', 'msgfromid>'=>'0', 'msgtoid'=>$uid, 'folder'=>'inbox', 'new'=>'1'))->get('pms')->num_rows();
 			if($more == 2 || $more == 3) {
-				$annpm = $this->db->result_first("SELECT count(*) FROM ".UC_DBTABLEPRE."pms WHERE related='0' AND msgtoid='0' AND folder='inbox'");
-				$syspm = $this->db->result_first("SELECT count(*) FROM ".UC_DBTABLEPRE."pms WHERE related='0' AND msgtoid='$uid' AND folder='inbox' AND msgfromid='0'");
+				$annpm = $this->db->where(array('related'=>'0', 'msgtoid'=>'0', 'folder'=>'inbox'))->get('pms')->num_rows();
+				$syspm = $this->db->where(array('related'=>'0', 'msgtoid'=>$uid, 'folder'=>'inbox', 'msgfromid'=>'0'))->get('pms')->num_rows();
 			}
 			if($more == 2) {
 				return array('newpm' => $newpm, 'newprivatepm' => $newprvpm, 'announcepm' => $annpm, 'systempm' => $syspm);
 			} if($more == 4) {
 				return array('newpm' => $newpm, 'newprivatepm' => $newprvpm);
 			} else {
-				$pm = $this->db->fetch_first("SELECT pm.dateline,pm.msgfromid,m.username as msgfrom,pm.message FROM ".UC_DBTABLEPRE."pms pm LEFT JOIN ".UC_DBTABLEPRE."members m ON pm.msgfromid = m.uid WHERE (pm.related='0' OR pm.msgfromid='0') AND pm.msgtoid='$uid' AND pm.folder='inbox' ORDER BY pm.dateline DESC LIMIT 1");
+				$pm = $this->db->select('pm.dateline,pm.msgfromid,m.username as msgfrom,pm.message')->from('pms pm')->join('members m', 'pm.msgfromid = m.uid', 'LEFT')->where(array('pm.related'=>'0', 'pm.msgtoid'=>$uid, 'pm.folder'=>'inbox'))->or_where('pm.msgfromid', '0')->get('')->first_row("( ORDER BY pm.dateline DESC LIMIT 1");
 				return array('newpm' => $newpm, 'newprivatepm' => $newprvpm, 'announcepm' => $annpm, 'systempm' => $syspm, 'lastdate' => $pm['dateline'], 'lastmsgfromid' => $pm['msgfromid'], 'lastmsgfrom' => $pm['msgfrom'], 'lastmsg' => $pm['message']);
 			}
 		}
 	}
 
 	function deletepm($uid, $pmids) {
-		$this->db->query("DELETE FROM ".UC_DBTABLEPRE."pms WHERE msgtoid='$uid' AND pmid IN (".$this->base->implode($pmids).")");
+		$this->db->delete('pms', array('msgtoid'=>$uid, 'pmid IN'=>$pmids));
 		$delnum = $this->db->affected_rows();
 		return $delnum;
 	}
@@ -278,25 +322,23 @@ class Pm_m extends CI_Model
 		$delnum = 0;
 		if($folder == 'inbox' || $folder == 'newbox') {
 			if($filter == 'announcepm' && $this->base->user['admin']) {
-				$pmsadd = "pmid IN (".$this->base->implode($ids).")";
-				$this->db->query("DELETE FROM ".UC_DBTABLEPRE."pms WHERE folder='inbox' AND msgtoid='0' AND $pmsadd", 'UNBUFFERED');
+				$this->db->delete('pms', array('folder'=>'inbox', 'msgtoid'=>'0', 'pmid IN'=>$ids));
 			} elseif($ids) {
 				$delnum = 1;
-				$deluids = $this->base->implode($ids);
-				$this->db->query("DELETE FROM ".UC_DBTABLEPRE."pms
-					WHERE msgfromid IN ($deluids) AND msgtoid='$uid' AND folder='inbox' AND related='0'", 'UNBUFFERED');
-				$this->db->query("UPDATE ".UC_DBTABLEPRE."pms SET delstatus=2
-					WHERE msgfromid IN ($deluids) AND msgtoid='$uid' AND folder='inbox' AND delstatus=0", 'UNBUFFERED');
-				$this->db->query("UPDATE ".UC_DBTABLEPRE."pms SET delstatus=1
-					WHERE msgtoid IN ($deluids) AND msgfromid='$uid' AND folder='inbox' AND delstatus=0", 'UNBUFFERED');
-				$this->db->query("DELETE FROM ".UC_DBTABLEPRE."pms
-					WHERE msgfromid IN ($deluids) AND msgtoid='$uid' AND delstatus=1 AND folder='inbox'", 'UNBUFFERED');
-				$this->db->query("DELETE FROM ".UC_DBTABLEPRE."pms
-					WHERE msgtoid IN ($deluids) AND msgfromid='$uid' AND delstatus=2 AND folder='inbox'", 'UNBUFFERED');
+				$this->db->delete('pms',
+					array('msgfromid IN'=>$ids, 'msgtoid'=>$uid, 'folder'=>'inbox', 'related'=>'0'));
+				$this->db->update('pms', array('delstatus'=>2),
+					array('msgfromid IN'=>$ids, 'msgtoid'=>$uid, 'folder'=>'inbox', 'delstatus'=>0));
+				$this->db->update('pms', array('delstatus'=>1),
+					array('msgtoid IN'=>$ids, 'msgfromid'=>$uid, 'folder'=>'inbox', 'delstatus'=>0));
+				$this->db->delete('pms',
+					array('msgfromid IN'=>$ids, 'msgtoid'=>$uid, 'delstatus'=>1, 'folder'=>'inbox'));
+				$this->db->delete('pms',
+					array('msgtoid IN'=>$ids, 'msgfromid'=>$uid, 'delstatus'=>2, 'folder'=>'inbox'));
 			}
 		} elseif($folder == 'savebox') {
-			$this->db->query("DELETE FROM ".UC_DBTABLEPRE."pms
-				WHERE pmid IN (".$this->base->implode($ids).") AND folder='outbox' AND msgfromid='$uid'", 'UNBUFFERED');
+			$this->db->delete('pms',
+				array('pmid IN'=>$ids, 'folder'=>'outbox', 'msgfromid'=>$uid));
 			$delnum = 1;
 		}
 		return $delnum;
@@ -304,12 +346,12 @@ class Pm_m extends CI_Model
 
 	function get_blackls($uid, $uids = array()) {
 		if(!$uids) {
-			$blackls = $this->db->result_first("SELECT blacklist FROM ".UC_DBTABLEPRE."memberfields WHERE uid='$uid'");
+			$blackls = $this->db->select('blacklist')->where('uid', $uid)->get('memberfields')->first_row();
 		} else {
 			$uids = $this->base->implode($uids);
 			$blackls = array();
-			$query = $this->db->query("SELECT uid, blacklist FROM ".UC_DBTABLEPRE."memberfields WHERE uid IN ($uids)");
-			while($data = $this->db->fetch_array($query)) {
+			$rows = $this->db->select('uid, blacklist')->where_in('uid',$uids)->get('memberfields')->result_array();
+			foreach($rows as $data) {
 				$blackls[$data['uid']] = explode(',', $data['blacklist']);
 			}
 		}
@@ -317,8 +359,7 @@ class Pm_m extends CI_Model
 	}
 
 	function set_blackls($uid, $blackls) {
-		$this->db->query("UPDATE ".UC_DBTABLEPRE."memberfields SET blacklist='$blackls' WHERE uid='$uid'");
-		return $this->db->affected_rows();
+		return $this->db->update('memberfields', array('blacklist'=>$blackls), array('uid'=>$uid));
 	}
 
 	function update_blackls($uid, $username, $action = 1) {
@@ -326,15 +367,15 @@ class Pm_m extends CI_Model
 		if($action == 1) {
 			if(!in_array('{ALL}', $username)) {
 				$usernames = $this->base->implode($username);
-				$query = $this->db->query("SELECT username FROM ".UC_DBTABLEPRE."members WHERE username IN ($usernames)");
+				$rows = $this->db->select('username')->where_in('username', $username)->get('members')->result_array();
 				$usernames = array();
-				while($data = $this->db->fetch_array($query)) {
+				foreach($rows as $data) {
 					$usernames[addslashes($data['username'])] = addslashes($data['username']);
 				}
 				if(!$usernames) {
 					return 0;
 				}
-				$blackls = addslashes($this->db->result_first("SELECT blacklist FROM ".UC_DBTABLEPRE."memberfields WHERE uid='$uid'"));
+				$blackls = addslashes($this->db->select('blacklist')->where('uid', $uid)->get('memberfields')->first_row('array'));
 				if($blackls) {
 					$list = explode(',', $blackls);
 					foreach($list as $k => $v) {
@@ -349,11 +390,11 @@ class Pm_m extends CI_Model
 				$listnew = implode(',', $usernames);
 				$blackls .= $blackls !== '' ? ','.$listnew : $listnew;
 			} else {
-				$blackls = addslashes($this->db->result_first("SELECT blacklist FROM ".UC_DBTABLEPRE."memberfields WHERE uid='$uid'"));
+				$blackls = addslashes($this->db->select('blacklist')->where('uid', $uid)->get('memberfields')->first_row('array'));
 				$blackls .= ',{ALL}';
 			}
 		} else {
-			$blackls = addslashes($this->db->result_first("SELECT blacklist FROM ".UC_DBTABLEPRE."memberfields WHERE uid='$uid'"));
+			$blackls = addslashes($this->db->select('blacklist')->where('uid', $uid)->get('memberfields')->first_row('array'));
 			$list = $blackls = explode(',', $blackls);
 			foreach($list as $k => $v) {
 				if(in_array($v, $username)) {
@@ -362,7 +403,7 @@ class Pm_m extends CI_Model
 			}
 			$blackls = implode(',', $blackls);
 		}
-		$this->db->query("UPDATE ".UC_DBTABLEPRE."memberfields SET blacklist='$blackls' WHERE uid='$uid'");
+		$this->db->update('memberfields', array('blacklist'=>$blackls), array('uid'=>$uid));
 		return 1;
 	}
 
@@ -376,15 +417,17 @@ class Pm_m extends CI_Model
 
 	function count_pm_by_fromuid($uid, $timeoffset = 86400) {
 		$dateline = $this->base->time - intval($timeoffset);
-		return $this->db->result_first("SELECT COUNT(*) FROM ".UC_DBTABLEPRE."pms WHERE msgfromid='$uid' AND dateline>'$dateline'");
+		return $this->db->where(array('msgfromid'=>$uid, 'dateline>'=>$dateline))->get('pms')->first_row('array');
 	}
 
 	function is_reply_pm($uid, $touids) {
 		$touid_str = implode("', '", $touids);
-		$pm_reply = $this->db->fetch_all("SELECT msgfromid, msgtoid FROM ".UC_DBTABLEPRE."pms WHERE msgfromid IN ('$touid_str') AND msgtoid='$uid' AND related=1", 'msgfromid');
-		foreach($touids as $val) {
-			if(!isset($pm_reply[$val])) {
-				return false;
+		$pm_reply = $this->db->select('msgfromid, msgtoid')->where(array('msgfromid IN'=>$touid_str, 'msgtoid'=>$uid, 'related'=>1))->get('pms')->result_array();
+		foreach($pm_reply as $reply){
+			foreach($touids as $val) {
+				if(!isset($pm_reply[$reply['msgfromid']])) {
+					return false;
+				}
 			}
 		}
 		return true;
