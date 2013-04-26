@@ -10,14 +10,14 @@ class Plugin extends MY_Controller {
 			$this->message('no_permission_for_this_module');
 		}
 		$a = getgpc('a');
-		$this->load('plugin');
-		$this->plugin = $_ENV['plugin']->get_plugin($a);
-		$this->plugins = $_ENV['plugin']->get_plugins();
+		$this->load->model('plugin_m');
+		$this->plugin = $this->plugin_m->get_plugin($a);
+		$this->plugins = $this->plugin_m->get_plugins();
 		if(empty($this->plugin)) {
 			$this->message('read_plugin_invalid');
 		}
-		$this->view->assign('plugin', $this->plugin);
-		$this->view->assign('plugins', $this->plugins);
+		$this->load->vars('plugin', $this->plugin);
+		$this->load->vars('plugins', $this->plugins);
 		$this->view->languages = $this->plugin['lang'];
 		$this->view->tpldir = UC_ROOT.'./plugin/'.$a;
 		$this->view->objdir = UC_DATADIR.'./view';

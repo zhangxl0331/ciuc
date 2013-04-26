@@ -17,29 +17,29 @@ class Domain extends MY_Controller {
 	function ls() {
 		$status = 0;
 		if(@$_POST['domainnew']) {
-			if(!$_ENV['misc']->check_ip($_POST['ipnew'])) {
+			if(!$this->misc_m->check_ip($_POST['ipnew'])) {
 				$this->message('app_add_ip_invalid', 'BACK');
 			}
-			$_ENV['domain']->add_domain($_POST['domainnew'], $_POST['ipnew']);
+			$this->domain_m->add_domain($_POST['domainnew'], $_POST['ipnew']);
 			$status = 1;
 			$this->writelog('domain_add', 'domainnew='.htmlspecialchars($_POST['domainnew']).'&ipnew='.htmlspecialchars($_POST['ipnew']));
 		}
 		if(@$_POST['domain']) {
 			foreach($_POST['domain'] as $id => $arr) {
-				if(!$_ENV['misc']->check_ip($_POST['ip'][$id])) {
+				if(!$this->domain_m->check_ip($_POST['ip'][$id])) {
 					$this->message('app_add_ip_invalid', 'BACK');
 				}
-				$_ENV['domain']->update_domain($_POST['domain'][$id], $_POST['ip'][$id], $id);
+				$this->domain_m->update_domain($_POST['domain'][$id], $_POST['ip'][$id], $id);
 			}
 			$status = 2;
 		}
 		if(@$_POST['delete']) {
-			$_ENV['domain']->delete_domain($_POST['delete']);
+			$this->domain_m->delete_domain($_POST['delete']);
 			$status = 2;
 			$this->writelog('domain_delete', "delete=".implode(',', $_POST['delete']));
 		}
 		if($status > 0) {
-			$notedata = $_ENV['domain']->get_list($_GET['page'], 1000000, 1000000);
+			$notedata = $this->domain_m->get_list($_GET['page'], 1000000, 1000000);
 			$this->load->model('note_m');
 			$this->note_m->add('updatehosts', '', $this->serialize($notedata));
 			$this->note_m->send();

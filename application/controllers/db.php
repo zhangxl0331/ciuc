@@ -43,8 +43,8 @@ class Db extends MY_Controller {
 			$data['baklist'] = $baklist;
 		} elseif($operate == 'view') {
 			$dir = getgpc('dir');
-			$this->load('app');
-			$applist = $_ENV['app']->get_apps();
+			$this->load->model('app_m');
+			$applist = $this->app_m->get_apps();
 			$data['applist'] = $applist;
 			$data['dir'] = $dir;
 		} elseif($operate == 'ping') {
@@ -52,9 +52,10 @@ class Db extends MY_Controller {
 			$app = $this->cache['apps'][$appid];
 			$dir = trim(getgpc('dir'));
 			$url = $app['url'].'/api/dbbak.php?apptype='.$app['type'];
-			$code = $this->authcode('&method=ping&dir='.$dir.'&time='.time(), 'ENCODE', $app['authkey']);
+			$code = authcode('&method=ping&dir='.$dir.'&time='.time(), 'ENCODE', $app['authkey']);
 			$url .= '&code='.urlencode($code);
-			$res = $_ENV['misc']->dfopen2($url, 0, '', '', 1, $app['ip'], 20, TRUE);
+			$this->load->model('misc_m');
+			$res = $this->misc_m->dfopen2($url, 0, '', '', 1, $app['ip'], 20, TRUE);
 			if($res == '1') {
 				$this->message($this->_parent_js($appid, '<img src="images/correct.gif" border="0" class="statimg" /><span class="green">'.$this->lang['dumpfile_exists'].'</span>').'<script>parent.import_status['.$appid.']=true;</script>');
 			} else {
@@ -71,7 +72,7 @@ class Db extends MY_Controller {
 		$this->load->view('db', $data);
 	}
 
-	function onoperate() {
+	function operate() {
 		require_once UC_ROOT.'lib/xml.class.php';
 		$nexturl = getgpc('nexturl');
 		$appid = intval(getgpc('appid'));
@@ -96,7 +97,8 @@ class Db extends MY_Controller {
 		if(empty($appid)) {
 			$app['ip'] = defined('UC_IP') ? UC_IP : '';
 		}
-		$res = $_ENV['misc']->dfopen2($url, 0, '', '', 1, $app['ip'], 20, TRUE);
+		$this->load->model('misc_m');
+		$res = $this->misc_m->dfopen2($url, 0, '', '', 1, $app['ip'], 20, TRUE);
 		if(empty($res)) {
 			$this->message($this->_parent_js($appid, 'db_back_api_url_invalid'));
 		}
@@ -116,7 +118,7 @@ class Db extends MY_Controller {
 		exit;
 	}
 
-	function ondelete() {
+	function delete() {
 		require_once UC_ROOT.'lib/xml.class.php';
 		$appid = intval(getgpc('appid'));
 		$backupdir = getgpc('backupdir');
@@ -135,7 +137,8 @@ class Db extends MY_Controller {
 			$appname = $app['name'];
 		}
 		$url .= '&code='.urlencode($code);
-		$res = $_ENV['misc']->dfopen2($url, 0, '', '', 1, $app['ip'], 20, TRUE);
+		$this->load->model('misc_m');
+		$res = $this->misc_m->dfopen2($url, 0, '', '', 1, $app['ip'], 20, TRUE);
 		$next_appid = $this->_next_appid($appid);
 		if($next_appid != $this->_next_appid($next_appid)) {
 			$this->message($this->_parent_js($backupdir, 'delete_dumpfile_redirect', array('$appname' => $appname)), 'admin.php?m=db&a=delete&appid='.$next_appid.'&backupdir='.$backupdir);

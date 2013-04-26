@@ -33,7 +33,7 @@ class Mail extends MY_Controller {
 
 	function send() {
 		$mailid = intval(getgpc('mailid'));
-		$result = $_ENV['mail']->send_by_id($mailid);
+		$result = $this->mail_m->send_by_id($mailid);
 		if($result) {
 			$this->writelog('mail_send', "appid=$appid&noteid=$noteid");
 			$this->message('mail_succeed', $_SERVER['HTTP_REFERER']);

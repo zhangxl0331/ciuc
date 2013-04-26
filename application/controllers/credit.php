@@ -10,6 +10,7 @@ class Credit extends MY_Controller {
 			$this->message('no_permission_for_this_module');
 		}
 		$this->load->model('setting_m');
+		$this->load->model('cache_m');
 	}
 	
 	function ls() {
@@ -35,8 +36,7 @@ class Credit extends MY_Controller {
 				$key = $appsrc.'_'.$creditsrc.'_'.$appdesc.'_'.$creditdesc;
 				$creditexchange[$key] = $ratiosrc."\t".$ratiodesc;
 				$this->set_setting('creditexchange', $creditexchange, TRUE);
-				$this->load('cache');
-				$_ENV['cache']->updatedata('settings');
+				$this->cache_m->updatedata('settings');
 				$status = 1;
 				$this->writelog('credit_addexchange', $appsrc.'_'.$creditsrc.' : '.$appdesc.'_'.$creditdesc.'='.$ratiosrc.' : '.$ratiodesc);
 			} else {
@@ -50,8 +50,7 @@ class Credit extends MY_Controller {
 					unset($creditexchange[$key]);
 				}
 				$this->set_setting('creditexchange', $creditexchange, TRUE);
-				$this->load('cache');
-				$_ENV['cache']->updatedata('settings');
+				$this->cache_m->updatedata('settings');
 				$status = 1;
 				$this->writelog('credit_deleteexchange', "delete=".implode(',', $delete));
 			}
@@ -157,8 +156,7 @@ class Credit extends MY_Controller {
 		include_once UC_DATADIR.'cache/credits.php';
 		$credits = $_CACHE['credits'];
 		$this->set_setting('credits', $credits, TRUE);
-		$this->load('cache');
-		$_ENV['cache']->updatedata('settings');
+		$this->cache_m->updatedata('settings');
 		$this->writelog('credit_sync', 'succeed');
 
 		$settings = $this->get_setting(array('creditexchange'), TRUE);
@@ -184,8 +182,8 @@ class Credit extends MY_Controller {
 		foreach($updaterequest as $appid => $value) {
 			$data[] = implode('', $updaterequest[$appid]);
 		}
-		$_ENV['note']->add('updatecreditsettings', implode('', $data));
-		$_ENV['note']->send();
+		$this->note_m->add('updatecreditsettings', implode('', $data));
+		$this->note_m->send();
 
 		$this->message('syncappcredits_updated','admin.php?m=credit&a=ls');
 	}

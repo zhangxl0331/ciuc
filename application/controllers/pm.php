@@ -18,7 +18,7 @@ class Pm extends MY_Controller {
 		$filter = 'announcepm';
 		$status = 0;
 		if(submitcheck()) {
-			$delnum = $_ENV['pm']->deletepm($this->user['uid'], $_POST['delete']);
+			$delnum = $this->pm_m->deletepm($this->user['uid'], $_POST['delete']);
 			$status = 1;
 			$this->writelog('pm_delete', "delete=".implode(',', $_POST['delete']));
 		}
@@ -38,7 +38,7 @@ class Pm extends MY_Controller {
 
 	function view() {
 		$pmid = @is_numeric($_GET['pmid']) ? $_GET['pmid'] : 0;
-		$pms = $_ENV['pm']->get_pm_by_pmid($this->user['uid'], $pmid);
+		$pms = $this->pm_m->get_pm_by_pmid($this->user['uid'], $pmid);
 
 		if($pms[0]) {
 			$pms = $pms[0];
@@ -61,7 +61,7 @@ class Pm extends MY_Controller {
 	function send() {
 		$status = 0;
 		if(submitcheck()) {
-			$lastpmid = $_ENV['pm']->sendpm($_POST['subject'], $_POST['message'], $this->user['isfounder'] ? '' : $this->user, 0);
+			$lastpmid = $this->pm_m->sendpm($_POST['subject'], $_POST['message'], $this->user['isfounder'] ? '' : $this->user, 0);
 			$status = 1;
 			$this->writelog('pm_send', "subject=".htmlspecialchars($_POST['subject']));
 		}
@@ -85,8 +85,8 @@ class Pm extends MY_Controller {
 			if($usernames) {
 				$uids = 0;
 				$usernames = "'".implode("', '", explode(',', $usernames))."'";
-				$query = $this->db->query("SELECT uid FROM ".UC_DBTABLEPRE."members WHERE username IN ($usernames)");
-				while($res = $this->db->fetch_array($query)) {
+				$rows = $this->db->select('uid')->where_in('username', $usernames)->get('members')->result_array();
+				foreach($rows as $res) {
 					$uids .= ','.$res['uid'];
 				}
 				if($uids) {

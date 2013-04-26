@@ -155,7 +155,7 @@ class User extends MY_Controller {
 	
 	function add() {
 		$this->check_priv();
-		if(!$this->submitcheck('submit')) {
+		if(!submitcheck('submit')) {
 			exit;
 		}
 		$username = getgpc('addname', 'P');
@@ -180,7 +180,7 @@ class User extends MY_Controller {
 				$this->message('user_add_email_exists', 'BACK');
 			}
 		}
-		$uid = $_ENV['user']->add_user($username, $password, $email);
+		$uid = $this->user_m->add_user($username, $password, $email);
 		$this->message('user_add_succeed', 'admin.php?m=user&a=ls');
 	}
 	
@@ -190,7 +190,7 @@ class User extends MY_Controller {
 		$this->load->language('admin');
 	
 		$status = 0;
-		if(!empty($_POST['addname']) && $this->submitcheck()) {
+		if(!empty($_POST['addname']) && submitcheck()) {
 			$this->check_priv();
 			$username = getgpc('addname', 'P');
 			$password =  getgpc('addpassword', 'P');
@@ -198,7 +198,7 @@ class User extends MY_Controller {
 	
 			if(($status = $this->_check_username($username)) >= 0) {
 				if(($status = $this->_check_email($email)) >= 0) {
-					$_ENV['user']->add_user($username, $password, $email);
+					$this->user_m->add_user($username, $password, $email);
 					$status = 1;
 					$this->writelog('user_add', "username=$username");
 				}
@@ -207,7 +207,7 @@ class User extends MY_Controller {
 		$data['status'] = $status;
 	
 		if(!empty($_POST['delete'])) {
-			$_ENV['user']->delete_user($_POST['delete']);
+			$this->user_m->delete_user($_POST['delete']);
 			$status = 2;
 			$this->writelog('user_delete', "uid=".implode(',', $_POST['delete']));
 		}
@@ -270,13 +270,13 @@ class User extends MY_Controller {
 		$uid = getgpc('uid');
 		$status = 0;
 		if(!$this->user['isfounder']) {
-			$isprotected = $this->db->result_first("SELECT COUNT(*) FROM ".UC_DBTABLEPRE."protectedmembers WHERE uid = '$uid'");
+			$isprotected = $this->db->where('uid', $uid)->get('protectedmembers')->num_rows();
 			if($isprotected) {
 				$this->message('user_edit_noperm');
 			}
 		}
 	
-		if($this->submitcheck()) {
+		if(submitcheck()) {
 			$username = getgpc('username', 'P');
 			$newusername = getgpc('newusername', 'P');
 			$password = getgpc('password', 'P');
@@ -284,33 +284,33 @@ class User extends MY_Controller {
 			$delavatar = getgpc('delavatar', 'P');
 			$rmrecques = getgpc('rmrecques', 'P');
 			$sqladd = '';
+			$this->load->model('note_m');
 			if($username != $newusername) {
-				if($_ENV['user']->get_user_by_username($newusername)) {
+				if($this->user_m->get_user_by_username($newusername)) {
 					$this->message('admin_user_exists');
 				}
 				$sqladd .= "username='$newusername', ";
-				$this->load('note');
-				$_ENV['note']->add('renameuser', 'uid='.$uid.'&oldusername='.urlencode($username).'&newusername='.urlencode($newusername));
+				
+				$this->note_m->add('renameuser', 'uid='.$uid.'&oldusername='.urlencode($username).'&newusername='.urlencode($newusername));
 			}
 			if($password) {
 				$salt = substr(uniqid(rand()), 0, 6);
 				$orgpassword = $password;
 				$password = md5(md5($password).$salt);
 				$sqladd .= "password='$password', salt='$salt', ";
-				$this->load('note');
-				$_ENV['note']->add('updatepw', 'username='.urlencode($username).'&password=');
+				$this->note_m->add('updatepw', 'username='.urlencode($username).'&password=');
 			}
 			if($rmrecques) {
 				$sqladd .= "secques='', ";
 			}
 			if(!empty($delavatar)) {
-				$_ENV['user']->delete_useravatar($uid);
+				$this->user_m->delete_useravatar($uid);
 			}
 	
 			$this->db->query("UPDATE ".UC_DBTABLEPRE."members SET $sqladd email='$email' WHERE uid='$uid'");
 			$status = $this->db->errno() ? -1 : 1;
 		}
-		$user = $this->db->fetch_first("SELECT * FROM ".UC_DBTABLEPRE."members WHERE uid='$uid'");
+		$user = $this->db->where('uid', $uid)->get('members')->first_row('array');
 		$user['bigavatar'] = '<img src="avatar.php?uid='.$uid.'&size=big">';
 		$user['bigavatarreal'] = '<img src="avatar.php?uid='.$uid.'&size=big&type=real">';
 		$data['uid'] = $uid;
@@ -322,22 +322,22 @@ class User extends MY_Controller {
 	
 	function _check_username($username) {
 		$username = addslashes(trim(stripslashes($username)));
-		if(!$_ENV['user']->check_username($username)) {
+		if(!$this->user_m->check_username($username)) {
 			return UC_USER_CHECK_USERNAME_FAILED;
 			/*		} elseif($username != $_ENV['user']->replace_badwords($username)) {
 				return UC_USER_USERNAME_BADWORD;*/
-		} elseif($_ENV['user']->check_usernameexists($username)) {
+		} elseif($this->user_m->check_usernameexists($username)) {
 			return UC_USER_USERNAME_EXISTS;
 		}
 		return 1;
 	}
 	
 	function _check_email($email) {
-		if(!$_ENV['user']->check_emailformat($email)) {
+		if(!$this->user_m->check_emailformat($email)) {
 			return UC_USER_EMAIL_FORMAT_ILLEGAL;
-		} elseif(!$_ENV['user']->check_emailaccess($email)) {
+		} elseif(!$this->user_m->check_emailaccess($email)) {
 			return UC_USER_EMAIL_ACCESS_ILLEGAL;
-		} elseif($this->settings['doublee'] && $_ENV['user']->check_emailexists($email)) {
+		} elseif($this->settings['doublee'] && $this->user_m->check_emailexists($email)) {
 			return UC_USER_EMAIL_EXISTS;
 		} else {
 			return 1;

@@ -17,10 +17,10 @@ class Cache extends MY_Controller {
 		if(submitcheck('submit')) {
 			$type = getgpc('type', 'P');
 			if(!is_array($type) || in_array('data', $type)) {
-				$_ENV['cache']->updatedata();
+				$this->cache_m->updatedata();
 			}
 			if(!is_array($type) || in_array('tpl', $type)) {
-				$_ENV['cache']->updatetpl();
+				$this->cache_m->updatetpl();
 			}
 			$updated = true;
 		}

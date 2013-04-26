@@ -60,10 +60,10 @@ class Note extends MY_Controller {
 		$this->load->view('note', $data);
 	}
 
-	function onsend() {
+	function send() {
 		$noteid = intval(getgpc('noteid'));
 		$appid = intval(getgpc('appid'));
-		$result = $_ENV['note']->sendone($appid, $noteid);
+		$result = $this->note_m->sendone($appid, $noteid);
 		if($result) {
 			$this->writelog('note_send', "appid=$appid&noteid=$noteid");
 			$this->message('note_succeed', $_SERVER['HTTP_REFERER']);

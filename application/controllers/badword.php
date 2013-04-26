@@ -21,18 +21,18 @@ class Badword extends MY_Controller {
 		$delete = getgpc('delete', 'P');
 		if($find) {
 			foreach($find as $id => $arr) {
-				$_ENV['badword']->update_badword($find[$id], $replacement[$id], $id);
+				$this->badword_m->update_badword($find[$id], $replacement[$id], $id);
 			}
 		}
 		$status = 0;
 		if($findnew) {
-			$_ENV['badword']->add_badword($findnew, $replacementnew, $this->user['username']);
+			$this->badword_m->add_badword($findnew, $replacementnew, $this->user['username']);
 			$status = 1;
 			$this->writelog('badword_add', 'findnew='.htmlspecialchars($findnew).'&replacementnew='.htmlspecialchars($replacementnew));
 		}
 		if(@$delete) {
 
-			$_ENV['badword']->delete_badword($delete);
+			$this->badword_m->delete_badword($delete);
 			$status = 2;
 			$this->writelog('badword_delete', "delete=".implode(',', $delete));
 		}
@@ -40,23 +40,23 @@ class Badword extends MY_Controller {
 			$badwords = getgpc('badwords', 'P');
 			$type = getgpc('type', 'P');
 			if($type == 0) {
-				$_ENV['badword']->truncate_badword();
+				$this->badword_m->truncate_badword();
 				$type = 1;
 			}
 			$arr = explode("\n", str_replace(array("\r", "\n\n"), array("\r", "\n"), $badwords));
 			foreach($arr as $k => $v) {
 				$arr2 = explode("=", $v);
-				$_ENV['badword']->add_badword($arr2[0], $arr2[1], $this->user['username'], $type);
+				$this->badword_m->add_badword($arr2[0], $arr2[1], $this->user['username'], $type);
 			}
 		}
 		if($status > 0) {
-			$notedata = $_ENV['badword']->get_list($page, 1000000, 1000000);
-			$this->load('note');
-			$_ENV['note']->add('updatebadwords', '', $this->serialize($notedata, 1));
-			$_ENV['note']->send();
+			$notedata = $this->badword_m->get_list($page, 1000000, 1000000);
+			$this->load->model('note_m');
+			$this->note_m->add('updatebadwords', '', $this->serialize($notedata, 1));
+			$this->note_m->send();
 
-			$this->load('cache');
-			$_ENV['cache']->updatedata('badwords');
+			$this->load->model('cache_m');
+			$this->cache_m->updatedata('badwords');
 		}
 		$num = $this->badword_m->get_total_num();
 		$badwordlist = $this->badword_m->get_list($page, UC_PPP, $num);
@@ -71,7 +71,7 @@ class Badword extends MY_Controller {
 	}
 
 	function export() {
-		$data = $_ENV['badword']->get_list(1, 1000000, 1000000);
+		$data = $this->badword_m->get_list(1, 1000000, 1000000);
 		$s = '';
 		if($data) {
 			foreach($data as $v) {
