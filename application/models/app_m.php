@@ -5,6 +5,7 @@ class App_m extends CI_Model
 	public function __construct()
 	{
 		parent::__construct();
+		$this->load->library('xml');
 	}
 	
 	function get_apps($col = '*', $where = '') {
@@ -18,7 +19,7 @@ class App_m extends CI_Model
 		}
 		$return = array();
 		foreach($arr as $k => $v) {
-			isset($v['extra']) && !empty($v['extra']) && $v['extra'] = unserialize($v['extra']);
+			isset($v['extra']) && !empty($v['extra']) && $v['extra'] = $this->xml->unserialize($v['extra']);
 			if($tmp = authcode($v['authkey'], 'DECODE', UC_MYKEY)) {
 				$v['authkey'] = $tmp;
 			}
@@ -30,7 +31,7 @@ class App_m extends CI_Model
 	function get_app_by_appid($appid, $includecert = FALSE) {
 		$appid = intval($appid);
 		$arr = $this->db->where('appid', $appid)->get('applications')->first_row('array');
-		$arr['extra'] = unserialize($arr['extra']);
+		$arr['extra'] = $this->xml->unserialize($arr['extra']);
 		if($tmp = authcode($arr['authkey'], 'DECODE', UC_MYKEY)) {
 			$arr['authkey'] = $tmp;
 		}

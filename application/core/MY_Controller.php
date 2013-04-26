@@ -194,19 +194,19 @@ class MY_Controller extends CI_Controller
 		return isset($this->input[$k]) ? (is_array($this->input[$k]) ? $this->input[$k] : trim($this->input[$k])) : NULL;
 	}
 	
-	function serialize($s, $htmlon = 0) {
+// 	function serialize($s, $htmlon = 0) {
 		
-		$this->load->library('xml');
+// 		$this->load->library('xml');
 	
-		return xml_serialize($s, $htmlon);
-	}
+// 		return xml_serialize($s, $htmlon);
+// 	}
 	
-	function unserialize($s) {
+// 	function unserialize($s) {
 		
-		$this->load->library('xml');
+// 		$this->load->library('xml');
 	
-		return xml_unserialize($s);
-	}
+// 		return xml_unserialize($s);
+// 	}
 	
 	
 	

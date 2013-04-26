@@ -303,8 +303,8 @@ window.onload = testlink;
 					</tr>
 					<tr>
 						<td>
-							<input type="radio" class="radio" id="yes" name="synlogin" value="1" <?php echo $synlogin[1];?> /><label for="yes"><?php echo $this->lang->line('yes');?></label>
-							<input type="radio" class="radio" id="no" name="synlogin" value="0" <?php echo $synlogin[0];?> /><label for="no"><?php echo $this->lang->line('no');?></label>
+							<input type="radio" class="radio" id="yes" name="synlogin" value="1" <?php echo isset($synlogin[1])?$synlogin[1]:'';?> /><label for="yes"><?php echo $this->lang->line('yes');?></label>
+							<input type="radio" class="radio" id="no" name="synlogin" value="0" <?php echo isset($synlogin[0])?$synlogin[0]:'';?> /><label for="no"><?php echo $this->lang->line('no');?></label>
 						</td>
 						<td><?php echo $this->lang->line('app_login_comment');?></td>
 					</tr>
@@ -313,8 +313,8 @@ window.onload = testlink;
 					</tr>
 					<tr>
 						<td>
-							<input type="radio" class="radio" id="yes" name="recvnote" value="1" <?php echo $recvnotechecked[1];?> /><label for="yes"><?php echo $this->lang->line('yes');?></label>
-							<input type="radio" class="radio" id="no" name="recvnote" value="0" <?php echo $recvnotechecked[0];?> /><label for="no"><?php echo $this->lang->line('no');?></label>
+							<input type="radio" class="radio" id="yes" name="recvnote" value="1" <?php echo isset($recvnotechecked[1])?$recvnotechecked[1]:'';?> /><label for="yes"><?php echo $this->lang->line('yes');?></label>
+							<input type="radio" class="radio" id="no" name="recvnote" value="0" <?php echo isset($recvnotechecked[0])?$recvnotechecked[0]:'';?> /><label for="no"><?php echo $this->lang->line('no');?></label>
 						</td>
 						<td></td>
 					</tr>
@@ -344,7 +344,7 @@ window.onload = testlink;
 							define('UC_PPP', '20');
 							</textarea>
 						</th>
-						<td>{lang app_code_comment}</td>
+						<td><?php echo $this->lang->line('app_code_comment');?></td>
 					</tr>
 				</table>
 				<?php endif;?>

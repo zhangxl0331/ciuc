@@ -12,6 +12,7 @@ class App extends MY_Controller {
 		$this->load->model('app_m');
 		$this->load->model('misc_m');
 		$this->load->model('cache_m');
+		$this->load->library('xml');
 	}
 	
 	function ls() {
@@ -70,7 +71,7 @@ class App extends MY_Controller {
 					$tagtemplates['fields'][$k] = $v;
 				}
 			}
-			$tagtemplates = $this->serialize($tagtemplates, 1);
+			$tagtemplates = $this->xml->serialize($tagtemplates, 1);
 
 			if(!$this->misc_m->check_url($_POST['url'])) {
 				$this->message('app_add_url_invalid', 'BACK');
@@ -83,7 +84,7 @@ class App extends MY_Controller {
 				$this->db->update('applications', array('name'=>$name, 'url'=>$url, 'ip'=>$ip, 'viewprourl'=>$viewprourl, 'apifilename'=>$apifilename, 'authkey'=>$authkey, 'synlogin'=>$synlogin, 'type'=>$type, 'tagtemplates'=>$tagtemplates), array('appid'=>$app[appid]));
 				$appid = $app['appid'];
 			} else {
-				$extra = serialize(array('apppath'=> getgpc('apppath', 'P')));
+				$extra = $this->xml->serialize(array('apppath'=> getgpc('apppath', 'P')));
 				$this->db->insert('applications', array('name'=>$name, 'url'=>$url, 'ip'=>$ip, 'viewprourl'=>$viewprourl, 'apifilename'=>$apifilename, 'authkey'=>$authkey, 'synlogin'=>$synlogin, 'type'=>$type, 'recvnote'=>$recvnote, 'extra'=>$extra, 'tagtemplates'=>$tagtemplates));
 				$appid = $this->db->insert_id();
 			}
@@ -104,7 +105,7 @@ class App extends MY_Controller {
 		$appid = intval(getgpc('appid'));
 		$app = $this->app_m->get_app_by_appid($appid);
 		$status = '';
-		if($app['extra']['apppath'] && @include $app['extra']['apppath'].'./api/'.$app['apifilename']) {
+		if(isset($app['extra']['apppath']) && $app['extra']['apppath'] && @include $app['extra']['apppath'].'./api/'.$app['apifilename']) {
 			$uc_note = new uc_note();
 			$status = $uc_note->test($note['getdata'], $note['postdata']);
 		} else {
@@ -158,7 +159,7 @@ class App extends MY_Controller {
 			}
 
 			$tagtemplates = array();
-			$tagtemplates['template'] = MAGIC_QUOTES_GPC ? stripslashes(getgpc('tagtemplates', 'P')) : getgpc('tagtemplates', 'P');
+			$tagtemplates['template'] = getgpc('tagtemplates', 'P');
 			$tagfields = explode("\n", getgpc('tagfields', 'P'));
 			foreach($tagfields as $field) {
 				$field = trim($field);
@@ -167,9 +168,9 @@ class App extends MY_Controller {
 					$tagtemplates['fields'][$k] = $v;
 				}
 			}
-			$tagtemplates = $this->serialize($tagtemplates, 1);
+			$tagtemplates = $this->xml->serialize($tagtemplates, 1);
 
-			$extra = addslashes(serialize($app['extra']));
+			$extra = addslashes($this->xml->serialize($app['extra']));
 			$this->db->update('applications', array('appid'=>$appid, 'name'=>$name, 'url'=>$url, 'type'=>$type, 'ip'=>$ip, 'viewprourl'=>$viewprourl, 'apifilename'=>$apifilename, 'authkey'=>$authkey, 'synlogin'=>$synlogin, 'recvnote'=>$recvnote, 'extra'=>$extra, 'tagtemplates'=>$tagtemplates), array('appid'=>$appid));
 			$updated = true;
 			$this->cache_m->updatedata('apps');
@@ -179,7 +180,7 @@ class App extends MY_Controller {
 			$this->_add_note_for_app();
 			$app = $this->app_m->get_app_by_appid($appid);
 		}
-		$tagtemplates = unserialize($app['tagtemplates']);
+		$tagtemplates = $this->xml->unserialize($app['tagtemplates']);
 		$template = htmlspecialchars($tagtemplates['template']);
 		$tmp = '';
 		if(is_array($tagtemplates['fields'])) {
@@ -211,24 +212,24 @@ class App extends MY_Controller {
 		$data['updated'] = $updated;
 		$addapp = getgpc('addapp');
 		$data['addapp'] = $addapp;
-		$data['apppath'] = $app['extra']['apppath'];
+		$data['apppath'] = isset($app['extra']['apppath'])?$app['extra']['apppath']:'';
 		$data['tagtemplates'] = $tagtemplates;
 		$this->load->view('app', $data);
 	}
 
 	function _add_note_for_app() {
-		$this->load('note');
+		$this->load->model('note_m');
 		$notedata = $this->db->select('appid, type, name, url, ip, viewprourl, apifilename, charset, synlogin, extra, recvnote')->get("applications")->result_array();
 		$notedata = $this->_format_notedata($notedata);
 		$notedata['UC_API'] = UC_API;
-		$this->note_m->add('updateapps', '', $this->serialize($notedata, 1));
+		$this->note_m->add('updateapps', '', $this->xml->serialize($notedata, 1));
 		$this->note_m->send();	
 	}
 
 	function _format_notedata($notedata) {
 		$arr = array();
 		foreach($notedata as $key => $note) {
-			$note['extra'] = unserialize($note['extra']);
+			$note['extra'] = $this->xml->unserialize($note['extra']);
 			$arr[$note['appid']] = $note;
 		}
 		return $arr;

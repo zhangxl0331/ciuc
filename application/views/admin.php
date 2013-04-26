@@ -49,13 +49,13 @@
 			<div class="<?php if($status > 0):?>correctmsg<?php else:?>errormsg<?php endif;?>">
 				<p>
 				<?php if($status == 1):?> <?php echo $this->lang->line('admin_add_succeed');?>
-				<?php elseif($status == -1):?>{elseif $status == -1} <?php echo $this->lang->line('admin_add_succeed');?>
-				<?php elseif($status == -2):?>{elseif $status == -2} <?php echo $this->lang->line('admin_failed');?>
-				<?php elseif($status == -3):?>{elseif $status == -3} <?php echo $this->lang->line('admin_user_nonexistance');?>
-				<?php elseif($status == -4):?>{elseif $status == -4} <?php echo $this->lang->line('admin_config_unwritable');?>
-				<?php elseif($status == -5):?>{elseif $status == -5} <?php echo $this->lang->line('admin_founder_pw_incorrect');?>
-				<?php elseif($status == -6):?>{elseif $status == -6} <?php echo $this->lang->line('admin_pw_incorrect');?>
-				<?php elseif($status == 2):?>{elseif $status == 2} <?php echo $this->lang->line('admin_founder_pw_modified');?>
+				<?php elseif($status == -1):?> <?php echo $this->lang->line('admin_add_succeed');?>
+				<?php elseif($status == -2):?> <?php echo $this->lang->line('admin_failed');?>
+				<?php elseif($status == -3):?> <?php echo $this->lang->line('admin_user_nonexistance');?>
+				<?php elseif($status == -4):?> <?php echo $this->lang->line('admin_config_unwritable');?>
+				<?php elseif($status == -5):?> <?php echo $this->lang->line('admin_founder_pw_incorrect');?>
+				<?php elseif($status == -6):?> <?php echo $this->lang->line('admin_pw_incorrect');?>
+				<?php elseif($status == 2):?> <?php echo $this->lang->line('admin_founder_pw_modified');?>
 				<?php endif;?>
 				</p>
 			</div>
@@ -152,7 +152,7 @@
 							<td class="date"><?php echo $user['regdate'];?></td>
 							<td class="ip"><?php echo $user['regip'];?></td>
 							<td class="ip"><a href="<?php echo $this->config->base_url('user/edit?uid='.$user['uid'].'&fromadmin=yes');?>"><?php echo $this->lang->line('profile');?></a></td>
-							<td class="ip"><a href="<?php echo $this->config->base_url('user/edit?uid='.$user['uid']);?>"><?php echo $this->lang->line('privilege');?></a></td>
+							<td class="ip"><a href="<?php echo $this->config->base_url('admin/edit?uid='.$user['uid']);?>"><?php echo $this->lang->line('privilege');?></a></td>
 						</tr>
 					<?php endforeach;?>
 					<tr class="nobg">
@@ -193,7 +193,7 @@
 			<input type="hidden" name="formhash" value="<?php echo formhash();?>">
 				<table class="opt">
 					<tr>
-						<th><?php echo $this->lang->line('user_name');?><?php echo $this->lang->line('admin_admin');?> <?php echo $admin[username];?>:</th>
+						<th><?php echo $this->lang->line('user_name');?><?php echo $this->lang->line('admin_admin');?> <?php echo $admin['username'];?>:</th>
 					</tr>
 					<tr>
 						<td>

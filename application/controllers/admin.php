@@ -19,24 +19,24 @@ class Admin extends MY_Controller {
 		if(!empty($_POST['addname']) && submitcheck()) {
 			$addname = getgpc('addname', 'P');
 			$data['addname'] = $addname;
-			$uid = $this->db->select('uid')->where('username', $addname)->get('members')->first_row('array');
+			$uid = $this->db->select('uid')->where('username', $addname)->get('members')->first_row()->uid;
 			if($uid) {
-				$adminuid = $this->dbselect('uid')->where('username', $addname)->get('admins')->first_row('array');
+				$adminuid = $this->db->select('uid')->where('username', $addname)->get('admins')->first_row('array');
 				if($adminuid) {
 					$status = -1;
 				} else {
-					$allowadminsetting = getgpc('allowadminsetting', 'P');
-					$allowadminapp = getgpc('allowadminapp', 'P');
-					$allowadminuser = getgpc('allowadminuser', 'P');
-					$allowadminbadword = getgpc('allowadminbadword', 'P');
-					$allowadmincredits = getgpc('allowadmincredits', 'P');
-					$allowadmintag = getgpc('allowadmintag', 'P');
-					$allowadminpm = getgpc('allowadminpm', 'P');
-					$allowadmindomain = getgpc('allowadmindomain', 'P');
-					$allowadmindb = getgpc('allowadmindb', 'P');
-					$allowadminnote = getgpc('allowadminnote', 'P');
-					$allowadmincache = getgpc('allowadmincache', 'P');
-					$allowadminlog = getgpc('allowadminlog', 'P');
+					$allowadminsetting = $this->input->post('allowadminsetting');
+					$allowadminapp = $this->input->post('allowadminapp');
+					$allowadminuser = $this->input->post('allowadminuser');
+					$allowadminbadword = $this->input->post('allowadminbadword');
+					$allowadmincredits = $this->input->post('allowadmincredits');
+					$allowadmintag = $this->input->post('allowadmintag');
+					$allowadminpm = $this->input->post('allowadminpm');
+					$allowadmindomain = $this->input->post('allowadmindomain');
+					$allowadmindb = $this->input->post('allowadmindb');
+					$allowadminnote = $this->input->post('allowadminnote');
+					$allowadmincache = $this->input->post('allowadmincache');
+					$allowadminlog = $this->input->post('allowadminlog');
 					$insertid = $this->db->insert('admins', array(
 						'uid'=>$uid,
 						'username'=>$addname,
@@ -71,7 +71,7 @@ class Admin extends MY_Controller {
 			$newpw = getgpc('newpw', 'P');
 			$newpw2 = getgpc('newpw2', 'P');
 			if(UC_FOUNDERPW == md5(md5($oldpw).UC_FOUNDERSALT)) {
-				$configfile = UC_ROOT.'./data/config.inc.php';
+				$configfile = APPPATH.'config/constants.php';
 				if(!is_writable($configfile)) {
 					$status = -4;
 				} else {
@@ -98,8 +98,8 @@ class Admin extends MY_Controller {
 		$data['status'] = $status;
 
 		if(!empty($_POST['delete'])) {
-			$uids = $this->implode(getgpc('delete', 'P'));
-			$this->db->delete('admins', array('uid IN'=>$uids));
+			$uids = $this->input->post('delete');
+			$this->db->where_in('uid', $uids)->delete('admins');
 		}
 
 		$page = max(1, getgpc('page'));
@@ -126,6 +126,7 @@ class Admin extends MY_Controller {
 	function edit() {
 		$uid = getgpc('uid');
 		$status = 0;
+		$admin = $this->db->where('uid', $uid)->get('admins')->first_row('array');
 		if(submitcheck()) {
 			$allowadminsetting = getgpc('allowadminsetting', 'P');
 			$allowadminapp = getgpc('allowadminapp', 'P');
@@ -139,7 +140,7 @@ class Admin extends MY_Controller {
 			$allowadminnote = getgpc('allowadminnote', 'P');
 			$allowadmincache = getgpc('allowadmincache', 'P');
 			$allowadminlog = getgpc('allowadminlog', 'P');
-			$this->db->update('admins', array(
+			$update = $this->db->update('admins', array(
 				'allowadminsetting'=>$allowadminsetting,
 				'allowadminapp'=>$allowadminapp,
 				'allowadminuser'=>$allowadminuser,
@@ -153,10 +154,10 @@ class Admin extends MY_Controller {
 				'allowadmincache'=>$allowadmincache,
 				'allowadminlog'=>$allowadminlog),
 				array('uid'=>$uid));
-			$status = $this->db->errno() ? -1 : 1;
-			$this->writelog('admin_priv_edit', 'username='.htmlspecialchars($admin));
+			$status = !$update ? -1 : 1;
+			$this->writelog('admin_priv_edit', 'username='.htmlspecialchars($admin['username']));
 		}
-		$admin = $this->db->where('uid', $uid)->get('admins')->first_row('array');
+		
 		$data['uid'] = $uid;
 		$data['admin'] = $admin;
 		$data['status'] = $status;

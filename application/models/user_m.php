@@ -2,9 +2,12 @@
 
 class User_m extends CI_Model
 {
+	var $settings = array();
 	public function __construct()
 	{
 		parent::__construct();
+		$this->load->model('cache_m');
+		$this->settings = $this->cache_m->getdata('settings');
 	}
 
 	function get_user_by_uid($uid) {
@@ -55,7 +58,7 @@ class User_m extends CI_Model
 	}
 
 	function check_emailaccess($email) {
-		$setting = $this->base->get_setting(array('accessemail', 'censoremail'));
+		$setting = $this->settings;
 		$accessemail = $setting['accessemail'];
 		$censoremail = $setting['censoremail'];
 		$accessexp = '/('.str_replace("\r\n", '|', preg_quote(trim($accessemail), '/')).')$/i';
@@ -104,8 +107,8 @@ class User_m extends CI_Model
 		$update['username'] = $username;
 		$update['password'] = $password;
 		$update['email'] = $email;
-		$update['regip'] = $regip;
-		$update['regdate'] = $this->base->time;
+		$update['regip'] = $this->input->ip_address();
+		$update['regdate'] = time();
 		$update['salt'] = $salt;
 		$this->db->insert('members', $update);
 		$uid = $this->db->insert_id();
@@ -166,37 +169,67 @@ class User_m extends CI_Model
 	function delete_useravatar($uidsarr) {
 		$uidsarr = (array)$uidsarr;
 		foreach((array)$uidsarr as $uid) {
-			file_exists($avatar_file = UC_DATADIR.'./avatar/'.$this->base->get_avatar($uid, 'big', 'real')) && unlink($avatar_file);
-			file_exists($avatar_file = UC_DATADIR.'./avatar/'.$this->base->get_avatar($uid, 'middle', 'real')) && unlink($avatar_file);
-			file_exists($avatar_file = UC_DATADIR.'./avatar/'.$this->base->get_avatar($uid, 'small', 'real')) && unlink($avatar_file);
-			file_exists($avatar_file = UC_DATADIR.'./avatar/'.$this->base->get_avatar($uid, 'big')) && unlink($avatar_file);
-			file_exists($avatar_file = UC_DATADIR.'./avatar/'.$this->base->get_avatar($uid, 'middle')) && unlink($avatar_file);
-			file_exists($avatar_file = UC_DATADIR.'./avatar/'.$this->base->get_avatar($uid, 'small')) && unlink($avatar_file);
+			file_exists($avatar_file = FCPATH.'data/avatar/'.get_avatar($uid, 'big', 'real')) && unlink($avatar_file);
+			file_exists($avatar_file = FCPATH.'data/avatar/'.get_avatar($uid, 'middle', 'real')) && unlink($avatar_file);
+			file_exists($avatar_file = FCPATH.'data/avatar/'.get_avatar($uid, 'small', 'real')) && unlink($avatar_file);
+			file_exists($avatar_file = FCPATH.'data/avatar/'.get_avatar($uid, 'big')) && unlink($avatar_file);
+			file_exists($avatar_file = FCPATH.'data/avatar/'.get_avatar($uid, 'middle')) && unlink($avatar_file);
+			file_exists($avatar_file = FCPATH.'data/avatar/'.get_avatar($uid, 'small')) && unlink($avatar_file);
 		}		
 	}
 	
-	function get_total_num($sqladd = '') {
+	function get_total_num($sqladd = '', $like=array()) {
 		if($sqladd)
 		{
-			$data = $this->db->where($sqladd)->get('members')->num_rows();
+			if($like)
+			{
+				$data = $this->db->like($like)->where($sqladd)->get('members')->num_rows();
+			}
+			else 
+			{
+				$data = $this->db->where($sqladd)->get('members')->num_rows();
+			}
 		}
 		else 
 		{
-			$data = $this->db->get('members')->num_rows();
+			if($like)
+			{
+				$data = $this->db->like($like)->get('members')->num_rows();
+			}
+			else
+			{
+				$data = $this->db->get('members')->num_rows();
+			}
+			
 		}
 		
 		return $data;
 	}
 
-	function get_list($page, $ppp, $totalnum, $sqladd) {
+	function get_list($page, $ppp, $totalnum, $sqladd, $like=array()) {
 		$start = page_get_start($page, $ppp, $totalnum);
 		if($sqladd)
 		{
-			$data = $this->db->where($sqladd)->get('members', $ppp, $start)->result_array();
+			if($like)
+			{
+				$data = $this->db->like($like)->where($sqladd)->get('members', $ppp, $start)->result_array();
+			}
+			else
+			{
+				$data = $this->db->where($sqladd)->get('members', $ppp, $start)->result_array();
+			}			
 		}
 		else 
 		{
-			$data = $this->db->get('members', $ppp, $start)->result_array();
+			if($like)
+			{
+				$data = $this->db->like($like)->get('members', $ppp, $start)->result_array();
+			}
+			else
+			{
+				$data = $this->db->get('members', $ppp, $start)->result_array();
+			}
+			
 		}
 		
 		return $data;

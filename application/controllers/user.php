@@ -225,29 +225,29 @@ class User extends MY_Controller {
 		$data['srchregdateend'] = $srchregdateend;
 		$data['srchregip'] = $srchregip;
 		
-		$sqladd = '';
+		$sqladd = $like = array();
 		if($srchname) {
-			$sqladd .= " AND username LIKE '$srchname%'";			
+			$like['username'] = $srchname;			
 		}
 		if($srchuid) {
-			$sqladd .= " AND uid='$srchuid'";			
+			$sqladd['uid'] = $srchuid;			
 		}
 		if($srchemail) {
-			$sqladd .= " AND email='$srchemail'";			
+			$sqladd['email'] = $srchemail;			
 		}
 		if($srchregdatestart) {
-			$sqladd .= " AND regdate>'".strtotime($srchregdatestart)."'";			
+			$sqladd['regdate>'] = strtotime($srchregdatestart);			
 		}
 		if($srchregdateend) {
-			$sqladd .= " AND regdate<'".strtotime($srchregdateend)."'";			
+			$sqladd['regdate<'] = strtotime($srchregdateend);			
 		}
 		if($srchregip) {
-			$sqladd .= " AND regip='$srchregip'";			
+			$sqladd['regip'] = $srchregip;			
 		}
-		$sqladd = $sqladd ? "$sqladd" : '';
+		
 	
-		$num = $this->user_m->get_total_num($sqladd);
-		$userlist = $this->user_m->get_list($_GET['page'], UC_PPP, $num, $sqladd);
+		$num = $this->user_m->get_total_num($sqladd, $like);
+		$userlist = $this->user_m->get_list($_GET['page'], UC_PPP, $num, $sqladd, $like);
 		foreach($userlist as $key => $user) {
 			$user['smallavatar'] = '<img src="avatar.php?uid='.$user['uid'].'&size=small">';
 			$userlist[$key] = $user;
@@ -312,8 +312,8 @@ class User extends MY_Controller {
 			$status = !$update ? -1 : 1;
 		}
 		$user = $this->db->where('uid', $uid)->get('members')->first_row('array');
-		$user['bigavatar'] = '<img src="avatar.php?uid='.$uid.'&size=big">';
-		$user['bigavatarreal'] = '<img src="avatar.php?uid='.$uid.'&size=big&type=real">';
+		$user['bigavatar'] = '<img src="'.$this->config->base_url('service/avatar?uid='.$uid.'&size=big').'">';
+		$user['bigavatarreal'] = '<img src="'.$this->config->base_url('service/avatar?uid='.$uid.'&size=big&type=real').'">';
 		$data['uid'] = $uid;
 		$data['user'] = $user;
 		$data['status'] = $status;
