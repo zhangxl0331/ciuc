@@ -7,25 +7,25 @@
 		Processed in <span id="debug_time"></span> s
 		<fieldset>
 			<legend><b>GET:</b></legend>
-			<!--{eval echo '<pre>'.print_r($_GET, TRUE).'</pre>';}-->
+			<?php echo '<pre>'.print_r($_GET, TRUE).'</pre>';?>
 		</fieldset>
 		<fieldset>
 			<legend><b>POST:</b></legend>
-			<!--{eval echo '<pre>'.print_r($_POST, TRUE).'</pre>';}-->
+			<?php echo '<pre>'.print_r($_POST, TRUE).'</pre>';?>
 		</fieldset>
 		<fieldset>
 			<legend><b>COOKIE:</b></legend>
-			<!--{eval echo '<pre>'.print_r($_COOKIE, TRUE).'</pre>';}-->
+			<?php echo '<pre>'.print_r($_COOKIE, TRUE).'</pre>';?>
 		</fieldset>
 		<fieldset>
-			<legend><b>SQL:</b> $dbquerynum</legend>
-			<!--{loop $dbhistories $dbhistory}-->
-				 <li>$dbhistory</li>
-			<!--{/loop}-->
+			<legend><b>SQL:</b> <?php echo $dbquerynum;?></legend>
+			<?php foreach($dbhistories as $dbhistory):?>
+				 <li><?php echo $dbhistory;?></li>
+			<?php endforeach;?>
 		</fieldset>
 		<fieldset>
-			<legend><b>Include:</b> {eval echo count(get_included_files());}</legend>
-			<!--{eval echo '<pre>'.print_r(get_included_files(), TRUE).'</pre>';}-->
+			<legend><b>Include:</b> <?php echo count(get_included_files());?></legend>
+			<?php echo '<pre>'.print_r(get_included_files(), TRUE).'</pre>';?>
 		</fieldset>
 	</div>
 <?php endif;?>
