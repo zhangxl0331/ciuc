@@ -113,9 +113,9 @@ class App extends MY_Controller {
 			$status = $this->app_m->test_api($url, $ip);
 		}
 		if($status == '1') {
-			echo 'document.getElementById(\'status_'.$appid.'\').innerHTML = "<img src=\'images/correct.gif\' border=\'0\' class=\'statimg\' \/><span class=\'green\'>'.$this->lang['app_connent_ok'].'</span>";testlink();';
+			echo 'document.getElementById(\'status_'.$appid.'\').innerHTML = "<img src=\'images/correct.gif\' border=\'0\' class=\'statimg\' \/><span class=\'green\'>'.$this->lang->line('app_connent_ok').'</span>";testlink();';
 		} else {
-			echo 'document.getElementById(\'status_'.$appid.'\').innerHTML = "<img src=\'images/error.gif\' border=\'0\' class=\'statimg\' \/><span class=\'red\'>'.$this->lang['app_connent_false'].'</span>";testlink();';
+			echo 'document.getElementById(\'status_'.$appid.'\').innerHTML = "<img src=\'images/error.gif\' border=\'0\' class=\'statimg\' \/><span class=\'red\'>'.$this->lang->line('app_connent_false').'</span>";testlink();';
 		}
 
 	}
@@ -179,7 +179,7 @@ class App extends MY_Controller {
 			$this->_add_note_for_app();
 			$app = $this->app_m->get_app_by_appid($appid);
 		}
-		$tagtemplates = $this->unserialize($app['tagtemplates']);
+		$tagtemplates = unserialize($app['tagtemplates']);
 		$template = htmlspecialchars($tagtemplates['template']);
 		$tmp = '';
 		if(is_array($tagtemplates['fields'])) {
@@ -206,14 +206,14 @@ class App extends MY_Controller {
 		$data['dbcharset'] = $app['dbcharset'];
 		$data['type'] = $app['type'];
 		$data['recvnotechecked'] = $recvnotechecked;
-		$typelist = array('UCHOME'=>'UCenter Home','XSPACE'=>'X-Space','DISCUZ'=>'Discuz!','SUPESITE'=>'SupeSite','SUPEV'=>'SupeV','ECSHOP'=>'ECShop','ECMALL'=>'ECMall','OTHER'=>$this->lang['other']);
+		$typelist = array('UCHOME'=>'UCenter Home','XSPACE'=>'X-Space','DISCUZ'=>'Discuz!','SUPESITE'=>'SupeSite','SUPEV'=>'SupeV','ECSHOP'=>'ECShop','ECMALL'=>'ECMall','OTHER'=>$this->lang->line('other'));
 		$data['typelist'] = $typelist;
 		$data['updated'] = $updated;
 		$addapp = getgpc('addapp');
 		$data['addapp'] = $addapp;
 		$data['apppath'] = $app['extra']['apppath'];
 		$data['tagtemplates'] = $tagtemplates;
-		$this->load->view('admin_app', $data);
+		$this->load->view('app', $data);
 	}
 
 	function _add_note_for_app() {

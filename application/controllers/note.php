@@ -53,7 +53,7 @@ class Note extends MY_Controller {
 
 		$data['status'] = $status;
 		$data['applist'] = $this->apps;
-// 		$this->_format_notlist(&$notelist);
+		$notelist = $this->_format_notlist($notelist);
 		$data['notelist'] = $notelist;
 		$data['multipage'] = $multipage;
 
@@ -74,27 +74,28 @@ class Note extends MY_Controller {
 
 	}
 
-	function _note_status($status, $appid, $noteid, $args, $operation) {
+	function _note_status($status, $appid, $noteid, $args='', $operation='') {
 		if($status > 0) {
-			return '<font color="green">'.$this->lang['note_succeed'].'</font>';
+			return '<font color="green">'.$this->lang->line('note_succeed').'</font>';
 		} elseif($status == 0) {
 			$url = 'admin.php?m=note&a=send&appid='.$appid.'&noteid='.$noteid;
-			return '<a href="'.$url.'" class="red">'.$this->lang['note_na'].'</a>';
+			return '<a href="'.$url.'" class="red">'.$this->lang->line('note_na').'</a>';
 		} elseif($status < 0) {
 			$url = 'admin.php?m=note&a=send&appid='.$appid.'&noteid='.$noteid;
-			return '<a href="'.$url.'"><font color="red">'.$this->lang['note_false'].(-$status).$this->lang['note_times'].'</font></a>';
+			return '<a href="'.$url.'"><font color="red">'.$this->lang->line('note_false').(-$status).$this->lang->line('note_times').'</font></a>';
 		}
 	}
 
-	function _format_notlist(&$notelist) {
+	function _format_notlist($notelist) {
 		if(is_array($notelist)) {
 			foreach($notelist AS $key => $note) {
-				$notelist[$key]['operation'] = $this->lang['note_'.$note['operation']];//$this->operations[$note['operation']][0];
+				$notelist[$key]['operation'] = $this->lang->line('note_'.$note['operation']);//$this->operations[$note['operation']][0];
 				foreach($this->apps AS $appid => $app) {
-					$notelist[$key]['status'][$appid] = $this->_note_status($note['app'.$appid], $appid, $note['noteid'], $note['args'], $note['operation']);
+					$notelist[$key]['status'][$appid] = $this->_note_status($note['app'.$appid], $appid, $note['noteid'], '', $note['operation']);
 				}
 			}
 		}
+		return $notelist;
 	}
 }
 

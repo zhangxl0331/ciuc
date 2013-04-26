@@ -108,7 +108,7 @@ class Setting extends MY_Controller {
 		$items = array('maildefault', 'mailsend', 'mailserver', 'mailport', 'mailauth', 'mailfrom', 'mailauth_username', 'mailauth_password', 'maildelimiter', 'mailusername', 'mailsilent');
 		if(submitcheck()) {
 			foreach($items as $item) {
-				$value = getgpc($item, 'P');
+				$value = $this->input->post($item);
 				$this->setting_m->set_setting($item, $value);
 			}
 			$updated = true;

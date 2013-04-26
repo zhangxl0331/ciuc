@@ -90,7 +90,7 @@ class MY_Controller extends CI_Controller
 	
 	function init_app() {
 		$appid = intval(getgpc('appid'));
-		$appid && $this->app = $this->cache['apps'][$appid];
+		$appid && $this->app = $this->caches['apps'][$appid];
 	}
 	
 	function init_user() {
@@ -150,7 +150,7 @@ class MY_Controller extends CI_Controller
 	}
 	
 	function message($message, $redirect = '', $type = 0, $vars = array()) {
-		$this->load->language('message');
+		$this->load->language('messages');
 		if(isset($lang[$message])) {
 			$message = $lang[$message] ? str_replace(array_keys($vars), array_values($vars), $lang[$message]) : $message;
 		}

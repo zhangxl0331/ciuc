@@ -20,7 +20,7 @@ class User extends MY_Controller {
 	{
 		parent::__construct();
 
-		if($this->router->fetch_class() !='user' && $this->router->fetch_method() != 'login' && $this->router->fetch_method() != 'logout') {
+		if($this->router->fetch_method() != 'login' && $this->router->fetch_method() != 'logout') {
 			$this->check_priv();
 			if(!$this->user['isfounder'] && !$this->user['allowadminuser']) {
 				$this->message('no_permission_for_this_module');
@@ -283,13 +283,13 @@ class User extends MY_Controller {
 			$email = getgpc('email', 'P');
 			$delavatar = getgpc('delavatar', 'P');
 			$rmrecques = getgpc('rmrecques', 'P');
-			$sqladd = '';
+			$sqladd = array();
 			$this->load->model('note_m');
 			if($username != $newusername) {
 				if($this->user_m->get_user_by_username($newusername)) {
 					$this->message('admin_user_exists');
 				}
-				$sqladd .= "username='$newusername', ";
+				$sqladd['username'] = $newusername;
 				
 				$this->note_m->add('renameuser', 'uid='.$uid.'&oldusername='.urlencode($username).'&newusername='.urlencode($newusername));
 			}
@@ -297,18 +297,19 @@ class User extends MY_Controller {
 				$salt = substr(uniqid(rand()), 0, 6);
 				$orgpassword = $password;
 				$password = md5(md5($password).$salt);
-				$sqladd .= "password='$password', salt='$salt', ";
+				$sqladd['password'] = $password;
+				$sqladd['salt'] = $salt;
 				$this->note_m->add('updatepw', 'username='.urlencode($username).'&password=');
 			}
 			if($rmrecques) {
-				$sqladd .= "secques='', ";
+				$sqladd['secques'] = '';
 			}
 			if(!empty($delavatar)) {
 				$this->user_m->delete_useravatar($uid);
 			}
-	
-			$this->db->query("UPDATE ".UC_DBTABLEPRE."members SET $sqladd email='$email' WHERE uid='$uid'");
-			$status = $this->db->errno() ? -1 : 1;
+			$sqladd['email'] = $email;
+			$update = $this->db->update('members', $sqladd, array('uid'=>$uid));
+			$status = !$update ? -1 : 1;
 		}
 		$user = $this->db->where('uid', $uid)->get('members')->first_row('array');
 		$user['bigavatar'] = '<img src="avatar.php?uid='.$uid.'&size=big">';
@@ -316,7 +317,7 @@ class User extends MY_Controller {
 		$data['uid'] = $uid;
 		$data['user'] = $user;
 		$data['status'] = $status;
-		$this->load->view('admin_user', $data);
+		$this->load->view('user', $data);
 	}
 	
 	

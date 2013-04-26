@@ -57,7 +57,7 @@ class Note_m extends CI_Model
 		}
 		else
 		{
-			$data = $this->db->where('closed', 0)->order_by('dateline DESC')->get('notelist', $ppp, $start);
+			$data = $this->db->where('closed', 0)->order_by('dateline DESC')->get('notelist', $ppp, $start)->result_array();
 		}
 		foreach((array)$data as $k => $v) {
 			$data[$k]['postdata2'] = addslashes(str_replace('"', '', $data[$k]['postdata']));
@@ -68,8 +68,8 @@ class Note_m extends CI_Model
 	}
 
 	function delete_note($ids) {
-		$ids = $this->base->implode($ids);
-		return $this->db->delete('notelist', array('noteid IN'=>$ids));
+		
+		return $this->db->where_in('noteid', $ids)->delete('notelist');
 	}
 
 	function add($operation, $getdata='', $postdata='', $appids=array(), $pri = 0) {
