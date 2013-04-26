@@ -25,7 +25,7 @@ class Pm extends MY_Controller {
 		$pmnum = $this->db->where(array('msgtoid'=>'0', 'folder'=>'inbox'))->get('pms')->num_rows();
 		$pmlist = $this->pm_m->get_pm_list($this->user['uid'], $pmnum, $folder, $filter, $_GET['page']);
 		$multipage = page($pmnum, 10, $_GET['page'], 'admin.php?m=pm&a=ls');
-		$extra = 'extra='.rawurlencode($_GET['extra']);
+		$extra = 'extra='.rawurlencode($this->input->get('extra'));
 		$a = getgpc('a');
 		$data['a'] = $a;
 		$data['status'] = $status;
@@ -71,6 +71,7 @@ class Pm extends MY_Controller {
 
 	function clear() {
 		$delnum = 0;
+		$status = 0;
 		if(submitcheck()) {
 			$cleardays = intval(getgpc('cleardays', 'P'));
 			$unread = getgpc('unread') ? 1 : 0;

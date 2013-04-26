@@ -5,8 +5,8 @@
 		<div class="correctmsg"><p><?php echo $this->lang->line('clearpm_deleted');?>: <?php echo $delnum;?></p></div>
 	<?php endif;?>
 	<h3 class="marginbot">
-		<a href="admin.php?m=pm&a=ls" class="sgbtn"><?php echo $this->lang->line('announcepm');?></a>
-		<a href="admin.php?m=pm&a=send" class="sgbtn"><?php echo $this->lang->line('pm_send_announce');?></a>
+		<a href="<?php echo $this->config->base_url('pm/ls');?>" class="sgbtn"><?php echo $this->lang->line('announcepm');?></a>
+		<a href="<?php echo $this->config->base_url('pm/send');?>" class="sgbtn"><?php echo $this->lang->line('pm_send_announce');?></a>
 		<?php echo $this->lang->line('clear_pm');?>
 	</h3>
 	<div class="note fixwidthdec"><p class="i"><?php echo $this->lang->line('clearpm_totalnum');?>: <?php echo $pmnum;?></p></div>

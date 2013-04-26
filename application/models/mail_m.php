@@ -134,7 +134,7 @@ class Mail_m extends CI_Model
 
 	function _update_failures($mailid) {
 		$mailid = intval($mailid);
-		return $this->db->set('failures', 'failures+1', FALSE)->update('mailqueue', array(), array('mailid'=>$mailid'));
+		return $this->db->set('failures', 'failures+1', FALSE)->update('mailqueue', array(), array('mailid'=>$mailid));
 	}
 
 }

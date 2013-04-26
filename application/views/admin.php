@@ -168,7 +168,7 @@
 			<?php endif;?>
 		</div>
 	</div>
-	<?php if($_POST['editpwsubmit']):?>
+	<?php if(isset($_POST['editpwsubmit']) && $_POST['editpwsubmit']):?>
 		<script type="text/javascript">
 		switchbtn('editpw');
 		</script>

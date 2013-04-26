@@ -2,6 +2,7 @@
 
 class Credit extends MY_Controller {
 
+	var $settings = array();
 	public function __construct()
 	{
 		parent::__construct();
@@ -11,6 +12,7 @@ class Credit extends MY_Controller {
 		}
 		$this->load->model('setting_m');
 		$this->load->model('cache_m');
+		$this->settings = $this->cache_m->getdata('settings');
 	}
 	
 	function ls() {
@@ -24,14 +26,16 @@ class Credit extends MY_Controller {
 		$addexchange = getgpc('addexchange', 'G');
 		$delexchange = getgpc('delexchange', 'G');
 		$settings = $this->setting_m->get_setting(array('creditexchange'), TRUE);
-		$creditexchange = is_array($settings['creditexchange']) ? $settings['creditexchange'] : array();
+		$creditexchange = isset($settings['creditexchange']) && is_array($settings['creditexchange']) ? $settings['creditexchange'] : array();
 		$appsrc = @intval($appsrc);
 		$creditsrc = @intval($creditsrc);
 		$appdesc = @intval($appdesc);
 		$creditdesc = @intval($creditdesc);
 		$ratiosrc = ($ratiosrc = @intval($ratiosrc)) > 0 ? $ratiosrc : 1;
 		$ratiodesc = ($ratiodesc = @intval($ratiodesc)) > 0 ? $ratiodesc : 1;
-		if(!empty($addexchange) && $this->submitcheck()) {
+		$status = 0;
+		$creditselect = array();
+		if(!empty($addexchange) && submitcheck()) {
 			if($appsrc != $appdesc) {
 				$key = $appsrc.'_'.$creditsrc.'_'.$appdesc.'_'.$creditdesc;
 				$creditexchange[$key] = $ratiosrc."\t".$ratiodesc;
@@ -58,7 +62,7 @@ class Credit extends MY_Controller {
 			$creditexchange = is_array($settings['creditexchange']) ? $settings['creditexchange'] : array();
 		}
 
-		$apps = unserialize($this->settings['credits']);
+		$apps = isset($this->settings['credits'])&&unserialize($this->settings['credits']);
 		if(is_array($creditexchange)) {
 			foreach($creditexchange as $set => $ratio) {
 				$tmp = array();

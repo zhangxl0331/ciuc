@@ -274,6 +274,7 @@ class MY_Controller extends CI_Controller
 			} else {
 				$this->user['username'] = 'UCenterAdministrator';
 				$this->user['admin'] = 1;
+				$this->user['uid'] = 1;
 			}
 			$this->load->vars('user', $this->user);
 		}
