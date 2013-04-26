@@ -144,7 +144,7 @@ class Pm_m extends CI_Model
 				break;
 		}
 		$array = array();
-		$today = time() - (time() + $this->base->settings['timeoffset']) % 86400;
+		$today = time() - (time() + $this->settings['timeoffset']) % 86400;
 		foreach($rows as $data) {
 			$daterange = 5;
 			if($data['dateline'] >= $today) {
