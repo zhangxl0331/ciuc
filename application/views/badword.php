@@ -1,6 +1,6 @@
 <?php $this->load->view('header');?>
 
-<script src="<?php $this->config->base_url('js/common.js');?>" type="text/javascript"></script>
+<script src="<?php echo $this->config->base_url('js/common.js');?>" type="text/javascript"></script>
 <script type="text/javascript">
 	function switchbtn(btn) {
 		$('srchuserdiv').style.display = btn == 'srch' ? '' : 'none';

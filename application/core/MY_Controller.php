@@ -151,8 +151,8 @@ class MY_Controller extends CI_Controller
 	
 	function message($message, $redirect = '', $type = 0, $vars = array()) {
 		$this->load->language('messages');
-		if(isset($lang[$message])) {
-			$message = $lang[$message] ? str_replace(array_keys($vars), array_values($vars), $lang[$message]) : $message;
+		if($this->lang->line($message)) {
+			$message = $this->lang->line($message) ? str_replace(array_keys($vars), array_values($vars), $this->lang->line($message)) : $message;
 		}
 		$this->load->vars('message', $message);
 		$this->load->vars('redirect', $redirect);

@@ -9,7 +9,7 @@ class Cache_m extends CI_Model
 		$this->map = array(
 			'settings' => 'settings',
 			'badwords' => 'badwords',
-			'plugins' => 'plugins',
+// 			'plugins' => 'plugins',
 			'apps' => 'apps',
 		);
 		
@@ -38,10 +38,10 @@ class Cache_m extends CI_Model
 	}
 
 	function updatetpl() {
-		$tpl = dir(UC_DATADIR.'view');
+		$tpl = dir(FCPATH.'data/view');
 		while($entry = $tpl->read()) {
 			if(preg_match("/\.php$/", $entry)) {
-				@unlink(UC_DATADIR.'view/'.$entry);
+				@unlink(FCPATH.'data/'.$entry);
 			}
 		}
 		$tpl->close();

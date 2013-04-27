@@ -12,10 +12,7 @@
 	
 	function authcode($string, $operation = 'DECODE', $key = '', $expiry = 0) {
 	
-		$ckey_length = 4;	// �����Կ���� ȡֵ 0-32;
-		// ���������Կ���������������κι��ɣ�������ԭ�ĺ���Կ��ȫ��ͬ�����ܽ��Ҳ��ÿ�β�ͬ�������ƽ��Ѷȡ�
-		// ȡֵԽ�����ı䶯����Խ�����ı仯 = 16 �� $ckey_length �η�
-		// ����ֵΪ 0 ʱ���򲻲��������Կ
+		$ckey_length = 4;	
 	
 		$key = md5($key ? $key : UC_KEY);
 		$keya = md5(substr($key, 0, 16));

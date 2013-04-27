@@ -8,7 +8,7 @@
 		<div class="correctmsg"><p><?php echo $this->lang->line('update_succeed');?></p></div>
 	<?php endif;?>
 	<div class="mainbox">
-		<form action="admin.php?m=cache&a=update" method="post">
+		<form action="<?php echo $this->config->base_url('cache/update');?>" method="post">
 			<input type="hidden" name="formhash" value="<?php echo formhash();?>">
 			<table class="datalist fixwidth" onmouseover="addMouseEvent(this);">
 				<tr>

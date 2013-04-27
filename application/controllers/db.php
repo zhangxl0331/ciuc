@@ -17,7 +17,7 @@ class Db extends MY_Controller {
 		$status = 0;
 		$operate = getgpc('o');
 		if($operate == 'list') {
-			if($delete = $_POST['delete']) {
+			if($delete = @$_POST['delete']) {
 				if(is_array($delete)) {
 					foreach($delete AS $filename) {
 						@unlink('./data/backup/'.str_replace(array('/', '\\'), '', $filename));
@@ -28,10 +28,10 @@ class Db extends MY_Controller {
 			}
 	
 			$baklist = array();
-			if(is_dir(UC_ROOT.'./data/backup/')) {
-				$dir = dir(UC_ROOT.'./data/backup/');
+			if(is_dir(FCPATH.'data/backup/')) {
+				$dir = dir(FCPATH.'data/backup/');
 				while($entry = $dir->read()) {
-					$file = './data/backup/'.$entry;
+					$file = FCPATH.'data/backup/'.$entry;
 					if(is_dir($file) && preg_match("/backup_(\d+)_\w+/i", $file, $match)) {
 						$baklist[] = array('name' => $match[0], 'date' => $match[1]);
 					}
@@ -73,24 +73,24 @@ class Db extends MY_Controller {
 	}
 
 	function operate() {
-		require_once UC_ROOT.'lib/xml.class.php';
+		$this->load->library('xml');
 		$nexturl = getgpc('nexturl');
 		$appid = intval(getgpc('appid'));
 		$type = getgpc('t') == 'import' ? 'import' : 'export';
 		$backupdir = getgpc('backupdir');
-		$app = $this->cache['apps'][$appid];
+		$app = isset($this->caches['apps'][$appid]) && $this->caches['apps'][$appid];
 		if($nexturl) {
 			$url = $nexturl;
 		} else {
 			if($appid) {
-				if(!isset($this->cache['apps'][$appid])) {
+				if(!isset($this->caches['apps'][$appid])) {
 					$this->message($this->_parent_js($appid, 'appid_invalid'));
 				}
 				$url = $app['url'].'/api/dbbak.php?apptype='.$app['type'];
 				$code = $this->authcode('&method='.$type.'&sqlpath='.$backupdir.'&time='.time(), 'ENCODE', $app['authkey']);
 			} else {
 				$url = 'http://'.$_SERVER['HTTP_HOST'].str_replace('admin.php', 'api/dbbak.php', $_SERVER['PHP_SELF']).'?apptype=UCENTER';
-				$code = $this->authcode('&method='.$type.'&sqlpath='.$backupdir.'&time='.time(), 'ENCODE', UC_KEY);
+				$code = authcode('&method='.$type.'&sqlpath='.$backupdir.'&time='.time(), 'ENCODE', UC_KEY);
 			}
 			$url .= '&code='.urlencode($code);
 		}
@@ -159,9 +159,9 @@ class Db extends MY_Controller {
 	}
 
 	function _parent_js($extid, $message, $vars = array()) {
-		include UC_ROOT.'view/default/messages.lang.php';
- 		if(isset($lang[$message])) {
- 			$message = $lang[$message] ? str_replace(array_keys($vars), array_values($vars), $lang[$message]) : $message;
+		$this->load->language('messages');
+ 		if($this->lang->line($message)) {
+ 			$message = $this->lang->line($message) ? str_replace(array_keys($vars), array_values($vars), $this->lang->line($message)) : $message;
  		}
  		return '<script type="text/javascript">parent.show_status(\''.$extid.'\', \''.$message.'\');</script>';
 	}

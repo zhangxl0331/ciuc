@@ -25,8 +25,7 @@ class Domain_m extends CI_Model
 	}
 
 	function delete_domain($arr) {
-		$domainids = $this->base->implode($arr);
-		return $this->db->delete('domains', array('id IN'=>$domainids));
+		return $this->db->where_in('id', $arr)->delete('domains');
 	}
 
 	function update_domain($domain, $ip, $id) {

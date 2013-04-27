@@ -11,6 +11,7 @@ class Domain extends MY_Controller {
 		}
 		$this->load->model('domain_m');
 		$this->load->model('misc_m');
+		$this->load->library('xml');
 		$this->check_priv();
 	}
 	
@@ -26,7 +27,7 @@ class Domain extends MY_Controller {
 		}
 		if(@$_POST['domain']) {
 			foreach($_POST['domain'] as $id => $arr) {
-				if(!$this->domain_m->check_ip($_POST['ip'][$id])) {
+				if(!$this->misc_m->check_ip($_POST['ip'][$id])) {
 					$this->message('app_add_ip_invalid', 'BACK');
 				}
 				$this->domain_m->update_domain($_POST['domain'][$id], $_POST['ip'][$id], $id);
@@ -41,7 +42,7 @@ class Domain extends MY_Controller {
 		if($status > 0) {
 			$notedata = $this->domain_m->get_list($_GET['page'], 1000000, 1000000);
 			$this->load->model('note_m');
-			$this->note_m->add('updatehosts', '', $this->serialize($notedata));
+			$this->note_m->add('updatehosts', '', $this->xml->serialize($notedata));
 			$this->note_m->send();
 		}
 		$num = $this->domain_m->get_total_num();

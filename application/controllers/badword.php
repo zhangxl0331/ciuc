@@ -10,6 +10,7 @@ class Badword extends MY_Controller {
 			$this->message('no_permission_for_this_module');
 		}
 		$this->load->model('badword_m');
+		$this->load->library('xml');
 	}
 	
 	function ls() {
@@ -52,7 +53,7 @@ class Badword extends MY_Controller {
 		if($status > 0) {
 			$notedata = $this->badword_m->get_list($page, 1000000, 1000000);
 			$this->load->model('note_m');
-			$this->note_m->add('updatebadwords', '', $this->serialize($notedata, 1));
+			$this->note_m->add('updatebadwords', '', $this->xml->serialize($notedata, 1));
 			$this->note_m->send();
 
 			$this->load->model('cache_m');

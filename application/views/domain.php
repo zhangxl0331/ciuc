@@ -1,6 +1,6 @@
 <?php $this->load->view('header');?>
 
-<script src="<?php $this->config->base_url('js/common.js');?>" type="text/javascript"></script>
+<script src="<?php echo $this->config->base_url('js/common.js');?>" type="text/javascript"></script>
 <div class="container">
 	<?php if($status):?>
 		<div class="<?php if($status > 0):?>correctmsg<?php else:?>errormsg<?php endif;?>"><p><?php if($status == 2):?><?php echo $this->lang->line('domain_list_updated');?><?php elseif($status == 1):?><?php echo $this->lang->line('domain_add_succeed');?><?php endif;?></p></div>
@@ -38,8 +38,8 @@
 					<?php foreach($domainlist as $domain):?>
 					<tr>
 						<td><input type="checkbox" name="delete[]" value="<?php echo $domain['id'];?>" class="checkbox" /></td>
-						<td><input type="text" name="domain[<?php echo $domain['id'];?>]" value="$domain[domain]" title="<?php echo $this->lang->line('shortcut_tips');?>" class="txtnobd" onblur="this.className='txtnobd'" onfocus="this.className='txt'" style="text-align:left;" /></td>
-						<td><input type="text" name="ip[<?php echo $domain['ip'];?>]" value="<?php echo $domain['ip'];?>" title="<?php echo $this->lang->line('shortcut_tips');?>" class="txtnobd" onblur="this.className='txtnobd'" onfocus="this.className='txt'" style="text-align:left;" /></td>
+						<td><input type="text" name="domain[<?php echo $domain['id'];?>]" value="<?php echo $domain['domain'];?>" title="<?php echo $this->lang->line('shortcut_tips');?>" class="txtnobd" onblur="this.className='txtnobd'" onfocus="this.className='txt'" style="text-align:left;" /></td>
+						<td><input type="text" name="ip[<?php echo $domain['id'];?>]" value="<?php echo $domain['ip'];?>" title="<?php echo $this->lang->line('shortcut_tips');?>" class="txtnobd" onblur="this.className='txtnobd'" onfocus="this.className='txt'" style="text-align:left;" /></td>
 					</tr>
 					<?php endforeach;?>
 					<tr class="nobg">

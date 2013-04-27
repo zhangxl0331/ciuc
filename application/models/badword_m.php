@@ -33,8 +33,7 @@ class Badword_m extends CI_Model
 	}
 
 	function delete_badword($arr) {
-		$badwordids = $this->base->implode($arr);
-		return $this->db->delete('badwords', array('id IN', $badwordids));
+		return $this->db->where_in('id', $arr)->delete('badwords');
 	}
 
 	function truncate_badword() {

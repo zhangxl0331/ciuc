@@ -1,6 +1,6 @@
 <?php $this->load->view('header');?>
 
-<script src="<?php $this->config->base_url('js/common.js');?>" type="text/javascript"></script>
+<script src="<?php echo $this->config->base_url('js/common.js');?>" type="text/javascript"></script>
 
 <div class="container">
 	<?php if($operate == 'list'):?>
@@ -127,15 +127,15 @@
 <script type="text/javascript">
 var import_status = new Array();
 function db_delete(theform) {
-	var lang_tips = '{lang db_start_delete_dumpfile}';
-	if(!confirm('{lang db_delete_dumpfile_confirm}')) {
+	var lang_tips = '<?php echo $this->lang->line('db_start_delete_dumpfile');?>';
+	if(!confirm('<?php echo $this->lang->line('db_delete_dumpfile_confirm');?>')) {
 		return;
 	}
 	for(i = 0; theform[i] != null; i++) {
 		ele = theform[i];
 		if(/^operate\[/.test(ele.name) && ele.type == "checkbox" && ele.checked) {
 			show_status(ele.value, lang_tips);
-			$('operate_iframe_'+ele.value).src = 'admin.php?m=db&a=delete&backupdir='+ele.value;
+			$('operate_iframe_'+ele.value).src = '<?php echo $this->config->base_url('db/delete?backupdir=');?>'+ele.value;
 		}
 	}
 }
@@ -143,27 +143,27 @@ function db_delete(theform) {
 function db_operate(theform, operate) {
 	operate = operate == 'import' ? 'import' : 'export';
 	if(operate == 'export') {
-		var lang_tips = '{lang db_start_export_dumpfile}';
+		var lang_tips = '<?php echo $this->lang->line('db_start_export_dumpfile');?>';
 	} else {
-		if(!confirm('{lang db_import_dumpfile_confirm}')) {
+		if(!confirm('<?php echo $this->lang->line('db_import_dumpfile_confirm');?>')) {
 			return;
 		}
-		if(theform.operate_uc.checked && !confirm('{lang db_import_uc_dumpfile_confirm}')) {
+		if(theform.operate_uc.checked && !confirm('<?php echo $this->lang->line('db_import_uc_dumpfile_confirm');?>')) {
 			return;
 		}
-		var lang_tips = '{lang db_start_import_dumpfile}';
+		var lang_tips = '<?php echo $this->lang->line('db_start_import_dumpfile');?>';
 	}
 
 	if(theform.operate_uc.checked) {
 		show_status(0, lang_tips);
-		$('operate_iframe_0').src = 'admin.php?m=db&a=operate&t='+operate+'&appid=0&backupdir=<?php echo $dir;?>';
+		$('operate_iframe_0').src = '<?php echo $this->config->base_url('db/operate?t=');?>'+operate+'&appid=0&backupdir=<?php echo $dir;?>';
 	}
 	for(i = 0; theform[i] != null; i++) {
 		ele = theform[i];
 		if(/^operate\[\]$/.test(ele.name) && ele.type == "checkbox" && ele.checked) {
 			if(operate != 'import' || import_status[ele.value] != false) {
 				show_status(ele.value, lang_tips);
-				$('operate_iframe_'+ele.value).src = 'admin.php?m=db&a=operate&t='+operate+'&appid='+ele.value+'&backupdir=<?php echo $dir;?>';
+				$('operate_iframe_'+ele.value).src = '<?php echo $this->config->base_url('db/operate?t=');?>'+operate+'&appid='+ele.value+'&backupdir=<?php echo $dir;?>';
 			}
 		}
 	}
