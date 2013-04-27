@@ -1,6 +1,5 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-define('UC_SERVER_VERSION', '1.5.0');
-define('UC_SERVER_RELEASE', '20090121');
+
 /**
  * Code here is run before ALL controllers
  * 
@@ -80,7 +79,7 @@ class MY_Controller extends CI_Controller
 	}
 	
 	function init_app() {
-		$appid = intval($_REQUEST['appid']);
+		$appid = isset($_REQUEST['appid'])?intval($_REQUEST['appid']):NULL;
 		$appid && $this->app = $this->caches['apps'][$appid];
 	}
 	

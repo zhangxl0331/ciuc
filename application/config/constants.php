@@ -47,15 +47,8 @@ define('FOPEN_READ_WRITE_CREATE_STRICT',		'x+b');
 
 define('UC_NAME', 'UCenter');
 define('UC_VERSION', '1.5.0');
-define('UC_RELEASE', '20090121');
 define('UC_API', strtolower((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']));
-
-
-
 define('UC_CHARSET', 'utf-8');
-define('DBCHARSET', 'utf8');
-
-
 define('UC_FOUNDERPW', '11a70e6b057110b82f2bb2d8c0431c51');
 define('UC_FOUNDERSALT', '134180');
 define('UC_KEY', '4dcL8G6s36dI7Z6TfsaqfJcW0T7O005Ddi9A3w8Ub3cwc823610kcI5N1q1s8I1t');
