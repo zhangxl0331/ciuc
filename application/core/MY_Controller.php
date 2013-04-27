@@ -36,14 +36,11 @@ class MY_Controller extends CI_Controller
 		
 		$this->load->helper(array('global'));
 		
-		$this->sid = $this->cookie_status ? getgpc('sid', 'C') : rawurlencode(getgpc('sid', 'R'));
+		$this->sid = $this->cookie_status ? $this->input->cookie('sid') : rawurlencode($_REQUEST['sid']);
 		$this->load->vars('sid', $this->sid);
 		$this->load->vars('iframe', getgpc('iframe'));
 		$this->load->vars('class', $this->router->fetch_class());
 		$this->load->vars('method', $this->router->fetch_method());
-// 		if($this->router->fetch_class() !='user' && $this->router->fetch_method() != 'login' && $this->router->fetch_method() != 'logout') {
-// 			$this->check_priv();
-// 		}
 	}
 	
 	function init_var() {
@@ -58,15 +55,15 @@ class MY_Controller extends CI_Controller
 		$this->settings = $this->cache('settings');
 		$this->caches['apps'] = $this->cache('apps');
 		if(PHP_VERSION > '5.1') {
-// 			$timeoffset = intval($this->settings['timeoffset'] / 3600);
-// 			@date_default_timezone_set('Etc/GMT'.($timeoffset > 0 ? '-' : '+').(abs($timeoffset)));
+			$timeoffset = intval($this->settings['timeoffset'] / 3600);
+			@date_default_timezone_set('Etc/GMT'.($timeoffset > 0 ? '-' : '+').(abs($timeoffset)));
 		}
 	}
 	
 	function init_input($getagent = '') {
 		$input = getgpc('input', 'R');
 		if($input) {
-			$input = $this->authcode($input, 'DECODE', $this->app['authkey']);
+			$input = authcode($input, 'DECODE', $this->app['authkey']);
 			parse_str($input, $this->input);
 			$this->input = daddslashes($this->input, 1, TRUE);
 			$agent = $getagent ? $getagent : $this->input['agent'];
@@ -82,14 +79,8 @@ class MY_Controller extends CI_Controller
 		}
 	}
 	
-// 	function init_db() {
-// 		require_once UC_ROOT.'lib/db.class.php';
-// 		$this->db = new db();
-// 		$this->db->connect(UC_DBHOST, UC_DBUSER, UC_DBPW, UC_DBNAME, UC_DBCHARSET, UC_DBCONNECT, UC_DBTABLEPRE);
-// 	}
-	
 	function init_app() {
-		$appid = intval(getgpc('appid'));
+		$appid = intval($_REQUEST['appid']);
 		$appid && $this->app = $this->caches['apps'][$appid];
 	}
 	
@@ -127,26 +118,6 @@ class MY_Controller extends CI_Controller
 			$this->load->model('mail_m');
 			$this->mail_m->send();
 		}
-	}
-	
-	
-
-	
-	function get_setting($k = array(), $decode = FALSE) {
-		$return = array();
-		$sqladd = $k ? "WHERE k IN (".$this->implode($k).")" : '';
-		$settings = $this->db->fetch_all("SELECT * FROM ".UC_DBTABLEPRE."settings $sqladd");
-		if(is_array($settings)) {
-			foreach($settings as $arr) {
-				$return[$arr['k']] = $decode ? unserialize($arr['v']) : $arr['v'];
-			}
-		}
-		return $return;
-	}
-	
-	function set_setting($k, $v, $encode = FALSE) {
-		$v = is_array($v) || $encode ? addslashes(serialize($v)) : $v;
-		$this->db->query("REPLACE INTO ".UC_DBTABLEPRE."settings SET k='$k', v='$v'");
 	}
 	
 	function message($message, $redirect = '', $type = 0, $vars = array()) {
