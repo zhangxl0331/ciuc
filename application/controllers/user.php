@@ -249,7 +249,7 @@ class User extends MY_Controller {
 		$num = $this->user_m->get_total_num($sqladd, $like);
 		$userlist = $this->user_m->get_list($_GET['page'], UC_PPP, $num, $sqladd, $like);
 		foreach($userlist as $key => $user) {
-			$user['smallavatar'] = '<img src="avatar.php?uid='.$user['uid'].'&size=small">';
+			$user['smallavatar'] = '<img src="'.$this->config->base_url('service/avatar?uid='.$user['uid'].'&size=small').'">';
 			$userlist[$key] = $user;
 		}
 		$multipage = page($num, UC_PPP, $_GET['page'], $this->config->base_url('user/ls?srchname='.$srchname.'&srchregdatestart='.$srchregdatestart.'&srchregdateend='.$srchregdateend));
