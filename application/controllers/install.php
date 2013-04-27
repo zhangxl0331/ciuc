@@ -1,49 +1,11 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-error_reporting(E_ERROR | E_WARNING | E_PARSE);
-@set_time_limit(1000);
-set_magic_quotes_runtime(0);
 
-define('INSTALL_LANG', 'SC_UTF8');
+define('UC_INSTALL_LANG', 'SC_UTF8');
 define('CONSTANTS', APPPATH.'config/constants.php');
 define('DATABASE', APPPATH.'config/database.php');
-define('SQLFILE', FCPATH.'data/uc.sql');
-define('LOCK_INSTALL', FCPATH.'data/install.lock');
+define('UC_INSTALL_SQL', FCPATH.'data/uc.sql');
+define('UC_INSTALL_LOCK', FCPATH.'data/install.lock');
 define('LOCK_UPGRADE', FCPATH.'data/upgrade.lock');
-
-define('METHOD_UNDEFINED', 255);
-define('ENV_CHECK_RIGHT', 0);
-define('ERROR_CONFIG_VARS', 1);
-define('SHORT_OPEN_TAG_INVALID', 2);
-define('INSTALL_LOCKED', 3);
-define('DATABASE_NONEXISTENCE', 4);
-define('PHP_VERSION_TOO_LOW', 5);
-define('MYSQL_VERSION_TOO_LOW', 6);
-define('UC_URL_INVALID', 7);
-define('UC_DNS_ERROR', 8);
-define('UC_URL_UNREACHABLE', 9);
-define('UC_VERSION_INCORRECT', 10);
-define('UC_DBCHARSET_INCORRECT', 11);
-define('UC_API_ADD_APP_ERROR', 12);
-define('UC_ADMIN_INVALID', 13);
-define('UC_DATA_INVALID', 14);
-define('DBNAME_INVALID', 15);
-define('DATABASE_ERRNO_2003', 16);
-define('DATABASE_ERRNO_1044', 17);
-define('DATABASE_ERRNO_1045', 18);
-define('DATABASE_CONNECT_ERROR', 19);
-define('TABLEPRE_INVALID', 20);
-define('CONFIG_UNWRITEABLE', 21);
-define('ADMIN_USERNAME_INVALID', 22);
-define('ADMIN_EMAIL_INVALID', 25);
-define('ADMIN_EXIST_PASSWORD_ERROR', 26);
-define('ADMININFO_INVALID', 27);
-define('LOCKFILE_NO_EXISTS', 28);
-define('TABLEPRE_EXISTS', 29);
-define('ERROR_UNKNOW_TYPE', 30);
-define('ENV_CHECK_ERROR', 31);
-define('UNDEFINE_FUNC', 32);
-define('MISSING_PARAMETER', 33);
-define('LOCK_FILE_NOT_TOUCH', 34);
 
 $func_items = array('mysql_connect', 'fsockopen', 'gethostbyname', 'file_get_contents', 'xml_parser_create');
 
@@ -116,7 +78,7 @@ class Install extends CI_Controller {
 			show_msg('method_undefined', $method, 0);
 		}	
 		
-		if(file_exists(LOCK_INSTALL))
+		if(file_exists(UC_INSTALL_LOCK))
 		{
 			show_msg('install_locked', '', 0);
 		}
@@ -262,7 +224,7 @@ class Install extends CI_Controller {
 				$params['stricton'] = FALSE;
 				$this->load->database($params);
 		
-				$sql = file_get_contents(SQLFILE);
+				$sql = file_get_contents(UC_INSTALL_SQL);
 				$sql = str_replace("\r\n", "\n", $sql);
 		
 				if(!$view_off) 
@@ -294,7 +256,7 @@ class Install extends CI_Controller {
 		} 
 		elseif($method == 'ext_info') 
 		{		
-			@touch(LOCK_INSTALL);
+			@touch(UC_INSTALL_LOCK);
 			@touch(FCPATH.'data/install.lock');
 			if($view_off) 
 			{
@@ -311,14 +273,14 @@ class Install extends CI_Controller {
 		} 
 		elseif($method == 'install_check') 
 		{		
-			if(file_exists(LOCK_INSTALL)) 
+			if(file_exists(UC_INSTALL_LOCK)) 
 			{
 				@touch(LOCK_UPGRADE);
 				show_msg('installstate_succ');
 			} 
 			else 
 			{
-				show_msg('lock_file_not_touch', LOCK_INSTALL, 0);
+				show_msg('lock_file_not_touch', UC_INSTALL_LOCK, 0);
 			}
 		
 		} 
@@ -336,7 +298,9 @@ class Install extends CI_Controller {
 				show_msg('tablepre_exists', $tablepre, 0);
 			}
 		}
+
 	}
+	
 }
 
 /* End of file install.php */

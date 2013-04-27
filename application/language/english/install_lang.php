@@ -68,7 +68,7 @@ $lang = array(
 	'step_ext_info_desc' => '点击进入登陆',
 
 	'ext_info_succ' => '安装成功',
-	'install_locked' => '安装锁定，已经安装过了，如果您确定要重新安装，请到服务器上删除<br /> '.LOCK_INSTALL,
+	'install_locked' => '安装锁定，已经安装过了，如果您确定要重新安装，请到服务器上删除<br /> '.UC_INSTALL_LOCK,
 	'error_quit_msg' => '您必须解决以上问题，安装才可以继续',
 
 	'step_app_reg_title' => '设置运行环境',
