@@ -164,23 +164,7 @@ class MY_Controller extends CI_Controller
 	function input($k) {
 		return isset($this->input[$k]) ? (is_array($this->input[$k]) ? $this->input[$k] : trim($this->input[$k])) : NULL;
 	}
-	
-// 	function serialize($s, $htmlon = 0) {
 		
-// 		$this->load->library('xml');
-	
-// 		return xml_serialize($s, $htmlon);
-// 	}
-	
-// 	function unserialize($s) {
-		
-// 		$this->load->library('xml');
-	
-// 		return xml_unserialize($s);
-// 	}
-	
-	
-	
 	function setcookie($key, $value, $life = 0, $httponly = false) {
 		(!defined('UC_COOKIEPATH')) && define('UC_COOKIEPATH', '/');
 		(!defined('UC_COOKIEDOMAIN')) && define('UC_COOKIEDOMAIN', '');
@@ -287,7 +271,7 @@ class MY_Controller extends CI_Controller
 	
 	function sid_decode($sid) {
 		$ip = $this->input->ip_address();
-		$agent = $_SERVER['HTTP_USER_AGENT'];
+		$agent = $this->input->user_agent();
 		$authkey = md5($ip.$agent.UC_KEY);
 		$s = authcode(rawurldecode($sid), 'DECODE', $authkey, 1800);
 		if(empty($s)) {
@@ -303,7 +287,7 @@ class MY_Controller extends CI_Controller
 	
 	function sid_encode($username) {
 		$ip = $this->input->ip_address();
-		$agent = $_SERVER['HTTP_USER_AGENT'];
+		$agent = $this->input->user_agent();
 		$authkey = md5($ip.$agent.UC_KEY);
 		$check = substr(md5($ip.$agent), 0, 8);
 		return rawurlencode(authcode("$username\t$check", 'ENCODE', $authkey, 1800));
