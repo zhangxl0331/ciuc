@@ -1,6 +1,6 @@
 <?php $this->load->view('header');?>
 
-<script src="<?php $this->config->base_url('js/common.js');?>" type="text/javascript"></script>
+<script src="<?php echo $this->config->base_url('js/common.js');?>" type="text/javascript"></script>
 <?php if($a == 'ls'):?>
 <div class="container">
 	<?php if($status):?>
@@ -17,7 +17,7 @@
 			<input type="hidden" name="formhash" value="<?php echo formhash();?>">
 			<table class="datalist fixwidth" onmouseover="addMouseEvent(this);">
 				<tr>
-					<th><input type="checkbox" name="chkall" id="chkall" onclick="checkall('delete[]')" class="checkbox" /><label for="chkall"><?php echo $this->lang->line('announcepm_deleted');?>{lang badword_delete}</label></th>
+					<th><input type="checkbox" name="chkall" id="chkall" onclick="checkall('delete[]')" class="checkbox" /><label for="chkall"><?php echo $this->lang->line('badword_delete');?></label></th>
 					<th><?php echo $this->lang->line('title');?></th>
 					<th><?php echo $this->lang->line('pm_from');?></th>
 					<th><?php echo $this->lang->line('dateline');?></th>
@@ -25,7 +25,7 @@
 				<?php foreach($pmlist as $pm):?>
 					<tr>
 						<td class="option"><input type="checkbox" name="delete[]" value="<?php echo $pm['pmid'];?>" class="checkbox" /></td>
-						<td><a href="<?php echo $this->config->base_url('pm/view?pmid='.$pm['pmid'].'&$extra');?>"><?php if($pm['subject']):?><?php echo $pm[subject];?><?php else:?><?php echo $this->lang->line('pm_notitle');?><?php endif;?></a></td>
+						<td><a href="<?php echo $this->config->base_url('pm/view?pmid='.$pm['pmid'].'&$extra');?>"><?php if($pm['subject']):?><?php echo $pm['subject'];?><?php else:?><?php echo $this->lang->line('pm_notitle');?><?php endif;?></a></td>
 						<td><?php echo $pm['msgfrom'];?></td>
 						<td><?php echo $pm['dateline'];?></td>
 					</tr>

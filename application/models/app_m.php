@@ -47,8 +47,7 @@ class App_m extends CI_Model
 	}
 
 	function delete_apps($appids) {
-		$appids = $this->base->implode($appids);
-		return $this->db->delete('applications', array('appid IN'=>$appids));
+		return $this->db->where_in('appid', $appids)->delete('applications');
 	}
 
 /*	function update_app($appid, $name, $url, $authkey, $charset, $dbcharset) {

@@ -121,7 +121,7 @@ class Note_m extends CI_Model
 		foreach((array)$this->apps as $appid => $app) {
 			$appnotes = $note['app'.$appid];
 			if($app['recvnote'] && $appnotes != 1 && $appnotes > -UC_NOTE_REPEAT) {
-// 				$this->sendone($appid, 0, $note);
+				$this->sendone($appid, 0, $note);
 				$closenote = FALSE;
 				break;
 			}

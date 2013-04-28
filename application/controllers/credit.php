@@ -46,14 +46,14 @@ class Credit extends MY_Controller {
 			} else {
 				$status = -1;
 			}
-			$settings = $this->get_setting(array('creditexchange'), TRUE);
-			$creditexchange = is_array($settings['creditexchange']) ? $settings['creditexchange'] : array();
+			$settings = $this->setting_m->get_setting(array('creditexchange'), TRUE);
+			$creditexchange = is_array(@$settings['creditexchange']) ? $settings['creditexchange'] : array();
 		} elseif(!empty($delexchange) && $this->submitcheck()) {
 			if(is_array($delete)) {
 				foreach($delete as $key) {
 					unset($creditexchange[$key]);
 				}
-				$this->set_setting('creditexchange', $creditexchange, TRUE);
+				$this->setting_m->set_setting('creditexchange', $creditexchange, TRUE);
 				$this->cache_m->updatedata('settings');
 				$status = 1;
 				$this->writelog('credit_deleteexchange', "delete=".implode(',', $delete));

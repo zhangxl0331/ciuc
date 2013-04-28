@@ -5,6 +5,11 @@ class Pm_m extends CI_Model
 	public function __construct()
 	{
 		parent::__construct();
+		$this->load->model('cache_m');
+		
+		$appid = isset($_REQUEST['appid'])?intval($_REQUEST['appid']):NULL;
+		$apps = $this->cache_m->getdata('apps');
+		$appid && $apps && $this->app = $apps[$appid];
 	}
 
 	function pmintval($pmid) {
@@ -157,10 +162,10 @@ class Pm_m extends CI_Model
 				$daterange = 4;
 			}
 			$data['daterange'] = $daterange;
-			$data['daterangetext'] = !empty($this->lang['pm_daterange_'.$daterange]) ? $this->lang['pm_daterange_'.$daterange] : $daterange;
+			$data['daterangetext'] = ($pm_daterange = $this->lang->line('pm_daterange_'.$daterange)) ? $pm_daterange : $daterange;
 			$data['dbdateline'] = $data['dateline'];
-			$data['datelinetime'] = $this->base->date($data['dateline'], 1);
-			$data['dateline'] = $this->base->date($data['dateline']);
+			$data['datelinetime'] = $data['dateline'];
+			$data['dateline'] = $data['dateline'];
 			$data['subject'] = $data['subject'] != '' ? htmlspecialchars($data['subject']) : $this->lang['pm_notitle'];
 			$data['newstatus'] = $data['new'];
 			$data['touid'] = $data['avataruid'] = $uid == $data['msgfromid'] ? $data['msgtoid'] : $data['msgfromid'];
@@ -174,7 +179,7 @@ class Pm_m extends CI_Model
 	}
 
 	function sendpm($subject, $message, $msgfrom, $msgto, $pmid = 0, $savebox = 0, $related = 0) {
-		$_CACHE['badwords'] = $this->base->cache('badwords');
+		$_CACHE['badwords'] = $this->cache_m->getdata('badwords');
 		if($_CACHE['badwords']['findpattern']) {
 			$subject = @preg_replace($_CACHE['badwords']['findpattern'], $_CACHE['badwords']['replace'], $subject);
 			$message = @preg_replace($_CACHE['badwords']['findpattern'], $_CACHE['badwords']['replace'], $message);
@@ -184,7 +189,7 @@ class Pm_m extends CI_Model
 			$this->db->update('pms', array('msgtoid'=>$msgto, 'subject'=>$subject, 'dateline'=>$this->base->time, 'related'=>$related, 'message'=>$message),
 				array('pmid'=>$pmid, 'folder'=>'outbox', 'msgfromid'=>$msgfrom['uid']));
 		} else {
-			if($msgfrom['uid'] && $msgfrom['uid'] == $msgto) {
+			if(isset($msgfrom['uid']) && $msgfrom['uid'] == $msgto) {
 				return 0;
 			}
 			$box = $savebox ? 'outbox' : 'inbox';
@@ -192,10 +197,10 @@ class Pm_m extends CI_Model
 			if($subject == '' && !$related) {
 				$subject = $this->removecode(trim($message), 75);
 			} else {
-				$subject = $this->base->cutstr(trim($subject), 75, ' ');
+				$subject = cutstr(trim($subject), 75, ' ');
 			}
 
-			if($msgfrom['uid']) {
+			if(@$msgfrom['uid']) {
 				if($msgto) {
 					$sessionexist = $this->db->where(array('msgfromid'=>$msgfrom[uid], 'msgtoid'=>$msgto, 'folder'=>'inbox', 'related'=>'0'))->get('pms')->num_rows();
 				} else {
@@ -261,16 +266,16 @@ class Pm_m extends CI_Model
 			} else {
 				$this->db->insert('pms', 
 						array(
-								'msgfrom'=>$msgfrom['username'],
-								'msgfromid'=>$msgfrom['uid'],
+								'msgfrom'=>@$msgfrom['username'],
+								'msgfromid'=>@$msgfrom['uid'],
 								'msgtoid'=>$msgto,
 								'folder'=>$box,
 								'new'=>1,
 								'subject'=>$subject,
-								'dateline'=>$this->base->time,
+								'dateline'=>time(),
 								'related'=>0,
 								'message'=>$message,
-								'fromappid'=>$this->base->app['appid']
+								'fromappid'=>@$this->app['appid']?@$this->app['appid']:''
 								));
 				$lastpmid = $this->db->insert_id();
 			}
@@ -313,7 +318,7 @@ class Pm_m extends CI_Model
 	}
 
 	function deletepm($uid, $pmids) {
-		$this->db->delete('pms', array('msgtoid'=>$uid, 'pmid IN'=>$pmids));
+		$this->db->where_in('pmid', $pmids)->delete('pms');
 		$delnum = $this->db->affected_rows();
 		return $delnum;
 	}
@@ -408,7 +413,7 @@ class Pm_m extends CI_Model
 	}
 
 	function removecode($str, $length) {
-		return trim($this->base->cutstr(preg_replace(array(
+		return trim(cutstr(preg_replace(array(
 				"/\[(email|code|quote|img)=?.*\].*?\[\/(email|code|quote|img)\]/siU",
 				"/\[\/?(b|i|url|u|color|size|font|align|list|indent|float)=?.*\]/siU",
 				"/\r\n/",

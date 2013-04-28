@@ -154,13 +154,13 @@ class User_m extends CI_Model
 		foreach((array)$arr as $member) {
 			$puids[] = $member['uid'];
 		}
-		$uids = $this->base->implode(array_diff($uidsarr, $puids));
+		$uids = array_diff($uidsarr, $puids);
 		if($uids) {
-			$this->db->delete('members', array('uid IN'=>$uids));
-			$this->db->query('memberfields', array('uid IN'=>$uids));
+			$this->db->where_in('uid', $uids)->delete('members');
+			$this->db->where_in('uid', $uids)->delete('memberfields');
 			$this->delete_useravatar($uidsarr);
 			$this->load->model('note_m');
-			return $this->note_m->add('deleteuser', "ids=$uids");
+			return $this->note_m->add('deleteuser', serialize(array('ids'=>$uids)));
 		} else {
 			return 0;
 		}

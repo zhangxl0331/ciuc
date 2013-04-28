@@ -7,7 +7,7 @@
 	$Id: seccode.class.php 753 2008-11-14 06:48:25Z cnteacher $
 */
 
-class Seccode {
+class seccode {
 
 	var $code;			//100000-999999 ��Χ�����
 	var $type 	= 0;		//0 Ӣ��ͼƬ��֤��  1 ����ͼƬ��֤��  2 Flash ��֤��  3 ������֤��
