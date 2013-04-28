@@ -17,17 +17,17 @@ class Pm extends MY_Controller {
 		$folder = 'inbox';
 		$filter = 'announcepm';
 		$status = 0;
+		$delete = $this->input->post('delete');
 		if(submitcheck()) {
-			$delnum = $this->pm_m->deletepm($this->user['uid'], $_POST['delete']);
+			$delnum = $this->pm_m->deletepm($this->user['uid'], $delete);
 			$status = 1;
-			$this->writelog('pm_delete', "delete=".implode(',', $_POST['delete']));
+			$this->writelog('pm_delete', "delete=".implode(',', $delete));
 		}
 		$pmnum = $this->db->where(array('msgtoid'=>'0', 'folder'=>'inbox'))->get('pms')->num_rows();
 		$pmlist = $this->pm_m->get_pm_list($this->user['uid'], $pmnum, $folder, $filter, $_GET['page']);
 		$multipage = page($pmnum, 10, $_GET['page'], 'admin.php?m=pm&a=ls');
 		$extra = 'extra='.rawurlencode($this->input->get('extra'));
-		$a = getgpc('a');
-		$data['a'] = $a;
+
 		$data['status'] = $status;
 		$data['pmlist'] = $pmlist;
 		$data['extra'] = $extra;
@@ -37,7 +37,7 @@ class Pm extends MY_Controller {
 	}
 
 	function view() {
-		$pmid = @is_numeric($_GET['pmid']) ? $_GET['pmid'] : 0;
+		$pmid = @is_numeric($this->input->get('pmid')) ? $this->input->get('pmid') : 0;
 		$pms = $this->pm_m->get_pm_by_pmid($this->user['uid'], $pmid);
 
 		if($pms[0]) {
@@ -49,9 +49,8 @@ class Pm extends MY_Controller {
 			$pms['dateline'] = $this->date($pms['dateline']);
 		}
 
-		$extra = 'extra='.rawurlencode($_GET['extra']);
-		$a = getgpc('a');
-		$data['a'] = $a;
+		$extra = 'extra='.rawurlencode($this->input->get('extra'));
+
 		$data['pms'] = $pms;
 		$data['extra'] = $extra;
 
@@ -60,10 +59,12 @@ class Pm extends MY_Controller {
 
 	function send() {
 		$status = 0;
+		$subject = $this->input->post('subject');
+		$message = $this->input->post('message');
 		if(submitcheck()) {
-			$lastpmid = $this->pm_m->sendpm($_POST['subject'], $_POST['message'], $this->user['isfounder'] ? '' : $this->user, 0);
+			$lastpmid = $this->pm_m->sendpm($subject, $message, $this->user['isfounder'] ? '' : $this->user, 0);
 			$status = 1;
-			$this->writelog('pm_send', "subject=".htmlspecialchars($_POST['subject']));
+			$this->writelog('pm_send', "subject=".htmlspecialchars($subject));
 		}
 		$data['status'] = $status;
 		$this->load->view('pm_send', $data);
@@ -73,9 +74,9 @@ class Pm extends MY_Controller {
 		$delnum = 0;
 		$status = 0;
 		if(submitcheck()) {
-			$cleardays = intval(getgpc('cleardays', 'P'));
-			$unread = getgpc('unread') ? 1 : 0;
-			$usernames = trim(getgpc('usernames', 'P'));
+			$cleardays = intval($this->input->post('cleardays'));
+			$unread = $this->input->get_post('unread') ? 1 : 0;
+			$usernames = trim($this->input->post('usernames'));
 			$sqladd = '';
 			if($cleardays > 0) {
 				$sqladd .= ' AND dateline < '.($this->time - $cleardays * 86400);

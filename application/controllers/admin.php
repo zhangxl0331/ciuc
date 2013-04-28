@@ -16,8 +16,8 @@ class Admin extends MY_Controller {
 
 		$this->load->language('admin');
 		$status = 0;
-		if(!empty($_POST['addname']) && submitcheck()) {
-			$addname = getgpc('addname', 'P');
+		if($this->input->post('addname') && submitcheck()) {
+			$addname = $this->input->post('addname');
 			$data['addname'] = $addname;
 			$uid = $this->db->select('uid')->where('username', $addname)->get('members')->first_row()->uid;
 			if($uid) {
@@ -66,10 +66,10 @@ class Admin extends MY_Controller {
 			}
 		}
 
-		if(!empty($_POST['editpwsubmit']) && submitcheck()) {
-			$oldpw = getgpc('oldpw', 'P');
-			$newpw = getgpc('newpw', 'P');
-			$newpw2 = getgpc('newpw2', 'P');
+		if($this->input->post('editpwsubmit') && submitcheck()) {
+			$oldpw = $this->input->post('oldpw');
+			$newpw = $this->input->post('newpw');
+			$newpw2 = $this->input->post('newpw2');
 			if(UC_FOUNDERPW == md5(md5($oldpw).UC_FOUNDERSALT)) {
 				$configfile = APPPATH.'config/constants.php';
 				if(!is_writable($configfile)) {
@@ -97,12 +97,12 @@ class Admin extends MY_Controller {
 
 		$data['status'] = $status;
 
-		if(!empty($_POST['delete'])) {
+		if($this->input->post('delete')) {
 			$uids = $this->input->post('delete');
 			$this->db->where_in('uid', $uids)->delete('admins');
 		}
 
-		$page = max(1, getgpc('page'));
+		$page = max(1, $this->input->get_post('page'));
 		$ppp  = 15;
 		$totalnum = $this->db->get('admins')->num_rows();
 		$start = page_get_start($page, $ppp, $totalnum);
@@ -115,8 +115,6 @@ class Admin extends MY_Controller {
 			}
 		}
 
-		$a = getgpc('a');
-		$data['a'] = $a;
 		$data['multipage'] = $multipage;
 		$data['userlist'] = $userlist;
 		$this->load->view('admin', $data);
@@ -124,22 +122,22 @@ class Admin extends MY_Controller {
 	}
 
 	function edit() {
-		$uid = getgpc('uid');
+		$uid = $this->input->get_post('uid');
 		$status = 0;
 		$admin = $this->db->where('uid', $uid)->get('admins')->first_row('array');
 		if(submitcheck()) {
-			$allowadminsetting = getgpc('allowadminsetting', 'P');
-			$allowadminapp = getgpc('allowadminapp', 'P');
-			$allowadminuser = getgpc('allowadminuser', 'P');
-			$allowadminbadword = getgpc('allowadminbadword', 'P');
-			$allowadmintag = getgpc('allowadmintag', 'P');
-			$allowadminpm = getgpc('allowadminpm', 'P');
-			$allowadmincredits = getgpc('allowadmincredits', 'P');
-			$allowadmindomain = getgpc('allowadmindomain', 'P');
-			$allowadmindb = getgpc('allowadmindb', 'P');
-			$allowadminnote = getgpc('allowadminnote', 'P');
-			$allowadmincache = getgpc('allowadmincache', 'P');
-			$allowadminlog = getgpc('allowadminlog', 'P');
+			$allowadminsetting = $this->input->post('allowadminsetting');
+			$allowadminapp = $this->input->post('allowadminapp');
+			$allowadminuser = $this->input->post('allowadminuser');
+			$allowadminbadword = $this->input->post('allowadminbadword');
+			$allowadmintag = $this->input->post('allowadmintag');
+			$allowadminpm = $this->input->post('allowadminpm');
+			$allowadmincredits = $this->input->post('allowadmincredits');
+			$allowadmindomain = $this->input->post('allowadmindomain');
+			$allowadmindb = $this->input->post('allowadmindb');
+			$allowadminnote = $this->input->post('allowadminnote');
+			$allowadmincache = $this->input->post('allowadmincache');
+			$allowadminlog = $this->input->post('allowadminlog');
 			$update = $this->db->update('admins', array(
 				'allowadminsetting'=>$allowadminsetting,
 				'allowadminapp'=>$allowadminapp,

@@ -74,6 +74,7 @@ $form_db_init_items = array
 				'dbname' => array('type' => 'text', 'required' => 1, 'reg' => '/^.*$/', 'value' => array('type' => 'string', 'var' => 'ucenter')),
 				'dbuser' => array('type' => 'text', 'required' => 0, 'reg' => '/^.*$/', 'value' => array('type' => 'string', 'var' => 'root')),
 				'dbpw' => array('type' => 'password', 'required' => 0, 'reg' => '/^.*$/', 'value' => array('type' => 'string', 'var' => '')),
+				'dbcharset' => array('type' => 'text', 'required' => 0, 'reg' => '/^.*$/', 'value' => array('type' => 'string', 'var' => 'utf8')),
 				'tablepre' => array('type' => 'text', 'required' => 0, 'reg' => '/^.*$/', 'value' => array('type' => 'string', 'var' => 'uc_')),
 		),
 		'admininfo' => array
@@ -109,7 +110,7 @@ class Install extends CI_Controller {
 		
 		if(empty($method)) 
 		{
-			show_msg('method_undefined', $method, 0);
+			$this->show_msg('method_undefined', $method, 0);
 		}	
 		
 		if(file_exists(UC_INSTALL_LOCK))
@@ -119,17 +120,17 @@ class Install extends CI_Controller {
 					
 		if($method == 'show_license') 
 		{		
-			show_license();		
+			$this->show_license();		
 		} 
 		elseif($method == 'env_check') 
 		{			
-			$view_off && function_check($func_items);
+			$view_off && $this->function_check($func_items);
 		
-			env_check($env_items);
+			$this->env_check($env_items);
 		
-			dirfile_check($dirfile_items);
+			$this->dirfile_check($dirfile_items);
 		
-			show_env_result($env_items, $dirfile_items, $func_items);
+			$this->show_env_result($env_items, $dirfile_items, $func_items);
 		
 		} 
 		elseif($method == 'db_init') 
@@ -141,7 +142,7 @@ class Install extends CI_Controller {
 			{
 				foreach($form_db_init_items as $key => $items) 
 				{
-					$$key = getgpc($key, 'p');
+					$$key = $this->input->post($key);
 					if(!isset($$key) || !is_array($$key)) 
 					{
 						$submit = false;
@@ -168,7 +169,7 @@ class Install extends CI_Controller {
 				$submit = false;
 			}
 		
-			if(!$view_off && $_SERVER['REQUEST_METHOD'] == 'POST') 
+			if(!$view_off && $this->input->server('REQUEST_METHOD') == 'POST') 
 			{
 				if($ucfounderpw != $ucfounderpw2) 
 				{
@@ -180,7 +181,7 @@ class Install extends CI_Controller {
 				$dbname_not_exists = true;
 				if(!empty($dbhost) && empty($forceinstall)) 
 				{
-					$dbname_not_exists = check_db($dbhost, $dbuser, $dbpw, $dbname, $tablepre);
+					$dbname_not_exists = $this->check_db($dbhost, $dbuser, $dbpw, $dbname, $tablepre);
 					if(!$dbname_not_exists) 
 					{
 						$form_db_init_items['dbinfo']['forceinstall'] = array('type' => 'checkbox', 'required' => 0, 'reg' => '/^.*+/');
@@ -197,7 +198,7 @@ class Install extends CI_Controller {
 				$step = $step + 1;
 				if(empty($dbname)) 
 				{
-					show_msg('dbname_invalid', $dbname, 0);
+					$this->show_msg('dbname_invalid', $dbname, 0);
 				} 
 				else 
 				{
@@ -207,20 +208,20 @@ class Install extends CI_Controller {
 						$error = mysql_error();
 						if($errno == 1045) 
 						{
-							show_msg('database_errno_1045', $error, 0);
+							$this->show_msg('database_errno_1045', $error, 0);
 						} 
 						elseif($errno == 2003) 
 						{
-							show_msg('database_errno_2003', $error, 0);
+							$this->show_msg('database_errno_2003', $error, 0);
 						} 
 						else 
 						{
-							show_msg('database_connect_error', $error, 0);
+							$this->show_msg('database_connect_error', $error, 0);
 						}
 					}
 					if(mysql_get_server_info() > '4.1') 
 					{
-						mysql_query("CREATE DATABASE IF NOT EXISTS `$dbname` DEFAULT CHARACTER SET ".DBCHARSET);
+						mysql_query("CREATE DATABASE IF NOT EXISTS `$dbname` DEFAULT CHARACTER SET ".$dbcharset);
 					} 
 					else 
 					{
@@ -229,17 +230,17 @@ class Install extends CI_Controller {
 		
 					if(mysql_errno()) 
 					{
-						show_msg('database_errno_1044', mysql_error(), 0);
+						$this->show_msg('database_errno_1044', mysql_error(), 0);
 					}
 					mysql_close();
 				}
 		
 				if(strpos($tablepre, '.') !== false || intval($tablepre{0})) 
 				{
-					show_msg('tablepre_invalid', $tablepre, 0);
+					$this->show_msg('tablepre_invalid', $tablepre, 0);
 				}
 				
-				config_edit();
+				$this->config_edit();
 		
 				$params['hostname'] = $dbhost;
 				$params['username'] = $dbuser;
@@ -251,7 +252,7 @@ class Install extends CI_Controller {
 				$params['db_debug'] = TRUE;
 				$params['cache_on'] = FALSE;
 				$params['cachedir'] = '';
-				$params['char_set'] = DBCHARSET;
+				$params['char_set'] = $dbcharset;
 				$params['dbcollat'] = 'utf8_general_ci';
 				$params['swap_pre'] = '';
 				$params['autoinit'] = TRUE;
@@ -263,28 +264,28 @@ class Install extends CI_Controller {
 		
 				if(!$view_off) 
 				{
-					show_header();
-					show_install();
+					$this->show_header();
+					$this->show_install();
 				}
 		
-				runquery($sql);
+				$this->runquery($sql);
 		
-				$view_off && show_msg('initdbresult_succ');
+				$view_off && $this->show_msg('initdbresult_succ');
 		
 				if(!$view_off) 
 				{
 					echo '<script type="text/javascript">document.getElementById("laststep").disabled=false;document.getElementById("laststep").value = \''.$this->lang->line('install_succeed').'\';</script>'."\r\n";
-					show_footer();
+					$this->show_footer();
 				}
 		
 			}
 			if($view_off) 
 			{
-				show_msg('missing_parameter', '', 0);		
+				$this->show_msg('missing_parameter', '', 0);		
 			} 
 			else 
 			{				
-				show_form($form_db_init_items, $error_msg);		
+				$this->show_form($form_db_init_items, $error_msg);		
 			}
 		
 		} 
@@ -294,14 +295,14 @@ class Install extends CI_Controller {
 			@touch(FCPATH.'data/install.lock');
 			if($view_off) 
 			{
-				show_msg('ext_info_succ');
+				$this->show_msg('ext_info_succ');
 			} 
 			else 
 			{		
 				include CONFIG;
 				$md5password =  UC_FOUNDERPW;
-				setcookie('uc_founderauth', authcode("|$md5password|".md5($_SERVER['HTTP_USER_AGENT'])."|1", 'ENCODE', UC_KEY), time() + 3600, '/');
-				header("Location:.admin.php?m=frame&a=index&mainurl=".urlencode('admin.php?m=app&a=add'));		
+				setcookie('uc_founderauth', authcode("|$md5password|".md5($this->input->user_agent())."|1", 'ENCODE', UC_KEY), time() + 3600, '/');
+				header('Location:'.$this->config->base_url('index/index?mainurl='.urlencode('app/add')));		
 			}
 		
 		} 
@@ -310,34 +311,34 @@ class Install extends CI_Controller {
 			if(file_exists(UC_INSTALL_LOCK)) 
 			{
 				@touch(LOCK_UPGRADE);
-				show_msg('installstate_succ');
+				$this->show_msg('installstate_succ');
 			} 
 			else 
 			{
-				show_msg('lock_file_not_touch', UC_INSTALL_LOCK, 0);
+				$this->show_msg('lock_file_not_touch', UC_INSTALL_LOCK, 0);
 			}
 		
 		} 
 		elseif($method == 'tablepre_check') 
 		{
 		
-			$dbinfo = getgpc('dbinfo');
+			$dbinfo = $this->input->get_post('dbinfo');
 			extract($dbinfo);
 			if(check_db($dbhost, $dbuser, $dbpw, $dbname, $tablepre)) 
 			{
-				show_msg('tablepre_not_exists', 0);
+				$this->show_msg('tablepre_not_exists', 0);
 			} 
 			else 
 			{
-				show_msg('tablepre_exists', $tablepre, 0);
+				$this->show_msg('tablepre_exists', $tablepre, 0);
 			}
 		}
 
 	}
 	
 	function show_msg($error_no, $error_msg = 'ok', $success = 1, $quit = TRUE) {
-		$view_off = getgpc('view_off') ? TRUE : FALSE;
-		$step = intval(getgpc('step', 'R')) ? intval(getgpc('step', 'R')) : 0;
+		$view_off = $this->input->get_post('view_off') ? TRUE : FALSE;
+		$step = intval($this->input->get_post('step')) ? intval($this->input->get_post('step')) : 0;
 		if($view_off) {
 			$error_code = $success ? 0 : constant(strtoupper($error_no));
 			$error_msg = empty($error_msg) ? $error_no : $error_msg;
@@ -384,17 +385,17 @@ class Install extends CI_Controller {
 	
 	function check_db($dbhost, $dbuser, $dbpw, $dbname, $tablepre) {
 		if(!function_exists('mysql_connect')) {
-			show_msg('undefine_func', 'mysql_connect', 0);
+			$this->show_msg('undefine_func', 'mysql_connect', 0);
 		}
 		if(!@mysql_connect($dbhost, $dbuser, $dbpw)) {
 			$errno = mysql_errno();
 			$error = mysql_error();
 			if($errno == 1045) {
-				show_msg('database_errno_1045', $error, 0);
+				$this->show_msg('database_errno_1045', $error, 0);
 			} elseif($errno == 2003) {
-				show_msg('database_errno_2003', $error, 0);
+				$this->show_msg('database_errno_2003', $error, 0);
 			} else {
-				show_msg('database_connect_error', $error, 0);
+				$this->show_msg('database_connect_error', $error, 0);
 			}
 		} else {
 			if($query = mysql_query("SHOW TABLES FROM $dbname")) {
@@ -412,7 +413,7 @@ class Install extends CI_Controller {
 		foreach($dirfile_items as $key => $item) {
 			$item_path = $item['path'];
 			if($item['type'] == 'dir') {
-				if(!dir_writeable($item_path)) {
+				if(!$this->dir_writeable($item_path)) {
 					if(is_dir($item_path)) {
 						$dirfile_items[$key]['status'] = 0;
 						$dirfile_items[$key]['current'] = '+r';
@@ -475,7 +476,7 @@ class Install extends CI_Controller {
 	
 	function function_check(&$func_items) {
 		foreach($func_items as $item) {
-			function_exists($item) or show_msg('undefine_func', $item, 0);
+			function_exists($item) or $this->show_msg('undefine_func', $item, 0);
 		}
 	}
 	
@@ -486,7 +487,7 @@ class Install extends CI_Controller {
 	
 		foreach($env_items as $key => $item) {
 			if($key == 'php' && strcmp($item['current'], $item['r']) < 0) {
-				show_msg('php_version_too_low', $item['current'], 0);
+				$this->show_msg('php_version_too_low', $item['current'], 0);
 			}
 			$status = 1;
 			if($item['r'] != 'notset') {
@@ -502,7 +503,7 @@ class Install extends CI_Controller {
 					}
 				}
 			}
-			$view_off = getgpc('view_off') ? TRUE : FALSE;
+			$view_off = $this->input->get_post('view_off') ? TRUE : FALSE;
 			if($view_off) {
 				$env_str .= "\t\t<runCondition name=\"$key\" status=\"$status\" Require=\"$item[r]\" Best=\"$item[b]\" Current=\"$item[current]\"/>\n";
 			} else {
@@ -561,7 +562,7 @@ class Install extends CI_Controller {
 	
 		} else {
 	
-			show_header();
+			$this->show_header();
 	
 			echo "<h2 class=\"title\">".$this->lang->line('env_check')."</h2>\n";
 			echo "<table class=\"tb\" style=\"margin:20px 0 20px 55px;\">\n";
@@ -608,9 +609,9 @@ class Install extends CI_Controller {
 			echo $func_str;
 			echo "</table>\n";
 	
-			show_next_step(2, $error_code);
+			$this->show_next_step(2, $error_code);
 	
-			show_footer();
+			$this->show_footer();
 	
 		}
 	
@@ -633,15 +634,15 @@ class Install extends CI_Controller {
 	
 	function show_form(&$form_items, $error_msg) {
 	
-		$step = intval(getgpc('step', 'R')) ? intval(getgpc('step', 'R')) : 0;
+		$step = intval($_REQUEST['step']) ? intval($_REQUEST['step']) : 0;
 	
 		if(empty($form_items) || !is_array($form_items)) {
 			return;
 		}
 	
-		show_header();
-		show_setting('start');
-		show_setting('hidden', 'step', $step);
+		$this->show_header();
+		$this->show_setting('start');
+		$this->show_setting('hidden', 'step', $step);
 		$is_first = 1;
 		foreach($form_items as $key => $items) {
 			global ${'error_'.$key};
@@ -650,9 +651,9 @@ class Install extends CI_Controller {
 			}
 	
 			if(!${'error_'.$key}) {
-				show_tips('tips_'.$key);
+				$this->show_tips('tips_'.$key);
 			} else {
-				show_error('tips_admin_config', ${'error_'.$key});
+				$this->show_error('tips_admin_config', ${'error_'.$key});
 			}
 	
 			if($is_first == 0) {
@@ -678,31 +679,31 @@ class Install extends CI_Controller {
 				if($v['type'] == 'checkbox') {
 					$value = '1';
 				}
-				show_setting($k, $key.'['.$k.']', $value, $v['type'], isset($error_msg[$key][$k]) ? $key.'_'.$k.'_invalid' : '');
+				$this->show_setting($k, $key.'['.$k.']', $value, $v['type'], isset($error_msg[$key][$k]) ? $key.'_'.$k.'_invalid' : '');
 			}
 	
 			if($is_first) {
 				$is_first = 0;
 			}
 		}
-		show_setting('', 'submitname', 'new_step', 'submit');
-		show_setting('end');
-		show_footer();
+		$this->show_setting('', 'submitname', 'new_step', 'submit');
+		$this->show_setting('end');
+		$this->show_footer();
 	}
 	
 	function show_license() {
-		$view_off = getgpc('view_off') ? TRUE : FALSE;
-		$self = getgpc('self');
-		$uchidden = getgpc('uchidden');
-		$step = intval(getgpc('step', 'R')) ? intval(getgpc('step', 'R')) : 0;
+		$view_off = $this->input->get_post('view_off') ? TRUE : FALSE;
+		$self = $this->input->get_post('self');
+		$uchidden = $this->input->get_post('uchidden');
+		$step = intval($_REQUEST['step']) ? intval($_REQUEST['step']) : 0;
 		$next = $step + 1;
 		if($view_off)
 		{
-			show_msg('license_contents', $this->lang->line('license'), 1);
+			$this->show_msg('license_contents', $this->lang->line('license'), 1);
 		}
 		else
 		{
-			show_header();
+			$this->show_header();
 	
 			$license = str_replace('  ', '&nbsp; ', $this->lang->line('license'));
 			$lang_agreement_yes = $this->lang->line('agreement_yes');
@@ -721,7 +722,7 @@ class Install extends CI_Controller {
 	</div>
 EOT;
 	
-			show_footer();
+			$this->show_footer();
 	
 		}
 	}
@@ -730,7 +731,7 @@ EOT;
 		$type = strtoupper(preg_replace("/^\s*CREATE TABLE\s+.+\s+\(.+?\).*(ENGINE|TYPE)\s*=\s*([a-z]+?).*$/isU", "\\2", $sql));
 		$type = in_array($type, array('MYISAM', 'HEAP')) ? $type : 'MYISAM';
 		return preg_replace("/^\s*(CREATE TABLE\s+.+\s+\(.+?\)).*$/isU", "\\1", $sql).
-		(mysql_get_server_info() > '4.1' ? " ENGINE=$type DEFAULT CHARSET=".DBCHARSET : " TYPE=$type");
+		(mysql_get_server_info() > '4.1' ? " ENGINE=$type DEFAULT CHARSET=".$this->db->char_set : " TYPE=$type");
 	}
 	
 	function dir_writeable($dir) {
@@ -765,13 +766,9 @@ EOT;
 	}
 	
 	function show_header() {
-		define('SHOW_HEADER', TRUE);
-		$apppath = APPPATH;
-		$step = intval(getgpc('step', 'R')) ? intval(getgpc('step', 'R')) : 0;
+		$step = isset($_REQUEST['step']) ? intval($_REQUEST['step']) : 0;
 		$version = UC_VERSION;
 		$release = UC_RELEASE;
-		$install_lang = $this->lang->line(UC_INSTALL_LANG);
-		$title = $this->lang->line('title_install');
 		$charset = UC_CHARSET;
 		echo <<<EOT
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -794,10 +791,10 @@ EOT;
 <div class="container">
 	<div class="header">
 		<h1>{$this->lang->line('title_install')}</h1>
-		<span>V$version $install_lang $release</span>
+		<span>V$version {$this->lang->line(UC_INSTALL_LANG)} $release</span>
 EOT;
 	
-		$step > 0 && show_step($step);
+		$step > 0 && $this->show_step($step);
 	}
 	
 	function show_footer($quit = true) {
@@ -822,7 +819,7 @@ EOT;
 	}
 	
 	function showjsmessage($message) {
-		$view_off = getgpc('view_off') ? TRUE : FALSE;
+		$view_off = $this->input->get_post('view_off') ? TRUE : FALSE;
 		if($view_off) return;
 		echo '<script type="text/javascript">showmessage(\''.addslashes($message).' \');</script>'."\r\n";
 		flush();
@@ -850,10 +847,6 @@ EOT;
 	
 	}
 	
-	function get_onlineip() {
-		global $CI;
-		return $CI->input->ip_address();
-	}
 	
 	function config_edit() {
 		global $form_db_init_items;
@@ -861,7 +854,7 @@ EOT;
 		{
 			foreach($form_db_init_items as $key => $items)
 			{
-				$$key = getgpc($key, 'p');
+				$$key = $this->input->post($key);
 				foreach($items as $k => $v)
 				{
 					$tmp = $$key;
@@ -874,9 +867,9 @@ EOT;
 		$ucfounderpw= md5(md5($ucfounderpw).$ucsalt);
 		$regdate = time();
 	
-		$ucauthkey = generate_key();
-		$ucsiteid = generate_key();
-		$ucmykey = generate_key();
+		$ucauthkey = $this->generate_key();
+		$ucsiteid = $this->generate_key();
+		$ucmykey = $this->generate_key();
 	
 		$constants = file_get_contents(CONSTANTS);
 		$pattern = array(
@@ -924,7 +917,7 @@ EOT;
 	}
 	
 	function generate_key() {
-		$random = random(32);
+		$random = $this->random(32);
 		$info = md5($_SERVER['SERVER_SOFTWARE'].$_SERVER['SERVER_NAME'].$_SERVER['SERVER_ADDR'].$_SERVER['SERVER_PORT'].$_SERVER['HTTP_USER_AGENT'].time());
 		$return = '';
 		for($i=0; $i<64; $i++) {
@@ -935,32 +928,32 @@ EOT;
 	}
 	
 	function show_install() {
-		$view_off = getgpc('view_off') ? TRUE : FALSE;
+		$view_off = $this->input->get_post('view_off') ? TRUE : FALSE;
 		if($view_off) return;
-		$step = intval(getgpc('step', 'R')) ? intval(getgpc('step', 'R')) : 0;
+		$step = intval($_REQUEST['step']) ? intval($_REQUEST['step']) : 0;
 		echo <<<EOT
 <script type="text/javascript">
 function showmessage(message) {
-	document.getElementById('notice').value += message + "\r\n";
+	document.getElementById('notice').value += message + '\\n';
 }
 function initinput() {
-	window.location='install?step=($step+1)';
+	window.location='{$this->config->base_url('install?step='.($step+1))}';
 }
 </script>
 	<div class="main">
 		<div class="btnbox"><textarea name="notice" style="width: 80%;"  readonly="readonly" id="notice"></textarea></div>
 		<div class="btnbox marginbot">
-	<input type="button" name="submit" value="$this->lang->line('install_in_processed')" disabled style="height: 25" id="laststep" onclick="initinput()">
+	<input type="button" name="submit" value="{$this->lang->line('install_in_processed')}" disabled style="height: 25" id="laststep" onclick="initinput()">
 	</div>
 EOT;
 	}
 	
 	function runquery($sql) {
-		global $CI, $lang, $tablepre, $db;
+		global $lang, $tablepre;
 	
 		if(!isset($sql) || empty($sql)) return;
 	
-		$sql = str_replace("\r", "\n", str_replace(' '.ORIG_TABLEPRE, ' '.$CI->db->dbprefix, $sql));
+		$sql = str_replace("\r", "\n", str_replace(' uc_', ' '.$this->db->dbprefix, $sql));
 		$ret = array();
 		$num = 0;
 		foreach(explode(";\n", trim($sql)) as $query) {
@@ -979,10 +972,10 @@ EOT;
 	
 				if(substr($query, 0, 12) == 'CREATE TABLE') {
 					$name = preg_replace("/CREATE TABLE ([a-z0-9_]+) .*/is", "\\1", $query);
-					showjsmessage($this->lang->line('create_table').' '.$name.' ... '.$this->lang->line('succeed'));
-					$CI->db->query(createtable($query));
+					$this->showjsmessage($this->lang->line('create_table').' '.$name.' ... '.$this->lang->line('succeed'));
+					$this->db->query($this->createtable($query));
 				} else {
-					$CI->db->query($query);
+					$this->db->query($query);
 				}
 	
 			}
@@ -1028,7 +1021,7 @@ EOT;
 			//$out .= "Referer: $boardurl\r\n";
 			$out .= "Accept-Language: zh-cn\r\n";
 			$out .= "Content-Type: application/x-www-form-urlencoded\r\n";
-			$out .= "User-Agent: $_SERVER[HTTP_USER_AGENT]\r\n";
+			$out .= "User-Agent: {$this->input->user_agent()}\r\n";
 			$out .= "Host: $host\r\n";
 			$out .= 'Content-Length: '.strlen($post)."\r\n";
 			$out .= "Connection: Close\r\n";
@@ -1040,7 +1033,7 @@ EOT;
 			$out .= "Accept: */*\r\n";
 			//$out .= "Referer: $boardurl\r\n";
 			$out .= "Accept-Language: zh-cn\r\n";
-			$out .= "User-Agent: $_SERVER[HTTP_USER_AGENT]\r\n";
+			$out .= "User-Agent: {$this->input->user_agent()}\r\n";
 			$out .= "Host: $host\r\n";
 			$out .= "Connection: Close\r\n";
 			$out .= "Cookie: $cookie\r\n\r\n";
@@ -1210,13 +1203,13 @@ EOT;
 	function show_step($step) {
 	
 		$allow_method = array('show_license', 'env_check', 'db_init', 'ext_info', 'install_check', 'tablepre_check');
-		$method = getgpc('method');
+		$method = $this->input->get_post('method');
 		if(empty($method) || !in_array($method, $allow_method)) {
 			$method = isset($allow_method[$step]) ? $allow_method[$step] : '';
 		}
 	
 		if(empty($method)) {
-			show_msg('method_undefined', $method, 0);
+			$this->show_msg('method_undefined', $method, 0);
 		}
 	
 		$laststep = 4;

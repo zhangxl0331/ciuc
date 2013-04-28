@@ -30,13 +30,13 @@ class User extends MY_Controller {
 	}
 	
 	function login() {
-		$authkey = md5(UC_KEY.$_SERVER['HTTP_USER_AGENT'].$this->onlineip);
+		$authkey = md5(UC_KEY.$this->input->user_agent().$this->onlineip);
 	
-		$username = getgpc('username', 'P');
-		$password = getgpc('password', 'P');
-		$iframe	  = getgpc('iframe');
+		$username = $this->input->post('username');
+		$password = $this->input->post('password');
+		$iframe	  = $_REQUEST['iframe'];
 	
-		$isfounder = intval(getgpc('isfounder', 'P'));
+		$isfounder = intval($this->input->post('isfounder'));
 		/*
 			echo $sid = $this->sid_encode('admin');
 		echo $this->sid_decode($sid);
@@ -61,8 +61,8 @@ class User extends MY_Controller {
 			} 
 			else 
 			{	
-				$seccodehidden = urldecode(getgpc('seccodehidden', 'P'));
-				$seccode = strtoupper(getgpc('seccode', 'P'));
+				$seccodehidden = urldecode($this->input->post('seccodehidden'));
+				$seccode = strtoupper($this->input->post('seccode'));
 				$seccodehidden = authcode($seccodehidden, 'DECODE', $authkey);
 				$this->load->library('seccode');
 				$this->seccode->seccodeconvert($seccodehidden);
@@ -109,7 +109,7 @@ class User extends MY_Controller {
 	
 					$pwlen = strlen($password);
 					if($errorcode == 0) {
-						$this->setcookie('sid', $this->view->sid, 86400);
+						$this->input->set_cookie('sid', $this->view->sid, 86400);
 						
 						$this->user['admin'] = 1;
 						$this->writelog('login', 'succeed');
@@ -149,7 +149,7 @@ class User extends MY_Controller {
 	
 	function logout() {
 		$this->writelog('logout');
-		$this->setcookie('sid', '');
+		$this->input->set_cookie('sid', '');
 		header('location: '.$this->config->base_url());
 	}
 	
@@ -158,9 +158,9 @@ class User extends MY_Controller {
 		if(!submitcheck('submit')) {
 			exit;
 		}
-		$username = getgpc('addname', 'P');
-		$password =  getgpc('addpassword', 'P');
-		$email = getgpc('addemail', 'P');
+		$username = $this->input->post('addname');
+		$password =  $this->input->post('addpassword');
+		$email = $this->input->post('addemail');
 	
 		if(($status = $this->_check_username($username)) < 0) {
 			if($status == UC_USER_CHECK_USERNAME_FAILED) {
@@ -190,11 +190,11 @@ class User extends MY_Controller {
 		$this->load->language('admin');
 	
 		$status = 0;
-		if(!empty($_POST['addname']) && submitcheck()) {
+		if($this->input->post('addname') && submitcheck()) {
 			$this->check_priv();
-			$username = getgpc('addname', 'P');
-			$password =  getgpc('addpassword', 'P');
-			$email = getgpc('addemail', 'P');
+			$username = $this->input->post('addname');
+			$password =  $this->input->post('addpassword');
+			$email = $this->input->post('addemail');
 	
 			if(($status = $this->_check_username($username)) >= 0) {
 				if(($status = $this->_check_email($email)) >= 0) {
@@ -206,17 +206,17 @@ class User extends MY_Controller {
 		}
 		$data['status'] = $status;
 	
-		if(!empty($_POST['delete'])) {
-			$this->user_m->delete_user($_POST['delete']);
+		if($delete = $this->input->post('delete')) {
+			$this->user_m->delete_user($delete);
 			$status = 2;
-			$this->writelog('user_delete', "uid=".implode(',', $_POST['delete']));
+			$this->writelog('user_delete', "uid=".implode(',', $delete));
 		}
-		$srchname = getgpc('srchname', 'R');
-		$srchregdatestart = getgpc('srchregdatestart', 'R');
-		$srchregdateend = getgpc('srchregdateend', 'R');
-		$srchuid = intval(getgpc('srchuid', 'R'));
-		$srchregip = trim(getgpc('srchregip', 'R'));
-		$srchemail = trim(getgpc('srchemail', 'R'));
+		$srchname = $this->input->get_post('srchname');
+		$srchregdatestart = $this->input->get_post('srchregdatestart');
+		$srchregdateend = $this->input->get_post('srchregdateend');
+		$srchuid = intval($this->input->get_post('srchuid'));
+		$srchregip = trim($this->input->get_post('srchregip'));
+		$srchemail = trim($this->input->get_post('srchemail'));
 	
 		$data['srchname'] = $srchname;
 		$data['srchuid'] = $srchuid;
@@ -257,17 +257,17 @@ class User extends MY_Controller {
 		$this->_format_userlist($userlist);
 		$data['userlist'] = $userlist;
 		//$data['apps', $this->cache['apps']);
-		$adduser = getgpc('adduser');
-		$a = getgpc('a');
+		$adduser = $this->input->get_post('adduser');
+
 		$data['multipage'] = $multipage;
 		$data['adduser'] = $adduser;
-		$data['a'] = $a;
+
 		$this->load->view('user', $data);
 	
 	}
 	
 	function edit() {
-		$uid = getgpc('uid');
+		$uid = $this->input->get_post('uid');
 		$status = 0;
 		if(!$this->user['isfounder']) {
 			$isprotected = $this->db->where('uid', $uid)->get('protectedmembers')->num_rows();
@@ -277,12 +277,12 @@ class User extends MY_Controller {
 		}
 	
 		if(submitcheck()) {
-			$username = getgpc('username', 'P');
-			$newusername = getgpc('newusername', 'P');
-			$password = getgpc('password', 'P');
-			$email = getgpc('email', 'P');
-			$delavatar = getgpc('delavatar', 'P');
-			$rmrecques = getgpc('rmrecques', 'P');
+			$username = $this->input->post('username');
+			$newusername = $this->input->post('newusername');
+			$password = $this->input->post('password');
+			$email = $this->input->post('email');
+			$delavatar = $this->input->post('delavatar');
+			$rmrecques = $this->input->post('rmrecques');
 			$sqladd = array();
 			$this->load->model('note_m');
 			if($username != $newusername) {

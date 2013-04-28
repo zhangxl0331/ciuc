@@ -15,16 +15,16 @@ class Db extends MY_Controller {
 	
 	function ls() {
 		$status = 0;
-		$operate = getgpc('o');
+		$operate = $this->input->get_post('o');
 		if($operate == 'list') {
-			if($delete = @$_POST['delete']) {
+			if($delete = $this->input->post('delete')) {
 				if(is_array($delete)) {
 					foreach($delete AS $filename) {
 						@unlink('./data/backup/'.str_replace(array('/', '\\'), '', $filename));
 					}
 				}
 				$status = 2;
-				$this->writelog('db_delete', "delete=".implode(',', $_POST['delete']));
+				$this->writelog('db_delete', "delete=".implode(',', $delete));
 			}
 	
 			$baklist = array();
@@ -42,15 +42,15 @@ class Db extends MY_Controller {
 			}
 			$data['baklist'] = $baklist;
 		} elseif($operate == 'view') {
-			$dir = getgpc('dir');
+			$dir = $this->input->get_post('dir');
 			$this->load->model('app_m');
 			$applist = $this->app_m->get_apps();
 			$data['applist'] = $applist;
 			$data['dir'] = $dir;
 		} elseif($operate == 'ping') {
-			$appid = intval(getgpc('appid'));
+			$appid = intval($this->input->get_post('appid'));
 			$app = $this->cache['apps'][$appid];
-			$dir = trim(getgpc('dir'));
+			$dir = trim($this->input->get_post('dir'));
 			$url = $app['url'].'/api/dbbak.php?apptype='.$app['type'];
 			$code = authcode('&method=ping&dir='.$dir.'&time='.time(), 'ENCODE', $app['authkey']);
 			$url .= '&code='.urlencode($code);
@@ -74,10 +74,10 @@ class Db extends MY_Controller {
 
 	function operate() {
 		$this->load->library('xml');
-		$nexturl = getgpc('nexturl');
-		$appid = intval(getgpc('appid'));
-		$type = getgpc('t') == 'import' ? 'import' : 'export';
-		$backupdir = getgpc('backupdir');
+		$nexturl = $this->input->get_post('nexturl');
+		$appid = intval($this->input->get_post('appid'));
+		$type = $this->input->get_post('t') == 'import' ? 'import' : 'export';
+		$backupdir = $this->input->get_post('backupdir');
 		$app = isset($this->caches['apps'][$appid]) && $this->caches['apps'][$appid];
 		if($nexturl) {
 			$url = $nexturl;
@@ -89,7 +89,7 @@ class Db extends MY_Controller {
 				$url = $app['url'].'/api/dbbak.php?apptype='.$app['type'];
 				$code = $this->authcode('&method='.$type.'&sqlpath='.$backupdir.'&time='.time(), 'ENCODE', $app['authkey']);
 			} else {
-				$url = 'http://'.$_SERVER['HTTP_HOST'].str_replace('admin.php', 'api/dbbak.php', $_SERVER['PHP_SELF']).'?apptype=UCENTER';
+				$url = 'http://'.$this->input->server('HTTP_HOST').str_replace('admin.php', 'api/dbbak.php', $this->input->server('PHP_SELF')).'?apptype=UCENTER';
 				$code = authcode('&method='.$type.'&sqlpath='.$backupdir.'&time='.time(), 'ENCODE', UC_KEY);
 			}
 			$url .= '&code='.urlencode($code);
@@ -120,12 +120,12 @@ class Db extends MY_Controller {
 
 	function delete() {
 		require_once UC_ROOT.'lib/xml.class.php';
-		$appid = intval(getgpc('appid'));
-		$backupdir = getgpc('backupdir');
+		$appid = intval($this->input->get_post('appid'));
+		$backupdir = $this->input->get_post('backupdir');
 		$app = $this->cache['apps'][$appid];
 		if(empty($appid)) {
 			$app['ip'] = defined('UC_IP') ? UC_IP : '';
-			$url = 'http://'.$_SERVER['HTTP_HOST'].str_replace('admin.php', 'api/dbbak.php', $_SERVER['PHP_SELF']).'?apptype=UCENTER';
+			$url = 'http://'.$this->input->server('HTTP_HOST').str_replace('admin.php', 'api/dbbak.php', $this->input->server('PHP_SELF')).'?apptype=UCENTER';
 			$code = $this->authcode('&method=delete&sqlpath='.$backupdir.'&time='.time(), 'ENCODE', UC_KEY);
 			$appname = 'UCenter';
 		} else {

@@ -14,12 +14,12 @@ class Badword extends MY_Controller {
 	}
 	
 	function ls() {
-		$page = getgpc('page');
-		$find = getgpc('find', 'P');
-		$replacement = getgpc('replacement', 'P');
-		$replacementnew = getgpc('replacementnew', 'P');
-		$findnew = getgpc('findnew', 'P');
-		$delete = getgpc('delete', 'P');
+		$page = $this->input->get_post('page');
+		$find = $this->input->post('find');
+		$replacement = $this->input->post('replacement');
+		$replacementnew = $this->input->post('replacementnew');
+		$findnew = $this->input->post('findnew');
+		$delete = $this->input->post('delete');
 		if($find) {
 			foreach($find as $id => $arr) {
 				$this->badword_m->update_badword($find[$id], $replacement[$id], $id);
@@ -37,9 +37,9 @@ class Badword extends MY_Controller {
 			$status = 2;
 			$this->writelog('badword_delete', "delete=".implode(',', $delete));
 		}
-		if(getgpc('multisubmit', 'P')) {
-			$badwords = getgpc('badwords', 'P');
-			$type = getgpc('type', 'P');
+		if($this->input->post('multisubmit')) {
+			$badwords = $this->input->post('badwords');
+			$type = $this->input->post('type');
 			if($type == 0) {
 				$this->badword_m->truncate_badword();
 				$type = 1;

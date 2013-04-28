@@ -35,9 +35,9 @@ class MY_Controller extends CI_Controller
 		
 		$this->load->helper(array('global'));
 		
-		$this->sid = $this->cookie_status ? $this->input->cookie('sid') : rawurlencode($_REQUEST['sid']);
+		$this->sid = $this->cookie_status ? $this->input->cookie('sid') : rawurlencode($this->input->get_post('sid'));
 		$this->load->vars('sid', $this->sid);
-		$this->load->vars('iframe', getgpc('iframe'));
+		$this->load->vars('iframe', @$_REQUEST['iframe']);
 		$this->load->vars('class', $this->router->fetch_class());
 		$this->load->vars('method', $this->router->fetch_method());
 	}
@@ -60,7 +60,7 @@ class MY_Controller extends CI_Controller
 	}
 	
 	function init_input($getagent = '') {
-		$input = getgpc('input', 'R');
+		$input = @$_REQUEST['input'];
 		if($input) {
 			$input = authcode($input, 'DECODE', $this->app['authkey']);
 			parse_str($input, $this->input);
@@ -84,10 +84,10 @@ class MY_Controller extends CI_Controller
 	}
 	
 	function init_user() {
-		if(isset($_COOKIE['uc_auth'])) {
-			@list($uid, $username, $agent) = explode('|', $this->authcode($_COOKIE['uc_auth'], 'DECODE', ($this->input ? $this->app['appauthkey'] : UC_KEY)));
+		if($auth = $this->input->cookie('auth')) {
+			@list($uid, $username, $agent) = explode('|', $this->authcode($auth, 'DECODE', ($this->input ? $this->app['appauthkey'] : UC_KEY)));
 			if($agent != md5($_SERVER['HTTP_USER_AGENT'])) {
-				$this->setcookie('uc_auth', '');
+				$this->input->set_cookie('auth', '');
 			} else {
 				@$this->user['uid'] = $uid;
 				@$this->user['username'] = $username;
@@ -106,14 +106,14 @@ class MY_Controller extends CI_Controller
 	}
 	
 	function init_note() {
-		if($this->note_exists() && !getgpc('inajax')) {
+		if($this->note_exists() && !@$_REQUEST['inajax']) {
 			$this->load->model('note_m');
 			$this->note_m->send();
 		}
 	}
 	
 	function init_mail() {
-		if($this->mail_exists() && !getgpc('inajax')) {
+		if($this->mail_exists() && !@$_REQUEST['inajax']) {
 			$this->load->model('mail_m');
 			$this->mail_m->send();
 		}
@@ -163,25 +163,6 @@ class MY_Controller extends CI_Controller
 	function input($k) {
 		return isset($this->input[$k]) ? (is_array($this->input[$k]) ? $this->input[$k] : trim($this->input[$k])) : NULL;
 	}
-		
-	function setcookie($key, $value, $life = 0, $httponly = false) {
-		(!defined('UC_COOKIEPATH')) && define('UC_COOKIEPATH', '/');
-		(!defined('UC_COOKIEDOMAIN')) && define('UC_COOKIEDOMAIN', '');
-
-		if($value == '' || $life < 0) {
-			$value = '';
-			$life = -1;
-		}
-
-		$life = $life > 0 ? $this->time + $life : ($life < 0 ? $this->time - 31536000 : 0);
-		$path = $httponly && PHP_VERSION < '5.2.0' ? UC_COOKIEPATH."; HttpOnly" : UC_COOKIEPATH;
-		$secure = $_SERVER['SERVER_PORT'] == 443 ? 1 : 0;
-		if(PHP_VERSION < '5.2.0') {
-			setcookie($key, $value, $life, $path, UC_COOKIEDOMAIN, $secure);
-		} else {
-			setcookie($key, $value, $life, $path, UC_COOKIEDOMAIN, $secure, $httponly);
-		}
-	}
 	
 	function note_exists() {
 		$noteexists = $this->db->where('name', 'noteexists')->get('vars')->first_row();
@@ -204,10 +185,9 @@ class MY_Controller extends CI_Controller
 	
 	
 	function check_priv() {
-		$sid = $this->cookie_status ? getgpc('sid', 'C') : rawurlencode(getgpc('sid', 'R'));
-		$username = $this->sid_decode($sid);
+		$username = $this->sid_decode($this->sid);
 		if(empty($username)) {
-			header('Location: '.$this->config->base_url().'user/login?iframe='.getgpc('iframe', 'G').($this->cookie_status ? '' : '&sid='.$sid));
+			header('Location: '.$this->config->base_url().'user/login?iframe='.$this->input->get('iframe').($this->cookie_status ? '' : '&sid='.$this->sid));
 			exit;
 		} else {
 			$this->user['isfounder'] = $username == 'UCenterAdministrator' ? 1 : 0;
@@ -215,15 +195,15 @@ class MY_Controller extends CI_Controller
 				$admin = $this->db->select('a.*, m.*')->from('admins a')->join('members m', 'a.uid=m.uid', 'LEFT')->where('a.username', $username)->get()->row_array();
 				
 				if(empty($admin)) {
-					header('Location: '.$this->config->base_url().'user/login?iframe='.getgpc('iframe', 'G').($this->cookie_status ? '' : '&sid='.$sid));
+					header('Location: '.$this->config->base_url().'user/login?iframe='.$this->input->get('iframe').($this->cookie_status ? '' : '&sid='.$this->sid));
 					exit;
 				} else {
 					$this->user += $admin;
 					$this->user['username'] = $username;
 					$this->user['admin'] = 1;
-					$sid = $this->sid_encode($username);
-					$this->load->vars('sid', $sid);
-					$this->setcookie('sid', $this->sid, 86400);
+					$this->sid = $this->sid_encode($username);
+					$this->load->vars('sid', $this->sid);
+					$this->input->set_cookie('sid', $this->sid, 86400);
 				}
 			} else {
 				$this->user['username'] = 'UCenterAdministrator';

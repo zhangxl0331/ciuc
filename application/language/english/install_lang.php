@@ -219,6 +219,7 @@ $lang = array(
 	'dbuser' => '数据库用户名',
 	'dbpw' => '数据库密码',
 	'dbname' => '数据库名',
+	'dbcharset' => '数据库字符集',
 	'tablepre' => '数据表前缀',
 
 	'ucfounderpw' => '创始人密码',

@@ -11,8 +11,8 @@ class Mail extends MY_Controller {
 	}
 	
 	function ls() {
-		$page = getgpc('page');
-		$delete = getgpc('delete', 'P');
+		$page = $this->input->get_post('page');
+		$delete = $this->input->post('delete');
 		$status = 0;
 		if(!empty($delete)) {
 			$this->mail_m->delete_mail($delete);
@@ -32,14 +32,14 @@ class Mail extends MY_Controller {
 	}
 
 	function send() {
-		$mailid = intval(getgpc('mailid'));
+		$mailid = intval($this->input->get_post('mailid'));
 		$result = $this->mail_m->send_by_id($mailid);
 		if($result) {
 			$this->writelog('mail_send', "appid=$appid&noteid=$noteid");
-			$this->message('mail_succeed', $_SERVER['HTTP_REFERER']);
+			$this->message('mail_succeed', $this->input->server('HTTP_REFERER'));
 		} else {
 			$this->writelog('mail_send', 'failed');
-			$this->message('mail_false', $_SERVER['HTTP_REFERER']);
+			$this->message('mail_false', $this->input->server('HTTP_REFERER'));
 		}
 
 	}

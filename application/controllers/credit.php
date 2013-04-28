@@ -16,15 +16,15 @@ class Credit extends MY_Controller {
 	}
 	
 	function ls() {
-		$appsrc = getgpc('appsrc', 'P');
-		$creditsrc = getgpc('creditsrc', 'P');
-		$appdesc = getgpc('appdesc', 'P');
-		$creditdesc = getgpc('creditdesc', 'P');
-		$ratiosrc = getgpc('ratiosrc', 'P');
-		$ratiodesc = getgpc('ratiodesc', 'P');
-		$delete = getgpc('delete', 'P');
-		$addexchange = getgpc('addexchange', 'G');
-		$delexchange = getgpc('delexchange', 'G');
+		$appsrc = $this->input->post('appsrc');
+		$creditsrc = $this->input->post('creditsrc');
+		$appdesc = $this->input->post('appdesc');
+		$creditdesc = $this->input->post('creditdesc');
+		$ratiosrc = $this->input->post('ratiosrc');
+		$ratiodesc = $this->input->post('ratiodesc');
+		$delete = $this->input->post('delete');
+		$addexchange = $this->input->get('addexchange');
+		$delexchange = $this->input->get('delexchange');
 		$settings = $this->setting_m->get_setting(array('creditexchange'), TRUE);
 		$creditexchange = isset($settings['creditexchange']) && is_array($settings['creditexchange']) ? $settings['creditexchange'] : array();
 		$appsrc = @intval($appsrc);
@@ -108,11 +108,11 @@ class Credit extends MY_Controller {
 		$this->load('note');
 		$this->load('misc');
 		$this->load('cache');
-		$step = intval(getgpc('step', 'G'));
+		$step = intval($this->input->get('step'));
 		if(!$step && is_array($this->cache['apps'])) {
 			$credits = array();
-			$stepapp = intval(getgpc('stepapp', 'G'));
-			$testrelease = intval(getgpc('testrelease', 'G'));
+			$stepapp = intval($this->input->get('stepapp'));
+			$testrelease = intval($this->input->get('testrelease'));
 			$appids = array_keys($this->cache['apps']);
 			$appid = $appids[$stepapp];
 			if(!$stepapp) {

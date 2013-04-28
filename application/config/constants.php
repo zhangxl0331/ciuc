@@ -50,11 +50,11 @@ define('UC_VERSION', '1.5.0');
 define('UC_RELEASE', '20090121');
 define('UC_API', strtolower((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']));
 define('UC_CHARSET', 'utf-8');
-define('UC_FOUNDERPW', '11a70e6b057110b82f2bb2d8c0431c51');
-define('UC_FOUNDERSALT', '134180');
-define('UC_KEY', '4dcL8G6s36dI7Z6TfsaqfJcW0T7O005Ddi9A3w8Ub3cwc823610kcI5N1q1s8I1t');
-define('UC_SITEID', '4Zck8N6a3pdG7t6LfKaMf1cL0z790I5PdE9X378Cblcucm2y680HcN5p1R11871R');
-define('UC_MYKEY', '4gcF8y693qdr7L61fha4fYcV057W095Ad9983G8Qb7cLcY2S6z0McH5v1R1v8S1l');
+define('UC_FOUNDERPW', '2cb6c0859828e7e6f3742f73eb665e33');
+define('UC_FOUNDERSALT', '106786');
+define('UC_KEY', '2hfE5waxaRdp5B5u5iaT1SfU1Q3Wd980fM4xf76P3waW9c5v4Qczdre44Hdyf52a');
+define('UC_SITEID', '2Uft5VaMapdY5K5y5saY1ofg1k3Bdo84fJ4Dfa6T3GaA9a5L4wc3dLeD48dofg2E');
+define('UC_MYKEY', '2yf856aLaodr515o5Nai1if31036dC8ZfW4Wfr6j3Rav98564ecVdJeM4idGfp2E');
 define('UC_DEBUG', false);
 define('UC_PPP', 20);
 

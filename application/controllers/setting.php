@@ -11,6 +11,7 @@ class Setting extends MY_Controller {
 		if(!$this->user['isfounder'] && !$this->user['allowadminsetting']) {
 			$this->message('no_permission_for_this_module');
 		}
+		$this->load->library('xml');
 	}
 	
 	function ls() {
@@ -49,10 +50,8 @@ class Setting extends MY_Controller {
 			$this->_add_note_for_setting($settings);
 		}
 		$settings['dateformat'] = str_replace(array('y', 'n', 'j'), array('yyyy', 'mm', 'dd'), $settings['dateformat']);
-		$settings['timeformat'] = $settings['timeformat'] == 'H:i' ? 1 : 0;
+		$settings['timeformat'] = isset($settings['timeformat']) && $settings['timeformat'] == 'H:i' ? 1 : 0;
 		$settings['pmcenter'] = $settings['pmcenter'] ? 1 : 0;
-		$a = getgpc('a');
-		$data['a'] = $a;
 
 		$data['dateformat'] = $settings['dateformat'];
 		$timeformatchecked = array($settings['timeformat'] => 'checked="checked"');
@@ -80,10 +79,10 @@ class Setting extends MY_Controller {
 	function register() {
 		$updated = false;
 		if(submitcheck()) {
-			$this->setting_m->set_setting('doublee', getgpc('doublee', 'P'));
-			$this->setting_m->set_setting('accessemail', getgpc('accessemail', 'P'));
-			$this->setting_m->set_setting('censoremail', getgpc('censoremail', 'P'));
-			$this->setting_m->set_setting('censorusername', getgpc('censorusername', 'P'));
+			$this->setting_m->set_setting('doublee', $this->input->post('doublee'));
+			$this->setting_m->set_setting('accessemail', $this->input->post('accessemail'));
+			$this->setting_m->set_setting('censoremail', $this->input->post('censoremail'));
+			$this->setting_m->set_setting('censorusername', $this->input->post('censorusername'));
 			$updated = true;
 			$this->writelog('setting_register_update');
 			$this->updatecache();
@@ -130,7 +129,7 @@ class Setting extends MY_Controller {
 
 	function _add_note_for_setting($settings) {
 		$this->load->model('note_m');
-		$this->note_m->add('updateclient', '', $this->serialize($settings, 1));
+		$this->note_m->add('updateclient', '', $this->xml->serialize($settings, 1));
 		$this->note_m->send();
 	}
 }

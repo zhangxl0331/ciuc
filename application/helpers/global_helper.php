@@ -1,14 +1,5 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-	function getgpc($k, $t='R') {
-		switch($t) {
-			case 'P': $var = &$_POST; break;
-			case 'G': $var = &$_GET; break;
-			case 'C': $var = &$_COOKIE; break;
-			case 'R': $var = &$_REQUEST; break;
-		}
-		return isset($var[$k]) ? (is_array($var[$k]) ? $var[$k] : trim($var[$k])) : NULL;
-	}
 	
 	function authcode($string, $operation = 'DECODE', $key = '', $expiry = 0) {
 	
@@ -115,12 +106,8 @@
 	}
 	
 	function submitcheck() {
-		return @getgpc('formhash', 'P') == formhash() ? true : false;
+		return @$_POST['formhash'] == formhash() ? true : false;
 	}
-	
-// 	function implode($arr) {
-// 		return "'".implode("','", (array)$arr)."'";
-// 	}
 	
 	function set_home($uid, $dir = '.') {
 		$uid = sprintf("%09d", $uid);
@@ -203,29 +190,11 @@
 		return $strcut.$dot;
 	}
 	
-// 	function setcookie($key, $value, $life = 0, $httponly = false) {
-// 		(!defined('UC_COOKIEPATH')) && define('UC_COOKIEPATH', '/');
-// 		(!defined('UC_COOKIEDOMAIN')) && define('UC_COOKIEDOMAIN', '');
-	
-// 		if($value == '' || $life < 0) {
-// 			$value = '';
-// 			$life = -1;
-// 		}
-	
-// 		$life = $life > 0 ? $this->time + $life : ($life < 0 ? $this->time - 31536000 : 0);
-// 		$path = $httponly && PHP_VERSION < '5.2.0' ? UC_COOKIEPATH."; HttpOnly" : UC_COOKIEPATH;
-// 		$secure = $_SERVER['SERVER_PORT'] == 443 ? 1 : 0;
-// 		if(PHP_VERSION < '5.2.0') {
-// 			setcookie($key, $value, $life, $path, UC_COOKIEDOMAIN, $secure);
-// 		} else {
-// 			setcookie($key, $value, $life, $path, UC_COOKIEDOMAIN, $secure, $httponly);
-// 		}
-// 	}
 	
 	function dstripslashes($string) {
 		if(is_array($string)) {
 			foreach($string as $key => $val) {
-				$string[$key] = $this->dstripslashes($val);
+				$string[$key] = dstripslashes($val);
 			}
 		} else {
 			$string = stripslashes($string);

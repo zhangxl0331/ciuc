@@ -34,8 +34,8 @@ class Note extends MY_Controller {
 	}
 	
 	function ls() {
-		$page = getgpc('page');
-		$delete = getgpc('delete', 'P');
+		$page = $this->input->get_post('page');
+		$delete = $this->input->post('delete');
 		$status = 0;
 		if(!empty($delete)) {
 			$this->note_m->delete_note($delete);
@@ -61,15 +61,15 @@ class Note extends MY_Controller {
 	}
 
 	function send() {
-		$noteid = intval(getgpc('noteid'));
-		$appid = intval(getgpc('appid'));
+		$noteid = intval($this->input->get_post('noteid'));
+		$appid = intval($this->input->get_post('appid'));
 		$result = $this->note_m->sendone($appid, $noteid);
 		if($result) {
 			$this->writelog('note_send', "appid=$appid&noteid=$noteid");
-			$this->message('note_succeed', $_SERVER['HTTP_REFERER']);
+			$this->message('note_succeed', $this->input->server('HTTP_REFERER'));
 		} else {
 			$this->writelog('note_send', 'failed');
-			$this->message('note_false', $_SERVER['HTTP_REFERER']);
+			$this->message('note_false', $this->input->server('HTTP_REFERER'));
 		}
 
 	}

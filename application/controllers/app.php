@@ -17,20 +17,20 @@ class App extends MY_Controller {
 	
 	function ls() {
 		$status = $affectedrows = 0;
-		if(!empty($_POST['delete'])) {
-			$affectedrows += $this->app_m->delete_apps($_POST['delete']);
-			foreach($_POST['delete'] as $k => $appid) {
+		if($delete = $this->input->post('delete')) {
+			$affectedrows += $this->app_m->delete_apps($delete);
+			foreach($this->input->post('delete') as $k => $appid) {
 				$this->app_m->alter_app_table($appid, 'REMOVE');
 				unset($_POST['name'][$k]);
 			}
 			$this->cache_m->updatedata();
-			$this->writelog('app_delete', 'appid='.implode(',', $_POST['delete']));
+			$this->writelog('app_delete', 'appid='.implode(',', $delete));
 			$status = 2;
 
 			$this->_add_note_for_app();
 		}
 
-		$a = getgpc('a');
+
 		$applist = $this->app_m->get_apps();
 		$data['status'] = $status;
 		$data['a'] = $a;
@@ -44,26 +44,25 @@ class App extends MY_Controller {
 			$md5ucfounderpw = md5(UC_FOUNDERPW);
 			$data['md5ucfounderpw'] = $md5ucfounderpw;
 
-			$a = getgpc('a');
-			$data['a'] = $a;
+
 			$typelist = array('UCHOME'=>'UCenter Home','XSPACE'=>'X-Space','DISCUZ'=>'Discuz!','SUPESITE'=>'SupeSite','SUPEV'=>'SupeV','ECSHOP'=>'ECShop','ECMALL'=>'ECMall','OTHER'=>$this->lang->line('other'));
 			$data['typelist'] = $typelist;
 			$this->load->view('app', $data);
 		} else {
-			$type = getgpc('type', 'P');
-			$name = getgpc('name', 'P');
-			$url = getgpc('url', 'P');
-			$ip = getgpc('ip', 'P');
-			$viewprourl = getgpc('viewprourl', 'P');
-			$authkey = getgpc('authkey', 'P');
+			$type = $this->input->post('type');
+			$name = $this->input->post('name');
+			$url = $this->input->post('url');
+			$ip = $this->input->post('ip');
+			$viewprourl = $this->input->post('viewprourl');
+			$authkey = $this->input->post('authkey');
 			$authkey = authcode($authkey, 'ENCODE', UC_MYKEY);
-			$synlogin = getgpc('synlogin', 'P');
-			$recvnote = getgpc('recvnote', 'P');
-			$apifilename = trim(getgpc('apifilename', 'P'));
+			$synlogin = $this->input->post('synlogin');
+			$recvnote = $this->input->post('recvnote');
+			$apifilename = trim($this->input->post('apifilename'));
 
 			$tagtemplates = array();
-			$tagtemplates['template'] = getgpc('tagtemplates', 'P');
-			$tagfields = explode("\n", getgpc('tagfields', 'P'));
+			$tagtemplates['template'] = $this->input->post('tagtemplates');
+			$tagfields = explode("\n", $this->input->post('tagfields'));
 			foreach($tagfields as $field) {
 				$field = trim($field);
 				list($k, $v) = explode(',', $field);
@@ -73,10 +72,10 @@ class App extends MY_Controller {
 			}
 			$tagtemplates = $this->xml->serialize($tagtemplates, 1);
 
-			if(!$this->misc_m->check_url($_POST['url'])) {
+			if(!$this->misc_m->check_url($this->input->post('url'))) {
 				$this->message('app_add_url_invalid', 'BACK');
 			}
-			if(!empty($_POST['ip']) && !$this->misc_m->check_ip($_POST['ip'])) {
+			if($this->input->post('ip') && !$this->misc_m->check_ip($this->input->post('ip'))) {
 				$this->message('app_add_ip_invalid', 'BACK');
 			}
 			$app = $this->db->where('name', $name)->get('applications')->num_rows();
@@ -84,7 +83,7 @@ class App extends MY_Controller {
 				$this->db->update('applications', array('name'=>$name, 'url'=>$url, 'ip'=>$ip, 'viewprourl'=>$viewprourl, 'apifilename'=>$apifilename, 'authkey'=>$authkey, 'synlogin'=>$synlogin, 'type'=>$type, 'tagtemplates'=>$tagtemplates), array('appid'=>$app[appid]));
 				$appid = $app['appid'];
 			} else {
-				$extra = $this->xml->serialize(array('apppath'=> getgpc('apppath', 'P')));
+				$extra = $this->xml->serialize(array('apppath'=> $this->input->post('apppath')));
 				$this->db->insert('applications', array('name'=>$name, 'url'=>$url, 'ip'=>$ip, 'viewprourl'=>$viewprourl, 'apifilename'=>$apifilename, 'authkey'=>$authkey, 'synlogin'=>$synlogin, 'type'=>$type, 'recvnote'=>$recvnote, 'extra'=>$extra, 'tagtemplates'=>$tagtemplates));
 				$appid = $this->db->insert_id();
 			}
@@ -94,15 +93,15 @@ class App extends MY_Controller {
 			$this->cache_m->updatedata('apps');
 
 			$this->app_m->alter_app_table($appid, 'ADD');
-			$this->writelog('app_add', "appid=$appid; appname=$_POST[name]");
+			$this->writelog('app_add', "appid=$appid; appname={$this->input->post('name')}");
 			header("location: admin.php?m=app&a=detail&appid=$appid&addapp=yes&sid=".$this->view->sid);
 		}
 	}
 
 	function ping() {
-		$ip = getgpc('ip');
-		$url = getgpc('url');
-		$appid = intval(getgpc('appid'));
+		$ip = $this->input->get_post('ip');
+		$url = $this->input->get_post('url');
+		$appid = intval($this->input->get_post('appid'));
 		$app = $this->app_m->get_app_by_appid($appid);
 		$status = '';
 		if(isset($app['extra']['apppath']) && $app['extra']['apppath'] && @include $app['extra']['apppath'].'./api/'.$app['apifilename']) {
@@ -122,22 +121,22 @@ class App extends MY_Controller {
 	}
 
 	function detail() {
-		$appid = getgpc('appid');
+		$appid = $this->input->get_post('appid');
 		$updated = false;
 		$app = $this->app_m->get_app_by_appid($appid);
 		if(submitcheck()) {
-			$type = getgpc('type', 'P');
-			$name = getgpc('name', 'P');
-			$url = getgpc('url', 'P');
-			$ip = getgpc('ip', 'P');
-			$viewprourl = getgpc('viewprourl', 'P');
-			$apifilename = trim(getgpc('apifilename', 'P'));
-			$authkey = getgpc('authkey', 'P');
+			$type = $this->input->post('type');
+			$name = $this->input->post('name');
+			$url = $this->input->post('url');
+			$ip = $this->input->post('ip');
+			$viewprourl = $this->input->post('viewprourl');
+			$apifilename = trim($this->input->post('apifilename'));
+			$authkey = $this->input->post('authkey');
 			$authkey = authcode($authkey, 'ENCODE', UC_MYKEY);
-			$synlogin = getgpc('synlogin', 'P');
-			$recvnote = getgpc('recvnote', 'P');
-			if(getgpc('apppath', 'P')) {
-				$app['extra']['apppath'] = $this->_realpath(getgpc('apppath', 'P'));
+			$synlogin = $this->input->post('synlogin');
+			$recvnote = $this->input->post('recvnote');
+			if($this->input->post('apppath')) {
+				$app['extra']['apppath'] = $this->_realpath($this->input->post('apppath'));
 				if($app['extra']['apppath']) {
 					$apifile = $app['extra']['apppath'].'./api/uc.php';
 					if(!file_exists($apifile)) {
@@ -159,8 +158,8 @@ class App extends MY_Controller {
 			}
 
 			$tagtemplates = array();
-			$tagtemplates['template'] = getgpc('tagtemplates', 'P');
-			$tagfields = explode("\n", getgpc('tagfields', 'P'));
+			$tagtemplates['template'] = $this->input->post('tagtemplates');
+			$tagfields = explode("\n", $this->input->post('tagfields'));
 			foreach($tagfields as $field) {
 				$field = trim($field);
 				list($k, $v) = explode(',', $field);
@@ -189,8 +188,7 @@ class App extends MY_Controller {
 			}
 		}
 		$tagtemplates['fields'] = $tmp;
-		$a = getgpc('a');
-		$data['a'] = $a;
+
 		$app = $this->app_m->get_app_by_appid($appid);
 		$data['isfounder'] = $this->user['isfounder'];
 		$data['appid'] = $app['appid'];
@@ -210,7 +208,7 @@ class App extends MY_Controller {
 		$typelist = array('UCHOME'=>'UCenter Home','XSPACE'=>'X-Space','DISCUZ'=>'Discuz!','SUPESITE'=>'SupeSite','SUPEV'=>'SupeV','ECSHOP'=>'ECShop','ECMALL'=>'ECMall','OTHER'=>$this->lang->line('other'));
 		$data['typelist'] = $typelist;
 		$data['updated'] = $updated;
-		$addapp = getgpc('addapp');
+		$addapp = $this->input->get_post('addapp');
 		$data['addapp'] = $addapp;
 		$data['apppath'] = isset($app['extra']['apppath'])?$app['extra']['apppath']:'';
 		$data['tagtemplates'] = $tagtemplates;

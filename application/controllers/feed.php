@@ -16,8 +16,8 @@ class Feed extends MY_Controller {
 	}
 	
 	function ls() {
-		$page = getgpc('page');
-		$delete = getgpc('delete', 'P');
+		$page = $this->input->get_post('page');
+		$delete = $this->input->post('delete');
 		$num = $this->feed_m->get_total_num();
 		$feedlist = $this->feed_m->get_list($page, UC_PPP, $num);
 		$multipage = page($num, UC_PPP, $page, 'admin.php?m=feed&a=ls');

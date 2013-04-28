@@ -15,7 +15,7 @@ class Cache extends MY_Controller {
 	function update() {
 		$updated = false;
 		if(submitcheck('submit')) {
-			$type = getgpc('type', 'P');
+			$type = $this->input->post('type');
 			if(!is_array($type) || in_array('data', $type)) {
 				$this->cache_m->updatedata();
 			}

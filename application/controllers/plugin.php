@@ -9,7 +9,7 @@ class Plugin extends MY_Controller {
 		if(!$this->user['isfounder']) {
 			$this->message('no_permission_for_this_module');
 		}
-		$a = getgpc('a');
+		$a = $this->input->get_post('a');
 		$this->load->model('plugin_m');
 		$this->plugin = $this->plugin_m->get_plugin($a);
 		$this->plugins = $this->plugin_m->get_plugins();
@@ -24,7 +24,7 @@ class Plugin extends MY_Controller {
 	}
 	
 	function _call($a, $arg) {
-		$do = getgpc('do');
+		$do = $this->input->get_post('do');
 		$do = empty($do) ? 'onindex' : 'on'.$do;
 		if(method_exists($this, $do) && $do{0} != '_') {
 			$this->$do();
@@ -33,8 +33,8 @@ class Plugin extends MY_Controller {
 		}
 	}
 }
-$a = getgpc('a');
-$do = getgpc('do');
+$a = $this->input->get_post('a');
+$do = $this->input->get_post('do');
 if(!preg_match("/^[\w]{1,64}$/", $a)) {
 	exit('Argument Invalid');
 }

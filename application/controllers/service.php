@@ -9,7 +9,7 @@ class Service extends MY_Controller {
 	}
 	
 	function seccode() {
-		$authkey = md5(UC_KEY.$_SERVER['HTTP_USER_AGENT'].$this->onlineip);
+		$authkey = md5(UC_KEY.$this->input->user_agent().$this->input->ip_address());
 
 		$this->time = time();
 		$seccodeauth = $this->input->get_post('seccodeauth');
@@ -43,11 +43,11 @@ class Service extends MY_Controller {
 	
 	function avatar()
 	{
-		$uid = isset($_GET['uid']) ? $_GET['uid'] : 0;
-		$size = isset($_GET['size']) ? $_GET['size'] : '';
-		$random = isset($_GET['random']) ? $_GET['random'] : '';
-		$type = isset($_GET['type']) ? $_GET['type'] : '';
-		$check = isset($_GET['check_file_exists']) ? $_GET['check_file_exists'] : '';
+		$uid = intval($this->input->get('uid'));
+		$size = $this->input->get('size');
+		$random = $this->input->get('random');
+		$type = $this->input->get('type');
+		$check =$this->input->get('check_file_exists');
 		
 		$avatar = 'data/avatar/'.get_avatar($uid, $size, $type);
 		if(file_exists(FCPATH.$avatar)) {

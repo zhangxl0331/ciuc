@@ -15,11 +15,9 @@ class Index extends MY_Controller {
 	}
 	
 	function index() {
-		$sid = $this->cookie_status ? getgpc('sid', 'C') : rawurlencode(getgpc('sid', 'R'));
-		$mainurl = getgpc('mainurl');
-		$mainurl = !empty($mainurl) && preg_match("/^index/index?(&*\w+=\w+)*$/i", $mainurl) ? $this->config->base_url($mainurl) : $this->config->base_url('index/main?sid='.$sid);
+		$mainurl = $this->input->get_post('mainurl');
+		$mainurl = !empty($mainurl) && preg_match("/^index/index?(&*\w+=\w+)*$/i", $mainurl) ? $this->config->base_url($mainurl) : $this->config->base_url('index/main?sid='.$this->sid);
 		
-		$data['sid'] = $sid;
 		$data['mainurl'] = $mainurl;
 		$this->load->view('frame_index', $data);
 	}
@@ -42,7 +40,7 @@ class Index extends MY_Controller {
 		$data['notes'] = $notes;
 		$data['errornotes'] = $errornotes;
 		$data['pms'] = $pms;
-		$data['iframe'] = getgpc('iframe', 'G');
+		$data['iframe'] = $this->input->get('iframe');
 
 		$serverinfo = PHP_OS.' / PHP v'.PHP_VERSION;
 		$serverinfo .= @ini_get('safe_mode') ? ' Safe Mode' : NULL;
@@ -172,7 +170,7 @@ class Index extends MY_Controller {
 			$data .= $key.'='.rawurlencode($value).'&';
 		}
 
-		return 'update='.rawurlencode(base64_encode($data)).'&md5hash='.substr(md5($_SERVER['HTTP_USER_AGENT'].implode('', $update).$this->time), 8, 8).'&timestamp='.$this->time;
+		return 'update='.rawurlencode(base64_encode($data)).'&md5hash='.substr(md5($this->input->user_agent().implode('', $update).$this->time), 8, 8).'&timestamp='.$this->time;
 	}
 }
 
