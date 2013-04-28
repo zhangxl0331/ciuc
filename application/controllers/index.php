@@ -153,7 +153,7 @@ class Index extends MY_Controller {
 	}
 
 	function _get_uc_info() {
-		$update = array('uniqueid' => UC_SITEID, 'version' => UC_SERVER_VERSION, 'release' => UC_SERVER_RELEASE, 'php' => PHP_VERSION, 'mysql' => $this->db->version(), 'charset' => UC_CHARSET);
+		$update = array('uniqueid' => UC_SITEID, 'version' => UC_VERSION, 'release' => UC_RELEASE, 'php' => PHP_VERSION, 'mysql' => $this->db->version(), 'charset' => UC_CHARSET);
 		$updatetime = @filemtime(UC_ROOT.'./data/updatetime.lock');
 		if(empty($updatetime) || ($this->time - $updatetime > 3600 * 4)) {
 			@touch(UC_ROOT.'./data/updatetime.lock');
