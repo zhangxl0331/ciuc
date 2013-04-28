@@ -1,7 +1,7 @@
 <?php $this->load->view('header');?>
 
 <script src="<?php $this->config->base_url('js/common.js');?>" type="text/javascript"></script>
-<?php if($method == 'ls'):?>
+<?php if($a == 'ls'):?>
 <div class="container">
 	<?php if($status):?>
 		<div class="correctmsg"><p><?php if($status == 1):?><?php echo $this->lang->line('announcepm_deleted');?><?php endif;?></p></div>
@@ -43,7 +43,7 @@
 	<?php endif;?>
 	</div>
 </div>
-<?php elseif($method == 'view'):?>
+<?php elseif($a == 'view'):?>
 <div class="container">
 	<h3 class="marginbot"><?php echo $this->lang->line('announcepm');?><a href="<?php echo $this->config->base_url('pm/ls?'.$extra);?>" class="sgbtn"><?php echo $this->lang->line('return');?></a></h3>
 	<div class="mainbox">

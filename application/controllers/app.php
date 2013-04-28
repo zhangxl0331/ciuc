@@ -33,7 +33,6 @@ class App extends MY_Controller {
 
 		$applist = $this->app_m->get_apps();
 		$data['status'] = $status;
-		$data['a'] = $a;
 		$data['applist'] = $applist;
 
 		$this->load->view('app', $data);

@@ -5,10 +5,10 @@
 <div class="container">
 	<?php if($updated):?>
 		<div class="correctmsg"><p><?php echo $this->lang->line('update_succeed');?></p></div>
-	<?php elseif($method == 'register'):?>
+	<?php elseif($a == 'register'):?>
 		<div class="note fixwidthdec"><p class="i"><?php echo $this->lang->line('setting_register_tips');?></p></div>
 	<?php endif;?>
-	<?php if($method == 'ls'):?>
+	<?php if($a == 'ls'):?>
 		<div class="mainbox nomargin">
 			<form action="<?php echo $this->config->base_url('setting/ls');?>" method="post">
 				<input type="hidden" name="formhash" value="<?php echo formhash();?>">
@@ -121,7 +121,7 @@
 				<div class="opt"><input type="submit" name="submit" value=" <?php echo $this->lang->line('submit');?> " class="btn" tabindex="3" /></div>
 			</form>
 		</div>
-	<?php elseif($method == 'register'):?>
+	<?php elseif($a == 'register'):?>
 		<div class="mainbox nomargin">
 			<form action="<?php echo $this->config->base_url('setting/register');?>" method="post">
 				<input type="hidden" name="formhash" value="<?php echo formhash();?>">

@@ -30,24 +30,21 @@ class User extends MY_Controller {
 	}
 	
 	function login() {
-		$authkey = md5(UC_KEY.$this->input->user_agent().$this->onlineip);
+		$authkey = md5(UC_KEY.$this->input->user_agent().$this->input->ip_address());
 	
 		$username = $this->input->post('username');
 		$password = $this->input->post('password');
 		$iframe	  = $_REQUEST['iframe'];
 	
 		$isfounder = intval($this->input->post('isfounder'));
-		/*
-			echo $sid = $this->sid_encode('admin');
-		echo $this->sid_decode($sid);
-		*/
+		
 		$rand = rand(100000, 999999);
 		$seccodeinit = rawurlencode(authcode($rand, 'ENCODE', $authkey, 180));
 		$errorcode = 0;
 		if(submitcheck()) 
 		{
-			$failedlogin = $this->db->where('ip', $this->onlineip)->get('failedlogins')->first_row();
-			if($failedlogin->count > 4) 
+			$failedlogin = $this->db->where('ip', $this->onlineip)->get('failedlogins')->first_row('array');
+			if($failedlogin['count'] > 4) 
 			{
 				if($this->time - $failedlogin->lastupdate < 15 * 60) 
 				{
@@ -81,7 +78,8 @@ class User extends MY_Controller {
 						if($md5password == UC_FOUNDERPW) 
 						{
 							$username = $this->user['username'];
-							$this->view->sid = $this->sid_encode($this->user['username']);
+							$this->sid = $this->sid_encode($this->user['username']);
+							$this->load->vars('sid', $this->sid);
 						} 
 						else 
 						{
@@ -96,7 +94,8 @@ class User extends MY_Controller {
 							$md5password =  md5(md5($password).$admin->salt);
 							if($admin->password == $md5password) 
 							{
-								$this->view->sid = $this->sid_encode($admin->username);
+								$this->sid = $this->sid_encode($admin->username);
+								$this->load->vars('sid', $this->sid);
 							} 
 							else 
 							{
@@ -106,10 +105,10 @@ class User extends MY_Controller {
 							$errorcode = UC_LOGIN_ERROR_ADMIN_NOT_EXISTS;
 						}
 					}
-	
+					
 					$pwlen = strlen($password);
 					if($errorcode == 0) {
-						$this->input->set_cookie('sid', $this->view->sid, 86400);
+						$this->input->set_cookie('sid', $this->sid, 86400);
 						
 						$this->user['admin'] = 1;
 						$this->writelog('login', 'succeed');
@@ -118,7 +117,7 @@ class User extends MY_Controller {
 							header('location: '.$url);
 							exit;
 						} else {
-							$url = $this->config->base_url(($this->cookie_status ? '' : '?sid='.$this->sid));
+							$url = $this->config->base_url(($this->cookie_status ? 'index/index' : 'index/index?sid='.$this->sid));
 							header('location: '.$url);
 							exit;
 						}

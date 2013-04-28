@@ -27,7 +27,7 @@ class Log extends MY_Controller {
 		foreach($logs AS $k => $v) {
 			if(count($v = explode("\t", $v)) > 1) {
 				$v[3] = $this->date($v[3]);
-				$v[4] = $this->lang[$v[4]];
+				$v[4] = $this->lang->line($v[4]);
 				$loglist[$k] = $v;
 			}
 		}

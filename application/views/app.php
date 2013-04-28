@@ -14,7 +14,7 @@ function testlink() {
 window.onload = testlink;
 </script>
 <div class="container">
-	<?php if($method == 'ls'):?>
+	<?php if($a == 'ls'):?>
 		<h3 class="marginbot"><?php echo $this->lang->line('app_list');?><a href="<?php echo $this->config->base_url('app/add');?>" class="sgbtn"><?php echo $this->lang->line('app_add');?></a></h3>
 		<?php if(!$status):?>
 			<div class="note fixwidthdec">
@@ -60,7 +60,7 @@ window.onload = testlink;
 				</div>
 			<?php endif;?>
 		</div>
-	<?php elseif($method == 'add'):?>
+	<?php elseif($a == 'add'):?>
 		<h3 class="marginbot"><?php echo $this->lang->line('app_add');?><a href="<?php echo $this->config->base_url('app/ls');?>" class="sgbtn"><?php echo $this->lang->line('app_list_return');?></a></h3>
 		<div class="mainbox">
 			<table class="opt">

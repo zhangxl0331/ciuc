@@ -3,7 +3,7 @@
 <script src="<?php echo $this->config->base_url('js/common.js');?>" type="text/javascript"></script>
 <script src="<?php echo $this->config->base_url('js/calendar.js');?>" type="text/javascript"></script>
 
-<?php if($method == 'ls'):?>
+<?php if($a == 'ls'):?>
 
 	<script type="text/javascript">
 		function switchbtn(btn) {

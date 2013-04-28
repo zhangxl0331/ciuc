@@ -1,6 +1,6 @@
 <?php $this->load->view('header');?>
 
-<?php if($method == 'ls'):?>
+<?php if($a == 'ls'):?>
 
 	<script src="<?php echo $this->config->base_url('js/common.js');?>" type="text/javascript"></script>
 	<script src="<?php echo $this->config->base_url('js/calendar.js');?>" type="text/javascript"></script>

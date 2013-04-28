@@ -35,11 +35,11 @@ class MY_Controller extends CI_Controller
 		
 		$this->load->helper(array('global'));
 		
-		$this->sid = $this->cookie_status ? $this->input->cookie('sid') : rawurlencode($this->input->get_post('sid'));
+		$this->sid = $this->cookie_status ? $this->input->cookie(config_item('cookie_prefix').'sid') : rawurlencode($this->input->get_post('sid'));
 		$this->load->vars('sid', $this->sid);
 		$this->load->vars('iframe', @$_REQUEST['iframe']);
-		$this->load->vars('class', $this->router->fetch_class());
-		$this->load->vars('method', $this->router->fetch_method());
+		$this->load->vars('m', $this->router->fetch_class());
+		$this->load->vars('a', $this->router->fetch_method());
 	}
 	
 	function init_var() {
