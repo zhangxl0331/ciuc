@@ -7,7 +7,7 @@ class Misc_m extends CI_Model
 		parent::__construct();
 	}
 	
-function get_host_by_url($url) {
+	function get_host_by_url($url) {
 		$m = parse_url($url);
 		if(!$m['host']) {
 			return -1;
