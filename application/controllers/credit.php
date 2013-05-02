@@ -150,9 +150,9 @@ class Credit extends MY_Controller {
 					@fwrite($fp, $s);
 					@fclose($fp);
 				}
-				header('location: '.UC_API.'/admin.php?m=credit&a=sync&step=0&stepapp='.$stepapp.'&sid='.$this->view->sid);
+				header('location: '.$this->config->base_url('credit/sync?step=0&stepapp='.$stepapp.'&sid='.$this->sid));
 			} else {
-				header('location: '.UC_API.'/admin.php?m=credit&a=sync&step=1&sid='.$this->view->sid);
+				header('location: '.$this->config->base_url('credit/sync?step=1&sid='.$this->sid));
 			}
 			exit();
 		}
@@ -189,7 +189,7 @@ class Credit extends MY_Controller {
 		$this->note_m->add('updatecreditsettings', implode('', $data));
 		$this->note_m->send();
 
-		$this->message('syncappcredits_updated','admin.php?m=credit&a=ls');
+		$this->message('syncappcredits_updated',$this->config->base_url('creadit/ls'));
 	}
 
 	function sync_unserialize($s, $release_root) {
