@@ -23,6 +23,7 @@
 					<tr>
 						<th colspan="2"><?php echo $this->lang->line('setting_timeformat');?>:</th>
 					</tr>
+					<tr>
 					<td>
 						<input type="radio" id="hr24" class="radio" name="timeformat" value="1" <?php echo isset($timeformat[1])?$timeformat[1]:'';?> /><label for="hr24"><?php echo $this->lang->line('setting_timeformat_hr24');?></label>
 						<input type="radio" id="hr12" class="radio" name="timeformat" value="0" <?php echo isset($timeformat[0])?$timeformat[0]:'';?> /><label for="hr12"><?php echo $this->lang->line('setting_timeformat_hr12');?></label>

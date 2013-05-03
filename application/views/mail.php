@@ -29,7 +29,7 @@
 					<tr>
 						<td><input type="checkbox" name="delete[]" value="<?php echo $mail['mailid'];?>" class="checkbox" /></td>
 						<td><?php echo $mail['subject'];?></td>
-						<td><a href="mailto:<?php echo $mail['email'];?>"><?php if($mail['username']):?><?php echo $mail['username'];?><?php else:?><?php echo $this->lang->line('anonymity');?><?php endif;?></td>
+						<td><a href="mailto:<?php echo $mail['email'];?>"><?php if($mail['username']):?><?php echo $mail['username'];?><?php else:?><?php echo $this->lang->line('anonymity');?><?php endif;?></a></td>
 						<td><?php echo $mail['dateline'];?></td>
 						<td><?php echo $mail['failures'];?></td>
 						<td><?php echo $mail['appname'];?></td>
