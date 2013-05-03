@@ -13,7 +13,6 @@ class MY_Controller extends CI_Controller
 	var $settings = array();
 	var $caches = array();
 	var $app = array();
-	var $input = array();
 	
 	var $cookie_status = 1;
 	
@@ -59,24 +58,24 @@ class MY_Controller extends CI_Controller
 		}
 	}
 	
-	function init_input($getagent = '') {
-		$input = @$_REQUEST['input'];
-		if($input) {
-			$input = authcode($input, 'DECODE', $this->app['authkey']);
-			parse_str($input, $this->input);
-			$this->input = daddslashes($this->input, 1, TRUE);
-			$agent = $getagent ? $getagent : $this->input['agent'];
+// 	function init_input($getagent = '') {
+// 		$input = @$_REQUEST['input'];
+// 		if($input) {
+// 			$input = authcode($input, 'DECODE', $this->app['authkey']);
+// 			parse_str($input, $this->input);
+// 			$this->input = daddslashes($this->input, 1, TRUE);
+// 			$agent = $getagent ? $getagent : $this->input['agent'];
 	
-			if(($getagent && $getagent != $this->input['agent']) || (!$getagent && md5($_SERVER['HTTP_USER_AGENT']) != $agent)) {
-				exit('Access denied for agent changed');
-			} elseif($this->time - $this->input('time') > 3600) {
-				exit('Authorization has expired');
-			}
-		}
-		if(empty($this->input)) {
-			exit('Invalid input');
-		}
-	}
+// 			if(($getagent && $getagent != $this->input['agent']) || (!$getagent && md5($_SERVER['HTTP_USER_AGENT']) != $agent)) {
+// 				exit('Access denied for agent changed');
+// 			} elseif($this->time - $this->input('time') > 3600) {
+// 				exit('Authorization has expired');
+// 			}
+// 		}
+// 		if(empty($this->input)) {
+// 			exit('Invalid input');
+// 		}
+// 	}
 	
 	function init_app() {
 		$appid = isset($_REQUEST['appid'])?intval($_REQUEST['appid']):NULL;
