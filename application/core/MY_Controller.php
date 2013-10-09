@@ -39,6 +39,10 @@ class MY_Controller extends CI_Controller
 		$this->load->vars('iframe', @$_REQUEST['iframe']);
 		$this->load->vars('m', $this->router->fetch_class());
 		$this->load->vars('a', $this->router->fetch_method());
+		
+		if($this->router->fetch_class() !='user' || ($this->router->fetch_method() != 'login' && $this->router->fetch_method() != 'logout')) {
+			$this->check_priv();
+		}
 	}
 	
 	function init_var() {

@@ -9,9 +9,6 @@ class Index extends MY_Controller {
 	public function __construct()
 	{
 		parent::__construct();
-		if($this->router->fetch_class() !='user' && $this->router->fetch_method() != 'login' && $this->router->fetch_method() != 'logout') {
-			$this->check_priv();
-		}
 	}
 	
 	function index() {

@@ -5,7 +5,6 @@ class Feed extends MY_Controller {
 	public function __construct()
 	{
 		parent::__construct();
-		$this->check_priv();
 		if(!$this->user['isfounder'] && !$this->user['allowadminnote']) {
 			$this->message('no_permission_for_this_module');
 		}

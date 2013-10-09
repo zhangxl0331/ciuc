@@ -6,7 +6,6 @@ class Admin extends MY_Controller {
 	{
 		parent::__construct();
 		$this->load->model('user_m');
-		$this->check_priv();
 		if(!$this->user['isfounder'] && !$this->user['allowadminbadword']) {
 			$this->message('no_permission_for_this_module');
 		}

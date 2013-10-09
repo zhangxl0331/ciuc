@@ -5,7 +5,6 @@ class Mail extends MY_Controller {
 	public function __construct()
 	{
 		parent::__construct();
-		$this->check_priv();
 		$this->load->model('mail_m');
 		$this->check_priv();
 	}
