@@ -90,7 +90,7 @@ class MY_Controller extends CI_Controller
 	
 	function init_user() {
 		if($auth = $this->input->cookie(config_item('cookie_prefix').'auth')) {
-			@list($uid, $username, $agent) = explode('|', $this->authcode($auth, 'DECODE', ($this->input ? $this->app['appauthkey'] : UC_KEY)));
+			@list($uid, $username, $agent) = explode('|', authcode($auth, 'DECODE', ($this->input ? $this->app['appauthkey'] : UC_KEY)));
 			if($agent != md5($this->input->user_agent())) {
 				$this->input->set_cookie('auth', '');
 			} else {
