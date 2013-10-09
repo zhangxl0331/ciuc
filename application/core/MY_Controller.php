@@ -37,10 +37,12 @@ class MY_Controller extends CI_Controller
 		$this->sid = $this->cookie_status ? $this->input->cookie(config_item('cookie_prefix').'sid') : rawurlencode($this->input->get_post('sid'));
 		$this->load->vars('sid', $this->sid);
 		$this->load->vars('iframe', @$_REQUEST['iframe']);
-		$this->load->vars('m', $this->router->fetch_class());
-		$this->load->vars('a', $this->router->fetch_method());
+		$m = $this->router->fetch_class();
+		$a = $this->router->fetch_method();
+		$this->load->vars('m', $m);
+		$this->load->vars('a', $a);
 		
-		if($this->router->fetch_class() !='user' || ($this->router->fetch_method() != 'login' && $this->router->fetch_method() != 'logout')) {
+		if($m !='user' || ($a != 'login' && $a != 'logout')) {
 			$this->check_priv();
 		}
 	}
