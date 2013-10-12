@@ -19,8 +19,12 @@ class User extends MY_Controller {
 	public function __construct()
 	{
 		parent::__construct();
-		if(!$this->user['isfounder'] && !$this->user['allowadminuser']) {
-			$this->message('no_permission_for_this_module');
+		$m = $this->router->fetch_class();
+		$a = $this->router->fetch_method();
+		if($a != 'login' && $a != 'logout') {
+			if(!$this->user['isfounder'] && !$this->user['allowadminuser']) {
+				$this->message('no_permission_for_this_module');
+			}
 		}
 		$this->load->model('user_m');
 	}
